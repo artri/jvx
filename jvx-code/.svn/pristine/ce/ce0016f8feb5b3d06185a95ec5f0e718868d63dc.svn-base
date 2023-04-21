@@ -1,0 +1,186 @@
+Changelog: JVx 0.8
+
+##################################################################
+#                          General                               #
+##################################################################
+
+- Moved JVx repositories to sourceforge (Java, .NET, Objective-C)
+- API changes
+- New features
+- Bugfixes
+
+
+##################################################################
+#                          Library                               #
+##################################################################
+
+http://support.sibvisions.com
+
+[API CHANGES]
+
+  - #43:  Set signel column invisible/visible
+  - #91:  Changed name detection for automatic link columns names, to be
+          database independent. To change the new handling the new method:
+          DBAccess.setAutomaticLinkColumnNameTranslation was defined
+  - #177: Changed automatic visible column detection in RowDefinition
+          (see #46). Now the detection is case sensitive. Use
+          RowDefinition.setDefaultIgnoredColumnNames(String...) with wildcards
+          e.g. *_id, *_ID
+  
+  - MemDataPage: getStorage added
+  - IStorage: renamed countRows to getEstimatedRowCount
+
+[BUGFIX]
+
+  - #135: DBDataBook reload with filter adds sub filter
+  - #17:  Export with translation of column names
+  - #164: NULLABLE columns - state wrong in Auto-Link-Reference columns
+  - #159: LinkedCellEditor shows toString() instead of the value as string
+  - #138: Connection problems not always detected 
+  - #137: DBSecurityManager doesn't close autologin statement(s)
+  - #93:  Mandatory color missing in tables with Dropdown lists
+  - #76:  Automatic link cell editor detection with FK/UK not working
+  
+  - getScaledImage endless loop, if the size of the original image is smaller
+    than the new size
+
+
+[FEATURE]
+
+  - #169: Removed directories from filename, if present
+  - #162: ObjectDataType added
+  - #117: RemoteDataBook IStorage fallback support
+  - #114: Oracle check constraint support with 'OR' expressions
+  - #91:  Automatic link column name detection independent of the DB
+  - #80:  Export with table columns and editor columns
+  
+
+[REFACTORED]
+
+  - removed classes directory from Configuration
+  - db scripts changed for test cases
+  - Mac support for DBToolbox
+
+--------------------------------------------------------------------------------
+Changelog: JVx 0.8 (beta2)  
+
+##################################################################
+#                          General                               #
+##################################################################
+
+- New features
+- Bugfixes
+- WebUI support
+- Test cases fixed
+- build changed
+
+
+##################################################################
+#                          Library                               #
+##################################################################
+
+http://support.sibvisions.com
+
+[BUGFIX]
+
+  - #134: DirectServerConnection remove properties
+  - #133: XmlSecurityManager with more than 1 user
+  - #130: Reflective.invokeLater
+  - #129: Image factory not initialized
+  - #128: Derby locking support
+  - #126: OracleDBAccess close statements
+  - #124: remove filename from uploaded file
+  - #123: HSQLDBAccess driver not registered
+  - #122: HSQLDBAccess locking
+  - #120: BeanTypeSerializer index not working in async mode
+  - SplitPanel divider location not working when switching mode of desktop 
+    (tab <-> frame)
+  
+  
+[FEATURE]
+
+  - #132: set password encryption algorithm
+  - #131: Server singleton instance and JNDI support
+  - #125: IDataRow.getValuesAsString
+  - #119: ISerializer.init
+  - #118: serializer name as connection property
+  - #112: set connection properties via config.xml
+  - #49:  automatic security detection of lifecycle objects
+  - generic showMessage method syntax
+  - fetch optimization (reduced calls)
+
+
+[REFACTORED]
+
+  - #127: HSQLDBAccess
+  - MetaData creation: reduced loops
+  - internal logging simplified
+
+--------------------------------------------------------------------------------
+Changelog: JVx 0.8 (beta1)
+
+##################################################################
+#                          General                               #
+##################################################################
+
+- New features
+- Performance tuning
+- Bugfixes
+- Code Review, not listed below
+
+
+##################################################################
+#                          Library                               #
+##################################################################
+
+http://support.sibvisions.com
+
+[BUGFIX]
+
+  - #106: Desktop: Tab/Frame mode hides scrollbar
+  - #102: Substorages MetaData cache
+  - #95:  IndexOutOfBoundsException in DataRow
+  - #90:  BigDecimalType contains not always a BigDecimal value
+  - #83:  DateCellEditor sometimes doesn't save 
+  - #82:  Alias detection in MySql
+  - #81:  Same column detection
+  
+  - Detect nullable columns through DB MetaData
+  - List interface instead of ArrayUtil for Property transfer 
+    (technology independent communication)
+  - ArrayUtil element calculation
+  - Internal toolbar handles: component handling changed
+  - UIFormLayout now uses componentUIResource for constraints
+
+
+[NEW FEATURE]
+
+  - #112: Set connection properties through config.xml
+  - #103: MetaData cache redesign
+  - #111: MetaData cache roles
+  - #110: En/Disable DBStorage features
+  - #105: dot notation for DefaultObjectProvider.putObject
+  - #98:  Hidden columnn configuration
+  - #97:  Column selection event
+  - #94:  Column label detection with MetaData
+  - #92:  Detect default values for columns and use the value 
+          on insert
+  - #88:  datatypes without java binding
+  - #87:  background for UITable (default: white)
+  - #75:  define automatic link cell editor on server side (API)
+  - #72:  UniversalSerializer as default Serializer instead of ByteSerializer
+  - #71:  Bean packages unified
+  - #70:  Export with customizable column names
+  - #47:  Automatic detect allowed values from check constraints
+  - #6:   getValueAsString (API)
+
+  - Modality for workscreens (API changes)
+  - constants for library version
+  - added version to connection properties
+  - GenericBean handles class hierarchy and is more flexible with derivation
+  - DBAccess update: return old value instead of null when nothing was changed
+  - better Alias handling
+  - Server and Client MetaData (split)
+  - Oracle sort/comp type set to BINARY (session parameters)
+  - UniversalSerializer supports cause of Throwable objects
+  - MetaData requests reduced

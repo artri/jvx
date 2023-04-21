@@ -1,0 +1,10 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+</head>
+<body bgcolor="white">
+Contains all interfaces to develop components for a graphical user interface. The interfaces are
+designed to be platform and technology independent. They can be used to create
+graphical user interfaces with AWT, Swing, SWT, JSF or whatever you want.
+</body>
+</html>

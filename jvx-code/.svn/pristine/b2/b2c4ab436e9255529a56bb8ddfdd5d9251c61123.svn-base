@@ -1,0 +1,327 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<synth>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  DEFAULT
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="default">
+    <object id="SmartGraphicsUtils" class="com.sibvisions.rad.ui.swing.ext.plaf.smart.SmartGraphicsUtils"/>
+    <graphicsUtils idref="SmartGraphicsUtils" />
+    
+    <state>
+  	</state>
+  </style>
+  <bind style="default" type="region" key=".*" />
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  BUTTON
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="arrowButton">
+    <!--not needed (optional) -->
+    <!--<property key="ArrowButton.size" type="integer" value="16"/> -->
+  </style>
+  <bind style="arrowButton" type="region" key="ArrowButton"/>
+  
+  <style id="button">
+    <property key="Button.textShiftOffset" type="integer" value="1"/>
+    <state>
+      <insets top="4" left="4" bottom="4" right="4"/>
+  	</state>
+  </style>
+  <bind style="button" type="region" key="Button"/>
+  
+  <style id="toggleButton">
+    <insets top="4" left="4" bottom="4" right="4"/>
+  </style>
+  <bind style="toggleButton" type="region" key="ToggleButton"/>
+  
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  PANEL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="panel">
+    <state>
+      <opaque value="true"/>
+    </state>
+  </style>
+  <bind style="panel" type="region" key="Panel"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  SPLITPANE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="splitPane">
+    <state>
+      <opaque value="true"/>
+    </state>
+  </style>
+  <bind style="splitPane" type="region" key="SplitPane"/>      
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  TAB
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="tabbedPane">
+    <insets top="1" left="1" bottom="1" right="1"/>
+    <property key="TabbedPane.textIconGap" type="integer" value="4"/>
+  </style>
+  <bind style="tabbedPane" type="region" key="TabbedPane"/>
+  
+  <style id="tabbedPaneTab">
+    <insets top="3" left="5" bottom="3" right="5"/>
+  </style>  
+  <bind style="tabbedPaneTab" type="region" key="TabbedPaneTab"/>
+  
+  <style id="tabbedPaneTabArea">
+    <insets top="1" left="5" bottom="5" right="5"/>
+  </style>
+  <bind style="tabbedPaneTabArea" type="region" key="TabbedPaneTabArea"/>
+  
+  <style id="tabbedPaneContent">
+    <insets top="2" left="2" bottom="2" right="2"/>
+  </style>
+  <bind style="tabbedPaneContent" type="region" key="TabbedPaneContent"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  TEXTFIELD
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="textField">
+    <insets top="3" left="3" bottom="3" right="3"/>
+  </style>
+  <bind style="textField" type="region" key="TextField"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  FORMATTEDTEXTFIELD
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="formattedTextField">
+    <insets top="3" left="3" bottom="3" right="3"/>
+  </style>
+  <bind style="formattedTextField" type="region" key="FormattedTextField"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  TEXAREA
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="textArea">
+    <!-- only 2px because the third px are the insets of the scrollpane. 
+         A textarea without scrollpane is unusual.  -->
+    <insets top="2" left="2" bottom="2" right="2"/>
+  </style>
+  <bind style="textArea" type="region" key="TextArea"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  PASSWORDFIELD
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="passwordField">
+    <insets top="3" left="3" bottom="3" right="3"/>
+  </style>
+  <bind style="passwordField" type="region" key="PasswordField"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  COMBOBOX
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="comboBox">
+    <insets top="3" left="3" bottom="3" right="3"/>
+  </style>
+  <bind style="comboBox" type="region" key="ComboBox"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  INTERNAL FRAME
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="internalFrame">
+    <insets top="4" left="4" bottom="4" right="4"/>
+  </style>
+  <bind style="internalFrame" type="region" key="InternalFrame"/>  
+  
+  <style id="internalFrameTitlePane">
+    <!-- bottom=3 weil 1px fuer den Rahmen verwendet wird und deswegen wegfaellt. -->
+    <insets top="2" left="2" bottom="3" right="2"/>
+  </style>
+  <bind style="internalFrameTitlePane" type="region" key="InternalFrameTitlePane"/>  
+
+  <style id="internalFrameMenuButton">
+    <insets top="0" left="0" bottom="0" right="0"/>
+  </style>
+  <bind style="internalFrameMenuButton" type="name" key="InternalFrameTitlePane.menuButton"/>  
+  
+  <style id="internalFrameIconifyButton">
+    <insets top="0" left="0" bottom="0" right="0"/>
+  </style>
+  <bind style="internalFrameIconifyButton" type="name" key="InternalFrameTitlePane.iconifyButton"/>  
+
+  <style id="internalFrameMaximizeButton">
+    <insets top="0" left="0" bottom="0" right="0"/>
+  </style>
+  <bind style="internalFrameMaximizeButton" type="name" key="InternalFrameTitlePane.maximizeButton"/>  
+
+  <style id="internalFrameCloseButton">
+    <insets top="0" left="0" bottom="0" right="0"/>
+  </style>
+  <bind style="internalFrameCloseButton" type="name" key="InternalFrameTitlePane.closeButton"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  DESKTOPPANE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="desktopPane">
+    <state>
+      <opaque value="true" />
+    </state>
+  </style>
+  <bind style="desktopPane" type="region" key="DesktopPane"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  LABEL
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="label">
+    <insets top="0" left="0" bottom="0" right="0"/>
+  </style>
+  <bind style="label" type="region" key="Label"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  TABLE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="table">
+    <state>
+      <insets top="3" left="3" bottom="3" right="3"/>
+      <property key="Table.rendererUseUIBorder" type="boolean" value="true"/>
+    </state>
+  </style>
+  <bind style="table" type="region" key="Table"/>
+
+  <style id="tableHeader">
+    <state>
+      <font name="dialog" size="12" style="BOLD"/>
+      <insets top="2" left="2" bottom="2" right="2"/>
+    </state>
+  </style>
+  <bind style="tableHeader" type="region" key="TableHeader"/>
+  <bind style="tableHeader" type="name" key="TableHeader.renderer"/>  
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  LIST
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="list">
+    <property key="List.rendererUseListColors" type="boolean" value="false"/>
+  </style>
+  <bind style="list" type="region" key="List"/>  
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  VIEWPORT
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="viewport">
+    <state>
+    </state>
+  </style>    
+  <bind style="viewport" type="region" key="Viewport"/>  
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  SCROLLPANE
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="scrollPane">
+    <!-- 1px to draw the border, if necessary -->
+    <insets top="1" left="1" bottom="1" right="1"/>
+    <property key="ScrollPane.viewportBorderInsets" type="insets" value="0 0 0 0" />
+  </style>
+  <bind style="scrollPane" type="region" key="ScrollPane"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  SCROLLBAR
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="scrollBar">
+    <state>
+      <property key="ScrollBar.squareButtons" type="boolean" value="true"/>
+      <property key="ScrollBar.thumbHeight" type="integer" value="16"/>
+      <property key="ScrollBar.minimumThumbSize" type="Dimension" value="16 16" />
+    </state>
+  </style>
+  <bind style="scrollBar" type="region" key="ScrollBar"/>
+
+  <style id="scrollBarThumb">
+  </style>
+  <bind style="scrollBarThumb" type="region" key="ScrollBarThumb"/>
+
+  <style id="scrollBarTrack">
+  </style>
+  <bind style="scrollBarTrack" type="region" key="ScrollBarTrack"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  TOOLBAR
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="toolBar">    
+    <defaultsProperty key="Smart/LF.ToolBar.insets" type="insets" value="4 4 4 4"/>
+  </style>
+  <bind style="toolBar" type="region" key="ToolBar"/>
+
+  <style id="toolBarSeparator">
+    <defaultsProperty key="ToolBar.separatorSize" type="dimension" value="5 5"/>
+    <defaultsProperty key="Smart/LF.ToolBar.handleSize" type="dimension" value="9 9"/>
+
+    <state>
+      <opaque value="false"/>
+    </state>
+  </style>
+  <bind style="toolBarSeparator" type="region" key="ToolBarSeparator"/>
+
+  <style id="toolBarContent">
+    <state>
+    </state>
+  </style>
+  <bind style="toolBarContent" type="region" key="ToolBarContent"/>
+
+  <style id="toolBarDragWindow">
+    <state>      
+    </state>
+  </style>
+  <bind style="toolBarDragWindow" type="region" key="ToolBarDragWindow"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  TOOLTIP
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="toolTip">
+    <insets top="2" left="2" bottom="2" right="2"/>
+  </style>
+  <bind style="toolTip" type="region" key="ToolTip"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  MENU
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="menu">
+    <insets top="3" left="3" bottom="3" right="3"/>
+    <defaultsProperty key="Menu.textIconGap" type="integer" value="4"/>
+    <property key="Menu.textIconGap" type="integer" value="4"/>
+  </style>
+  <bind style="menu" type="region" key="Menu"/>
+
+  <style id="menuBar">
+    <state>
+      <opaque value="false" />
+    </state>
+  </style>
+  <bind style="menuBar" type="region" key="MenuBar"/>
+  
+  <style id="menuItem">
+    <insets top="3" left="3" bottom="3" right="3"/>
+    <defaultsProperty key="MenuItem.textIconGap" type="integer" value="4"/>
+    <property key="Menu.textIconGap" type="integer" value="4"/>
+  </style>
+  <bind style="menuItem" type="region" key="MenuItem"/>
+  <bind style="menuItem" type="region" key="RadioButtonMenuItem"/>
+  <bind style="menuItem" type="region" key="CheckBoxMenuItem"/>
+  
+  <style id="menuItemAccelerator">
+    <state>
+      <opaque value="false" />
+    </state>
+  </style>
+  <bind style="menuItemAccelerator" type="region" key="MenuItemAccelerator"/>
+  
+  <style id="popupMenu">
+    <insets top="3" left="3" bottom="3" right="3"/>
+    <state>
+      <opaque value="false" />
+    </state>
+  </style>
+  <bind style="popupMenu" type="region" key="PopupMenu"/>
+   
+  <style id="popupMenuSeparator">
+    <insets top="0" left="0" bottom="0" right="0"/>
+    <property key="Separator.thickness" type="integer" value="1"/>     
+    <state>
+      <opaque value="false" />
+    </state>
+  </style>
+  <bind style="popupMenuSeparator" type="region" key="PopupMenuSeparator"/>
+  
+  <style id="separator">
+    <property key="Separator.thickness" type="integer" value="1"/>
+    <state>
+      <opaque value="false" />
+    </state>
+  </style>
+  <bind style="separator" type="region" key="Separator"/>
+<!--~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+  SPINNER
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~-->
+  <style id="spinner">
+    <insets top="3" left="3" bottom="3" right="3"/>
+  </style>
+  <bind style="spinner" type="region" key="Spinner"/>
+  
+</synth>

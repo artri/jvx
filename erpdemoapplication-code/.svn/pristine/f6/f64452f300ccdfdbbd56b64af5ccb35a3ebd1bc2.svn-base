@@ -1,0 +1,1 @@
+#default.class=com.sibvisions.util.log.log4j.Log4jLoggerFactory

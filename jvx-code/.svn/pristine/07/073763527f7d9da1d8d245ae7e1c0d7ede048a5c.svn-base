@@ -1,0 +1,164 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 19.11.2009 - [HM] - creation
+ */
+package com.sibvisions.rad.ui.web.impl;
+
+import javax.rad.ui.ICursor;
+
+import com.sibvisions.util.ArrayUtil;
+
+/**
+ * Web server implementation of {@link ICursor}.
+ * 
+ * @author Martin Handsteiner
+ */
+public class WebCursor extends WebResource 
+                      implements ICursor
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class Members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	  
+	/** HTML cursor names corresponding to the type. */
+	public static final String[] CURSORS = {
+		"default", "crosshair", "text", "wait", 
+		"sw-resize", "se-resize", "nw-resize", "ne-resize", 
+		"n-resize", "s-resize", "w-resize", "e-resize", 
+		"pointer", "move" 
+	};
+
+	/** the type. */
+	private int type;
+	/** the name. */
+	private String name;
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	  
+    /**
+     * Creates a new instance of <code>WebCursor</code>.
+     *
+     * @param pType the type.
+     * @param pName the name.
+     * @see ICursor
+     */
+	protected WebCursor(int pType, String pName)
+	{
+		type = pType;
+		name = pName;
+	}
+    
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Abstract methods implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public String getAsString()
+    {
+    	if (type >= 0 && type < CURSORS.length)
+    	{
+    		return CURSORS[type];
+    	}
+    	else if (name == null)
+    	{
+    		return "auto";
+    	}
+    	else
+    	{
+    		return name;
+    	}
+    }
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Interface implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+    public int getType()
+    {
+    	return type;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+    public String getName()
+    {
+    	return name;
+    }
+    
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// User-defined methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	  
+    /**
+     * Gets a <code>ICursor</code> object with the specified type.
+     * 
+     * @param pType the type of cursor
+     * @return the <code>ICursor</code>
+     * @see ICursor
+     */
+    public static ICursor getPredefinedCursor(int pType)
+	{
+		return new WebCursor(pType, null);
+	}
+    
+    /**
+     * Returns a system-specific custom <code>ICursor</code> object matching the 
+     * specified name.  Cursor names are, for example: "Invalid.16x16"
+     * 
+     * @param pCursorName a string describing the desired system-specific custom cursor 
+     * @return the system specific custom cursor named
+     * @see ICursor
+     */
+    public static ICursor getSystemCustomCursor(String pCursorName)
+	{
+		return new WebCursor(-1, pCursorName);
+	}
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Overwritten methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /**
+	 * {@inheritDoc}
+	 */
+    @Override
+    public void setAsString(String pValue)
+    {
+    	type = ArrayUtil.indexOf(CURSORS, pValue);
+    	
+    	if (type >= 0 || (pValue != null && pValue.length() == 0))
+    	{
+    		name = null;
+    	}
+    	else
+    	{
+    		name = pValue;
+    	}
+    }
+    
+}	// WebCursor

@@ -1,0 +1,15 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+</head>
+<body bgcolor="white">
+<p>Contains the interfaces and implementations for the new panel on the
+client side.</p>
+<p>The new panel implements the layout logic separated from the panel logic,
+which means that there is only one panel and multiple layouts. The layouts
+itself do not contain any state nor do they have any state in the sense of
+client/server shared state.</p>
+<p>All shared information is handed by the panel state and the layouts on the
+client side are absolutely positioned.</p>
+</body>
+</html>

@@ -1,0 +1,649 @@
+/*
+ * Copyright 2016 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 02.05.2016 - [RZ] - creation
+ */
+package com.sibvisions.rad.ui.vaadin.impl.layout;
+
+import java.lang.ref.WeakReference;
+import java.util.List;
+import java.util.WeakHashMap;
+
+import javax.rad.ui.IComponent;
+import javax.rad.ui.IInsets;
+import javax.rad.ui.layout.IFormLayout;
+
+import com.sibvisions.rad.ui.vaadin.ext.ui.client.panel.helper.Margins;
+import com.sibvisions.rad.ui.vaadin.ext.ui.panel.layout.FormLayout;
+import com.sibvisions.rad.ui.vaadin.ext.ui.panel.layout.FormLayout.WebAnchor;
+import com.sibvisions.rad.ui.vaadin.ext.ui.panel.layout.FormLayout.WebConstraint;
+import com.sibvisions.rad.ui.vaadin.impl.VaadinResource;
+import com.vaadin.ui.Component;
+
+/**
+ * The {@link VaadinClientBorderLayout} is the Vaadin specific implementation of
+ * the {@link IFormLayout} class.
+ * <p>
+ * This class wraps and provides {@link FormLayout the client-side layout}.
+ * 
+ * @author Robert Zenz
+ */
+public class VaadinClientFormLayout extends AbstractAlignedVaadinClientLayout<FormLayout, IFormLayout.IConstraints>
+		                            implements IFormLayout
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/** Stores uniquie the anchor wrapper. */
+	private WeakHashMap<WebAnchor, WeakReference<VaadinAnchor>> anchors = new WeakHashMap<WebAnchor, WeakReference<VaadinAnchor>>();
+
+	/** Stores uniquie the constraint wrapper. */
+	private WeakHashMap<WebConstraint, WeakReference<VaadinConstraints>> constraints = new WeakHashMap<WebConstraint, WeakReference<VaadinConstraints>>();
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Creates a new instance of {@link VaadinClientFormLayout}.
+	 */
+	public VaadinClientFormLayout()
+	{
+		super(new FormLayout());
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Interface implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void addComponent(IComponent pComponent, Object pConstraints, int pIndex)
+	{
+		if (pConstraints instanceof VaadinConstraints)
+		{
+		    VaadinConstraints cons = (VaadinConstraints)pConstraints;
+		    if (cons.layout != this 
+		            || cons.getLeftAnchor().getLayout() != this
+	                || cons.getRightAnchor().getLayout() != this
+	                || cons.getTopAnchor().getLayout() != this
+	                || cons.getBottomAnchor().getLayout() != this)
+		    {
+		        throw new IllegalArgumentException("Constraint " + pConstraints + " has anchors for an other layout!");
+		    }
+		    
+			super.addComponent(pComponent, (WebConstraint)cons.getResource(), pIndex);
+		}
+		else if (NEWLINE.equals(pConstraints))
+		{
+			super.addComponent(pComponent, pConstraints, pIndex);
+		}
+		else
+		{
+			super.addComponent(pComponent, null, pIndex);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IAnchor createAnchor(IAnchor pRelatedAnchor)
+	{
+		return getAnchor(new WebAnchor(getAnchor(pRelatedAnchor)));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IAnchor createAnchor(IAnchor pRelatedAnchor, int pPosition)
+	{
+		return getAnchor(new WebAnchor(getAnchor(pRelatedAnchor), pPosition));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IAnchor getBottomAnchor()
+	{
+		return getAnchor(layout.getBottomAnchor());
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IAnchor getBottomMarginAnchor()
+	{
+		return getAnchor(layout.getBottomMarginAnchor());
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IConstraints getConstraints(IAnchor pTopAnchor, IAnchor pLeftAnchor, IAnchor pBottomAnchor, IAnchor pRightAnchor)
+	{
+		return getConstraints(new WebConstraint(layout, getAnchor(pTopAnchor), getAnchor(pLeftAnchor), getAnchor(pBottomAnchor), getAnchor(pRightAnchor)));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IConstraints getConstraints(IComponent pComp)
+	{
+		return getConstraints(layout.getConstraint((Component)pComp.getResource()));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IConstraints getConstraints(int pColumn, int pRow)
+	{
+		return getConstraints(layout.getConstraints(pColumn, pRow));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IConstraints getConstraints(int pBeginColumn, int pBeginRow, int pEndColumn, int pEndRow)
+	{
+		return getConstraints(layout.getConstraints(pBeginColumn, pBeginRow, pEndColumn, pEndRow));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IAnchor[] getHorizontalAnchors()
+	{
+		return getAnchors(layout.getHorizontalAnchors());
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IAnchor getLeftAnchor()
+	{
+		return getAnchor(layout.getLeftAnchor());
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IAnchor getLeftMarginAnchor()
+	{
+		return getAnchor(layout.getLeftMarginAnchor());
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public int getNewlineCount()
+	{
+		return layout.getNewlineCount();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IAnchor getRightAnchor()
+	{
+		return getAnchor(layout.getRightAnchor());
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IAnchor getRightMarginAnchor()
+	{
+		return getAnchor(layout.getRightMarginAnchor());
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IAnchor getTopAnchor()
+	{
+		return getAnchor(layout.getTopAnchor());
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IAnchor getTopMarginAnchor()
+	{
+		return getAnchor(layout.getTopMarginAnchor());
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public IAnchor[] getVerticalAnchors()
+	{
+		return getAnchors(layout.getVerticalAnchors());
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setConstraints(IComponent pComp, IConstraints pConstraints)
+	{
+		resource.setConstraints((Component)pComp.getResource(),	getConstraints(pConstraints));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setMargins(IInsets pMargins)
+	{
+    	if (pMargins == null)
+    	{
+    		layout.setMargins(null);
+    	}
+    	else
+    	{
+    		layout.setMargins(new Margins(pMargins.getTop(), pMargins.getLeft(), pMargins.getBottom(), pMargins.getRight()));
+    	}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setNewlineCount(int pNewlineCount)
+	{
+		layout.setNewlineCount(pNewlineCount);
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// User-defined methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+    /**
+     * Gets the JVxFormLayout.Anchor from an IAnchor.
+     * @param pAnchor the IAnchor.
+     * @return the JVxFormLayout.Anchor.
+     */
+    private WebAnchor getAnchor(IAnchor pAnchor)
+    {
+    	if (pAnchor == null)
+    	{
+    		return null;
+    	}
+    	else
+    	{
+    		return (WebAnchor)pAnchor.getResource();
+    	}
+    }
+
+	/**
+	 * Gets the {@link IAnchor} for the given {@link WebAnchor}.
+	 * @param pAnchor the {@link WebAnchor}.
+	 * @return the {@link IAnchor}.
+	 */
+	private VaadinAnchor getAnchor(WebAnchor pAnchor)
+	{
+		if (pAnchor == null)
+		{
+			return null;
+		}
+		else
+		{
+	    	WeakReference<VaadinAnchor> anchorRef = anchors.get(pAnchor);
+	    	if (anchorRef != null)
+	    	{
+	    		VaadinAnchor anchor = anchorRef.get();
+	    		
+	    		if (anchor != null)
+	    		{
+	    			return anchor;
+	    		}
+	    	}
+	    	VaadinAnchor anchor = new VaadinAnchor(this, pAnchor);
+	    	
+	    	anchors.put(pAnchor, new WeakReference(anchor));
+	    	
+	    	return anchor;
+
+		}
+	}
+	
+	/**
+	 * Gets the {@link IAnchor}s for the given {@link WebAnchor}s.
+	 * @param pAnchors the {@link WebAnchor}s.
+	 * @return the {@link IAnchor}s.
+	 */
+	private IAnchor[] getAnchors(List<WebAnchor> pAnchors)
+	{
+		IAnchor[] result = new IAnchor[pAnchors.size()];
+		for (int i = 0; i < result.length; i++)
+		{
+			result[i] = getAnchor(pAnchors.get(i));
+		}
+    	return result;
+	}
+	
+    /**
+     * Gets the JVxFormLayout.Constraint from an IConstraints.
+     * @param pConstraints the IAnchor.
+     * @return the JVxFormLayout.Constraint.
+     */
+    private WebConstraint getConstraints(IConstraints pConstraints)
+    {
+    	if (pConstraints == null)
+    	{
+    		return null;
+    	}
+    	else
+    	{
+    		return (WebConstraint)pConstraints.getResource();
+    	}
+    }
+
+	/**
+	 * Gets the {@link IConstraints} for the given {@link WebConstraint}.
+	 * @param pConstraints the {@link WebConstraint}.
+	 * @return the {@link IConstraints}.
+	 */
+	private IConstraints getConstraints(WebConstraint pConstraints)
+	{
+		if (pConstraints == null)
+		{
+			return null;
+		}
+    	else
+    	{
+	    	WeakReference<VaadinConstraints> constraintRef = constraints.get(pConstraints);
+	    	if (constraintRef != null)
+	    	{
+	    		VaadinConstraints constraint = constraintRef.get();
+	    		
+	    		if (constraint != null)
+	    		{
+	    			return constraint;
+	    		}
+	    	}
+	    	VaadinConstraints constraint = new VaadinConstraints(this, pConstraints);
+	    	
+	    	constraints.put(pConstraints, new WeakReference(constraint));
+	    	
+	    	return constraint;
+    	}
+	}
+	
+	//****************************************************************
+	// Subclass definition
+	//****************************************************************
+	
+	/**
+	 * The {@link VaadinAnchor} is the Vaadin specific implementation of
+	 * {@link javax.rad.ui.layout.IFormLayout.IAnchor}.
+	 * 
+	 * @author Robert Zenz
+	 */
+	public static class VaadinAnchor extends VaadinResource<WebAnchor, WebAnchor> implements IAnchor
+	{
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Class members
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		
+		/** The layout. */
+		private VaadinClientFormLayout layout;
+		
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Initialization
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		
+		/**
+		 * Creates a new instance of {@link VaadinAnchor}.
+		 *
+		 * @param pLayout the layout.
+		 * @param pAnchor the anchor.
+		 */
+		public VaadinAnchor(VaadinClientFormLayout pLayout, WebAnchor pAnchor)
+		{
+			super(pAnchor);
+			
+			layout = pLayout;
+		}
+		
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Interface implementation
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public int getAbsolutePosition()
+		{
+			return resource.getAbsolutePosition();
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public IAnchor getBorderAnchor()
+		{
+			return layout.getAnchor(resource.getBorderAnchor());
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public IFormLayout getLayout()
+		{
+			return layout;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public int getOrientation()
+		{
+			return resource.getOrientation();
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public int getPosition()
+		{
+			return resource.getPosition();
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public IAnchor getRelatedAnchor()
+		{
+			return layout.getAnchor(resource.getRelatedAnchor());
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void setRelatedAnchor(IAnchor pAnchor)
+		{
+			resource.setRelatedAnchor(layout.getAnchor(pAnchor));
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public boolean isAutoSize()
+		{
+			return resource.isAutoSize();
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void setAutoSize(boolean pAutoSize)
+		{
+			resource.setAutoSize(pAutoSize);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void setPosition(int pPosition)
+		{
+			resource.setPosition(pPosition);
+		}
+		
+	} // VaadinAnchor
+	
+	/**
+	 * The {@link VaadinConstraints} is the Vaadin specific implementation of
+	 * {@link javax.rad.ui.layout.IFormLayout.IConstraints}.
+	 * 
+	 * @author Robert Zenz
+	 */
+	public static class VaadinConstraints extends VaadinResource<WebConstraint, WebConstraint> implements IConstraints
+	{
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Class members
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		
+		/** The {@link JavaFXFormLayout} this constraint belongs to. */
+		private VaadinClientFormLayout layout;
+		
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Initialization
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		
+		/**
+		 * Creates a new instance of {@link VaadinConstraints}.
+		 *
+		 * @param pLayout the layout.
+		 * @param pConstraint the constraint.
+		 */
+		public VaadinConstraints(VaadinClientFormLayout pLayout, WebConstraint pConstraint)
+		{
+			super(pConstraint);
+			
+			layout = pLayout;
+		}
+		
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Interface implementation
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public IAnchor getBottomAnchor()
+		{
+			return layout.getAnchor(resource.getBottomAnchor());
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public IAnchor getLeftAnchor()
+		{
+			return layout.getAnchor(resource.getLeftAnchor());
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public IAnchor getRightAnchor()
+		{
+			return layout.getAnchor(resource.getRightAnchor());
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public IAnchor getTopAnchor()
+		{
+			return layout.getAnchor(resource.getTopAnchor());
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void setBottomAnchor(IAnchor pBottomAnchor)
+		{
+			resource.setBottomAnchor(layout.getAnchor(pBottomAnchor));
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void setLeftAnchor(IAnchor pLeftAnchor)
+		{
+			resource.setLeftAnchor(layout.getAnchor(pLeftAnchor));
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void setRightAnchor(IAnchor pRightAnchor)
+		{
+			resource.setRightAnchor(layout.getAnchor(pRightAnchor));
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public void setTopAnchor(IAnchor pTopAnchor)
+		{
+			resource.setTopAnchor(layout.getAnchor(pTopAnchor));
+		}
+		
+	} // VaadinConstraints
+	
+}	// VaadinClientFormLayout

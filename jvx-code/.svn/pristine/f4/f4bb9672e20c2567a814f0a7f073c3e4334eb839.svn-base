@@ -1,0 +1,100 @@
+SIB Visions JVx - Enterprise Application Framework
+Copyright 2009 SIB Visions GmbH
+
+This product includes software developed by
+SIB Visions GmbH (http://www.sibvisions.com/).
+
+
+===
+
+LICENSE INFORMATION REGARDING BUNDLED THIRD-PARTY SOFTWARE
+
+The following third party software is distributed with JVx 
+and is provided under other licenses and/or has source 
+available from other locations.
+
+* Apache Commons Fileupload
+  License: Apache-2.0
+  Source code: http://commons.apache.org/fileupload/
+
+* IBM DB2 JDBC driver
+  License: IBM International Program License Agreement (see libs/license/jdbc4_LI_en)
+
+* HSQLDB
+  Licence: HSQLDB license (BSD based)
+  Source code: http://hsqldb.org/
+
+* JCIFS
+  License: GNU Lesser General Public License v. 2.1
+  Source code availibility: http://jcifs.samba.org
+  
+* Connector/J
+  License: GNU General Public License v. 2.0
+  Source code availibility: https://github.com/mysql/mysql-connector-j
+  
+* Oracle JDBC driver
+  License: Oracle Technology Network Development and Distribution License
+  
+* PostgreSql JDBC driver
+  License: BSD license
+  Source code availibility: http://jdbc.postgresql.org
+  
+* Tomcat Servlet API
+  License: Apache-2.0
+  Source code availibility: http://tomcat.apache.org
+  
+* MSSql JDBC driver
+  License: MIT license
+  Source code availibility: https://github.com/microsoft/mssql-jdbc
+  
+* Metadata extractor
+  License: Apache-2.0
+  Source code: https://github.com/drewnoakes/metadata-extractor
+  
+* Adobe XMPCore
+  License: The BSD 3-Clause License (BSD3)
+  Details: https://search.maven.org/artifact/com.adobe.xmp/xmpcore/6.1.11/bundle
+  
+* RESTlet
+  License: Apache-2.0
+  Details: https://restlet.talend.com/
+  Source code: see zip archives of website
+  
+* log4j 
+  License: Apache-2.0
+
+* log4j2 
+  License: Apache-2.0
+  Source code: https://github.com/apache/logging-log4j2
+  
+* javamail
+  License: COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.1 
+           https://javaee.github.io/javamail/LICENSE
+  Source code: https://github.com/javaee/javamail
+  
+* SQLite JDBC
+  License: Apache-2.0
+  Source code: https://github.com/xerial/sqlite-jdbc        
+
+* Jackson (fasterxml)
+  License: Apache-2.0
+  Source code: https://github.com/FasterXML/jackson-core
+
+* H2 JDBC
+  License: MPL 2.0 (Mozilla Public License Version 2.0), EPL 1.0 (Eclipse Public License)
+  Source code: https://github.com/h2database/h2database
+  
+* JTDS JDBC
+  License: LGPLv2
+  Source code: https://sourceforge.net/projects/jtds/
+  
+* JT400
+  License: IPLv1 (IBM Public license v1.0)
+  Source code: https://sourceforge.net/projects/jt400/
+
+* MariaDB JDBC
+  License: LGPLv2.1 or later
+  Source code: https://github.com/mariadb-corporation/mariadb-connector-j
+  
+* JavaBeans(TM) Activation Framework
+  License: COMMON DEVELOPMENT AND DISTRIBUTION LICENSE Version 1.0 (CDDL-1.0)

@@ -1,0 +1,23 @@
+Changelog: JVx 0.2
+
+##################################################################
+#                          Library                               #
+##################################################################
+
+[NEW FEATURE]
+ 
+  - TreeAdapter.ValueFormatter
+    * formatView defined
+    * IDataPage added as parameter
+  
+  - TreeAdapter.ValueFormatter
+    * formatView defined
+    * IDataRow added as parameter
+    
+  - AbstractApplication implemented and used in RemoteApplication
+  
+  - AbstractActivity implemented and used in RemoteActivity
+  
+  - Logger uses now JdkLogger instead of JdkStandardLogger
+  
+  - LoggerFactory now uses JdkLoggerFactory to support logging.properties

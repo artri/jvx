@@ -1,0 +1,126 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	     
+    <parent>
+      <groupId>org.sonatype.oss</groupId>
+      <artifactId>oss-parent</artifactId>
+      <version>7</version>
+    </parent>
+    
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.sibvisions.jvx</groupId>
+	<artifactId>jvxall</artifactId>
+	<name>JVx</name>
+	<description>A full-stack Enterprise Application Framework</description>
+	<version>1.1</version>
+	<url>http://www.sibvisions.com/jvx</url>
+    <packaging>jar</packaging>
+    
+    <licenses>
+      <license>
+        <name>The Apache Software License, Version 2.0</name>
+        <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+      </license>
+    </licenses>	
+	
+	<developers>
+		<developer>
+			<name>Martin Handsteiner</name>
+		</developer>
+		<developer>
+			<name>René Jahn</name>
+		</developer>
+		<developer>
+			<name>Roland Hörmann</name>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:svn:http://jvx.svn.sourceforge.net/svnroot/jvx/trunk/java/library</connection>
+		<developerConnection>scm:svn:https://jvx.svn.sourceforge.net/svnroot/jvx/trunk/java/library</developerConnection>
+		<url>http://jvx.svn.sourceforge.net/viewvc/jvx/trunk/java/library/</url>
+	</scm>
+ 	
+    <repositories>
+      <repository>  
+         <id>maven-restlet</id>  
+         <name>Public online Restlet repository</name>  
+         <url>http://maven.restlet.org</url>  
+      </repository>  	
+    </repositories>    
+	
+	<dependencies>
+        <dependency>
+            <groupId>commons-fileupload</groupId>
+            <artifactId>commons-fileupload</artifactId>
+            <version>1.2.2</version>
+        </dependency>
+       	<dependency>
+	        <groupId>com.fasterxml.jackson.core</groupId>
+	        <artifactId>jackson-core</artifactId>
+	        <version>2.4.0</version>
+        </dependency>
+      	<dependency>
+	        <groupId>com.fasterxml.jackson.core</groupId>
+	        <artifactId>jackson-annotations</artifactId>
+	        <version>2.4.0</version>
+        </dependency>
+      	<dependency>
+	        <groupId>com.fasterxml.jackson.core</groupId>
+	        <artifactId>jackson-databind</artifactId>
+	        <version>2.4.0</version>
+        </dependency>
+      	<dependency>
+	        <groupId>com.fasterxml.jackson.dataformat</groupId>
+	        <artifactId>jackson-dataformat-smile</artifactId>
+	        <version>2.4.0</version>
+        </dependency>
+      	<dependency>
+	        <groupId>com.fasterxml.jackson.dataformat</groupId>
+	        <artifactId>jackson-dataformat-csv</artifactId>
+	        <version>2.4.0</version>
+        </dependency>
+      	<dependency>
+	        <groupId>com.fasterxml.jackson.dataformat</groupId>
+	        <artifactId>jackson-dataformat-xml</artifactId>
+	        <version>2.4.0</version>
+        </dependency>
+      	<dependency>
+	        <groupId>com.fasterxml.jackson.dataformat</groupId>
+	        <artifactId>jackson-dataformat-yaml</artifactId>
+	        <version>2.4.0</version>
+        </dependency>
+      	<dependency>
+	        <groupId>com.fasterxml.jackson.module</groupId>
+	        <artifactId>jackson-module-jsonSchema</artifactId>
+	        <version>2.4.0</version>
+        </dependency>
+      	<dependency>
+	        <groupId>com.fasterxml.jackson.module</groupId>
+	        <artifactId>jackson-module-jaxb-annotations</artifactId>
+	        <version>2.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.mail</groupId>
+            <artifactId>javax.mail-api</artifactId>
+            <version>1.5.5</version>
+        </dependency>      
+        <dependency>  
+            <groupId>org.restlet.jee</groupId>  
+            <artifactId>org.restlet</artifactId>  
+            <version>2.3.2</version>  
+        </dependency>
+        <dependency>  
+            <groupId>org.restlet.jee</groupId>  
+            <artifactId>org.restlet.ext.jackson</artifactId>  
+            <version>2.3.2</version>  
+        </dependency>
+        <dependency>  
+            <groupId>org.restlet.jee</groupId>  
+            <artifactId>org.restlet.ext.servlet</artifactId>  
+            <version>2.3.2</version>  
+        </dependency>
+	</dependencies>
+	
+</project>

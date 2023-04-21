@@ -1,0 +1,275 @@
+/*
+ * Copyright 2013 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 16.06.2013 - [JR] - #673: creation
+ * 22.11.2016 - [JR] - include/exclude support
+ */
+package com.sibvisions.rad.server.config;
+
+import java.io.File;
+import java.util.List;
+
+import com.sibvisions.util.ArrayUtil;
+import com.sibvisions.util.xml.XmlNode;
+
+/**
+ * The <code>AppSetting</code> class encapsulates the access
+ * to app settings. The settings configure application locations. 
+ * 
+ * @author René Jahn
+ */
+public final class AppSettings extends Zone
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Creates a new instance of <code>AppSettings</code>.
+	 * 
+	 * @param pDirectory the config directory
+	 * @throws Exception if settings are not valid
+	 */
+	AppSettings(File pDirectory) throws Exception
+	{
+		super(pDirectory, "apps.xml");
+	}
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Overwritten methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void update() throws Exception
+	{
+		if (isValid())
+		{
+			super.update();
+		}
+		else
+		{
+			setContent(new XmlNode("apps"));
+		}
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// User-defined methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Gets all configured application directories.
+	 * 
+	 * @return the appliciation dir location
+	 */
+	public List<AppLocation> getAppLocations()
+	{
+		try
+		{
+			List<XmlNode> liNodes = getNodes("/apps/dir");
+	
+			if (liNodes != null)
+			{
+				ArrayUtil<AppLocation> auLocs = new ArrayUtil<AppLocation>();
+				
+				AppLocation loc;
+				
+				XmlNode xmnDir;
+				
+				List<XmlNode> liInclude;
+				List<XmlNode> liExclude;
+				
+				for (int i = 0, anz = liNodes.size(); i < anz; i++)
+				{
+				    xmnDir = liNodes.get(i);
+				    
+				    loc = new AppLocation(replace(xmnDir.getNodeValue("/location")));
+				    
+				    liInclude = xmnDir.getNodes("include");
+				    liExclude = xmnDir.getNodes("exclude");
+				    
+				    loc.liIncludes = toList(liInclude, "name");
+				    loc.liExcludes = toList(liExclude, "name");
+				    
+					auLocs.add(loc);
+				}
+				
+				return auLocs;
+			}
+		}
+		catch (Exception e)
+		{
+			//nothing to be done
+		}
+		
+		return null;
+	}
+	
+	/**
+	 * Replaces all system property placeholders with the current value of the system property.
+	 * A placeholder is defined as ${name}.
+	 * 
+	 * @param pValue the configuration value
+	 * @return the value with replaced system properties
+	 */
+	private String replace(String pValue)
+	{
+		if (pValue != null)
+		{
+			StringBuilder sbValue = new StringBuilder(pValue);
+			
+			String sProp;
+			
+			char ch;
+			
+			for (int i = 0; i < sbValue.length() - 1; i++)
+			{
+				ch = sbValue.charAt(i);
+				
+				if (ch == '$' && sbValue.charAt(i + 1) == '{')
+				{
+					for (int j = i + 1, anz = sbValue.length(); j < anz; j++)
+					{
+						if (sbValue.charAt(j) == '}')
+						{
+							sProp = System.getProperty(sbValue.substring(i + 2, j), "");
+							
+							sbValue.replace(i, j + 1, sProp);
+							
+							i = j + 1;
+							j = anz;
+						}
+					}
+				}
+			}
+			
+			return sbValue.toString();
+		}
+		else
+		{
+			return null;
+		}
+	}
+
+	/**
+	 * Converts a node list to a list of properties.
+	 * 
+	 * @param pNodes the node list
+	 * @param pPropertyName the name of the property
+	 * @return the property values from the list of nodes
+	 */
+	private List<String> toList(List<XmlNode> pNodes, String pPropertyName)
+	{
+	    if (pNodes != null)
+	    {
+	        ArrayUtil<String> liResult = new ArrayUtil<String>();
+	        
+	        for (XmlNode node : pNodes)
+	        {
+	            liResult.add(node.getNodeValue(pPropertyName));
+	        }
+	        
+	        return liResult;
+	    }
+	    
+	    return null;
+	}
+	
+	//****************************************************************
+    // Subclass definition
+    //****************************************************************
+
+	/**
+	 * The <code>AppLocation</code> class defines directories which contain application zones.
+	 * It also knows which application name is included or not.
+	 * 
+	 * @author René Jahn
+	 */
+	public final class AppLocation
+	{
+	    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Class members
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	    /** the application directory path. */
+	    private String sPath;
+	    
+	    /** the included application names. */
+	    private List<String> liIncludes;
+	    /** the excluded application names. */
+	    private List<String> liExcludes;
+
+	    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // Initialization
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	    
+	    /**
+	     * Creates a new instance of <code>AppLocation</code>.
+	     * 
+	     * @param pPath the path of the directory which contains applications
+	     */
+	    private AppLocation(String pPath)
+	    {
+	        sPath = pPath;
+	    }
+
+	    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+        // User-defined methods
+        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	    /** 
+	     * Gets the path for the application directory.
+	     * 
+	     * @return the path
+	     */
+	    public String getPath()
+	    {
+	        return sPath;
+	    }
+	    
+	    /**
+	     * Gets whether the given application name/zone is included.
+	     * 
+	     * @param pDirectory the name of the application (= zone name)
+	     * @return <code>true</code> if the name is included, <code>false</code> otherwise
+	     */
+	    public boolean isIncluded(String pDirectory)
+	    {
+	        boolean bIncluded = true;
+	        
+	        if (liIncludes != null)
+	        {
+	            //if includes are available, the directory must be in the list
+	            
+	            bIncluded = liIncludes.contains(pDirectory);
+	        }
+	        
+	        if (liExcludes != null)
+	        {
+	            //if excludes are available, the directory must not be in the list
+	            
+	            bIncluded = !liExcludes.contains(pDirectory);
+	        }
+	        
+	        return bIncluded;
+	    }
+	}
+
+}	// AppSettings

@@ -1,0 +1,1127 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 10.11.2008 - [HM] - creation
+ * 27.03.2009 - [JR] - uninstallEditor: unset databook
+ * 04.08.2009 - [JR] - popupMenuWillBecomeVisible, focusGained: changed selection (see REV 2838)
+ *                     (focusGained should not always select because you can't input text without overwriting)
+ * 24.03.2011 - [JR] - #317: cancelEditing checks parents enabled state
+ * 31.03.2011 - [JR] - #161: forward translation change to combobase
+ * 11.04.2014 - [JR] - #1006: automatically show/hide header
+ * 22.04.2014 - [RZ] - #1014: implemented displayReferencedColumnName
+ * 18.09.2014 - [RZ] - #1111: fixed that the cell editor will become empty upon invalid input
+ */
+package com.sibvisions.rad.ui.swing.ext.celleditor;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+
+import javax.rad.model.ColumnDefinition;
+import javax.rad.model.IChangeableDataRow;
+import javax.rad.model.IDataBook;
+import javax.rad.model.IDataPage;
+import javax.rad.model.IDataRow;
+import javax.rad.model.ModelException;
+import javax.rad.model.SortDefinition;
+import javax.rad.model.condition.Equals;
+import javax.rad.model.reference.ReferenceDefinition;
+import javax.rad.model.ui.ICellEditor;
+import javax.rad.model.ui.ICellEditorHandler;
+import javax.rad.model.ui.ICellEditorListener;
+import javax.rad.model.ui.ICellRenderer;
+import javax.rad.model.ui.IEditorControl;
+import javax.rad.ui.IAlignmentConstants;
+import javax.rad.ui.IColor;
+import javax.rad.ui.component.IPlaceholder;
+import javax.swing.AbstractListModel;
+import javax.swing.BorderFactory;
+import javax.swing.ComboBoxModel;
+import javax.swing.JComponent;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.PopupMenuEvent;
+import javax.swing.event.PopupMenuListener;
+import javax.swing.table.DefaultTableCellRenderer;
+
+import com.sibvisions.rad.ui.awt.impl.AwtDimension;
+import com.sibvisions.rad.ui.celleditor.AbstractLinkedCellEditor;
+import com.sibvisions.rad.ui.swing.ext.ICellFormatterEditorListener;
+import com.sibvisions.rad.ui.swing.ext.JVxComboBase;
+import com.sibvisions.rad.ui.swing.ext.JVxTable;
+import com.sibvisions.rad.ui.swing.ext.JVxUtil;
+import com.sibvisions.rad.ui.swing.ext.cellrenderer.JVxIconRenderer;
+import com.sibvisions.rad.ui.swing.ext.cellrenderer.JVxRendererContainer;
+import com.sibvisions.rad.ui.swing.ext.format.CellFormat;
+import com.sibvisions.rad.ui.swing.ext.layout.JVxBorderLayout;
+import com.sibvisions.rad.ui.swing.impl.SwingFactory;
+import com.sibvisions.util.ArrayUtil;
+
+/**
+ * The <code>JVxLinkedCellEditor</code> provides the generation of the 
+ * physical linked editor component, handles correct all events, and 
+ * gives standard access to edited values.
+ * 
+ * @author Martin Handsteiner
+ */
+public class JVxLinkedCellEditor extends AbstractLinkedCellEditor 
+                                 implements ICellRenderer<JComponent>
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/** The default Renderer anyway!. */
+	private JVxRendererContainer cellRenderer = null;
+	/** The text renderer. */
+	private DefaultTableCellRenderer textRenderer = null;
+	/** The text renderer. */
+	private JVxIconRenderer iconRenderer = null;
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Constructs a new JVxLinkedCellEditor.
+	 */
+	public JVxLinkedCellEditor()
+	{
+		this(null);
+	}
+	
+	/**
+	 * Constructs a new JVxLinkedCellEditor with the given link reference.
+	 * @param pLinkReference the link reference.
+	 */
+	public JVxLinkedCellEditor(ReferenceDefinition pLinkReference)
+	{
+		horizontalAlignment = ALIGN_DEFAULT;
+		popupSize = new AwtDimension(400, 200);
+		
+		setLinkReference(pLinkReference);
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Interface implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public ICellEditorHandler<JComponent> createCellEditorHandler(ICellEditorListener pCellEditorListener, 
+			                                                      IDataRow pDataRow, String pColumnName)
+	{
+		return new CellEditorHandler(this, (ICellFormatterEditorListener)pCellEditorListener, pDataRow, pColumnName);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public JComponent getCellRendererComponent(JComponent pParentComponent, IDataPage pDataPage, int pRowNumber, IDataRow pDataRow, String pColumnName, boolean pIsSelected,
+			boolean hasFocus)
+	{
+		if (cellRenderer == null)
+		{
+			cellRenderer = new JVxRendererContainer();
+			
+			textRenderer = new DefaultTableCellRenderer();
+			textRenderer.setFont(null);
+			textRenderer.setOpaque(false);
+			
+			iconRenderer = new JVxIconRenderer();
+			iconRenderer.setImage(JVxUtil.getImage("/com/sibvisions/rad/ui/swing/ext/images/combobox.png"));
+			iconRenderer.setOpaque(false);
+			
+			cellRenderer.add(textRenderer, JVxBorderLayout.CENTER);
+			cellRenderer.add(iconRenderer, JVxBorderLayout.EAST);
+		}
+		
+		textRenderer.setHorizontalAlignment(SwingFactory.getHorizontalSwingAlignment(
+				getDefaultHorizontalAlignment(pDataRow, pColumnName)));
+		textRenderer.setVerticalAlignment(SwingFactory.getVerticalSwingAlignment(getVerticalAlignment()));
+
+		IDataBook dataBook = pDataPage.getDataBook();
+		
+		try
+		{
+			iconRenderer.setVisible(pIsSelected && !dataBook.isReadOnly() && dataBook.isUpdateAllowed()
+					&& !pDataRow.getRowDefinition().getColumnDefinition(pColumnName).isReadOnly());
+		}
+		catch (Exception ex)
+		{
+			iconRenderer.setVisible(false);
+		}
+		
+		try
+		{
+			textRenderer.setText(getDisplayValue(pDataRow, pColumnName));
+		}
+		catch (Exception pException)
+		{
+			textRenderer.setText(null);
+		}
+
+		return cellRenderer;
+	}
+
+	//****************************************************************
+	// Subclass definition
+	//****************************************************************
+
+	/**
+     * Sets the internal changed Flag, and informs the CellEditorListener 
+     * if editing is completed.
+     * 
+     * @author Martin Handsteiner
+     */
+    public static class CellEditorHandler extends AbstractListModel
+                                          implements ICellEditorHandler<JComponent>,
+                                          			 ComboBoxModel,
+                                          			 DocumentListener,
+                                          			 KeyListener,
+                                        			 PopupMenuListener,
+                                                     FocusListener,
+                                                     MouseListener,
+                                                     Runnable
+    {
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    	// Class members
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    	/** The CellEditor, that created this handler. */
+    	private JVxLinkedCellEditor cellEditor;
+    	
+    	/** The CellEditorListener to inform, if editing is started or completed. */
+    	private ICellFormatterEditorListener cellEditorListener;
+    	
+    	/** The data row that is edited. */
+    	private IDataRow dataRow;
+    	
+    	/** The column names. */
+    	private String[] columnNames;
+
+    	/** The column names referenced. */
+    	private String[] referencedColumnNames;
+
+    	/** The column name of the edited column. */
+    	private String columnName;
+
+    	/** The column name referenced by the edited column. */
+    	private String referencedColumnName;
+    	
+    	/** The clear Columns. */
+    	private String[] clearColumns;
+
+    	/** The additional clear Columns. */
+    	private String[] additionalClearColumns;
+        /** The columns and additional Columns. */
+        private String[] allColumns;
+
+    	/** The DataBook referenced by the edited column. */
+    	private IDataBook referencedDataBook;
+
+    	/** The physical component that is added to the parent container. */
+    	private JVxComboBase cellEditorComponent;
+    	
+    	/** Dynamic alignment. */
+    	private IAlignmentConstants dynamicAlignment = null;
+    	
+    	/** The table shown in the popup. */
+    	private JVxTable table;
+    	
+    	/** Tells the listener to ignore the events. */
+    	private boolean ignoreEvent = false;
+    	
+    	/** True, if it's the first editing started event. */
+    	private boolean firstEditingStarted = true;
+    	
+    	/** Popup is opened automatically. */
+    	private boolean autoOpen = false;
+    	
+    	/** True, if it's the first editing started event. */
+    	private boolean popupChanged = false;
+    	
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    	// Initialization
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    	
+    	/**
+    	 * Constructs a new CellEditorHandler.
+    	 * 
+    	 * @param pCellEditor the CellEditor that created this handler.
+    	 * @param pCellEditorListener CellEditorListener to inform, if editing is started or completed.
+    	 * @param pDataRow the data row that is edited.
+    	 * @param pColumnName the column name of the edited column.
+    	 */
+    	public CellEditorHandler(JVxLinkedCellEditor pCellEditor, ICellFormatterEditorListener pCellEditorListener,
+    			                 IDataRow pDataRow, String pColumnName)
+    	{
+    		cellEditor = pCellEditor;
+    		cellEditorListener = pCellEditorListener;
+    		dataRow = pDataRow;
+    		columnName = pColumnName;
+    		
+    		columnNames = cellEditor.linkReference.getColumnNames();
+    		referencedColumnNames = cellEditor.linkReference.getReferencedColumnNames();
+    		if (columnNames.length == 0 && referencedColumnNames.length == 1)
+    		{
+    			columnNames = new String[] {pColumnName};
+    		}
+
+    		int columnIndex = ArrayUtil.indexOf(columnNames, columnName);
+    		if (columnIndex < 0)
+    		{
+    			throw new IllegalArgumentException("The edited column " + columnName + " has to be part of in column names list in LinkReference!");
+    		}
+    		else
+    		{
+        		referencedColumnName = referencedColumnNames[columnIndex];
+    		}
+    		
+       		referencedDataBook = cellEditor.linkReference.getReferencedDataBook();
+    		referencedDataBook.setSelectionMode(IDataBook.SelectionMode.DESELECTED);
+    		try
+			{
+    			clearColumns = cellEditor.getClearColumns(dataRow, columnName);
+    			additionalClearColumns = cellEditor.getAdditionalClearColumns(dataRow);
+
+    			referencedDataBook.setReadOnly(cellEditor.isTableReadonly());
+			}
+			catch (ModelException pModelException)
+			{
+				// Do nothing, it only tries to set data book readonly.
+			}
+            if (additionalClearColumns != null && additionalClearColumns.length > 0)
+            {
+                allColumns = ArrayUtil.addAll(columnNames, additionalClearColumns);
+            }
+    		
+    		table = new JVxTable();
+    		table.setDataBook(referencedDataBook);
+    		table.setBorder(BorderFactory.createEmptyBorder());
+    		table.setAutoResize(true);
+    		table.getJTable().setFocusable(false);
+    		
+    		cellEditorComponent = new JVxComboBase();
+    		cellEditorComponent.setPopupComponent(table);
+    		cellEditorComponent.setModel(this);
+    		if (cellEditor.getPopupSize() != null)
+    		{
+    			cellEditorComponent.setPopupSize((Dimension)cellEditor.getPopupSize().getResource());
+    		}
+    		
+    		if (cellEditorComponent.getEditorComponent() instanceof JTextField)
+    		{ 
+    			if (cellEditorListener.getControl() instanceof IAlignmentConstants && cellEditorListener.getControl() instanceof IEditorControl)
+    			{	// use alignment of editors, if possible.
+    				dynamicAlignment = (IAlignmentConstants)cellEditorListener.getControl();
+    			}
+    			else
+    			{
+	    			((JTextField)cellEditorComponent.getEditorComponent()).setHorizontalAlignment(SwingFactory.getHorizontalSwingAlignment(
+	    					cellEditor.getDefaultHorizontalAlignment(dataRow, columnName)));
+    			}
+        	}
+
+    		cellEditorComponent.getEditorComponent().getDocument().addDocumentListener(this);
+    		cellEditorComponent.getEditorComponent().addKeyListener(this);
+    		cellEditorComponent.getEditorComponent().addFocusListener(this);
+    		cellEditorComponent.getEditorComponent().setFocusTraversalKeysEnabled(false);
+    		cellEditorComponent.addPopupMenuListener(this);
+    		table.getJTable().addMouseListener(this);
+    	}
+
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    	// Interface implementation
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    	// ICellEditorHandler
+    	
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public void uninstallEditor()
+    	{
+    		cellEditorComponent.getEditorComponent().getDocument().removeDocumentListener(this);
+    		cellEditorComponent.getEditorComponent().removeKeyListener(this);
+    		cellEditorComponent.getEditorComponent().removeFocusListener(this);
+    		cellEditorComponent.removePopupMenuListener(this);
+    		table.getJTable().removeKeyListener(this);
+    		table.getJTable().removeMouseListener(this);
+    		//important, to remove the table-control from the databook!
+    		table.setDataBook(null);
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public ICellEditor getCellEditor()
+    	{
+    		return cellEditor;
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public ICellEditorListener getCellEditorListener()
+    	{
+    		return cellEditorListener;
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public IDataRow getDataRow()
+    	{
+    		return dataRow;
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public String getColumnName()
+    	{
+    		return columnName;
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public JComponent getCellEditorComponent()
+    	{
+    		return cellEditorComponent;
+    	}
+
+    	/**
+    	 * Sets the values and clears the additionalClearColumns, if values are changed.
+    	 * @param pNewValues the new values.
+    	 * @param pNotValidatedValue the value of this field, if it is not validated.
+    	 * @throws ModelException if it fails.
+    	 */
+    	private void setValuesAndClearIfNecessary(Object[] pNewValues, Object pNotValidatedValue) throws ModelException
+    	{
+    		IDataRow oldRow = dataRow.createDataRow(null);
+    		
+            IDataRow newRow = dataRow.createDataRow(null);
+            if (pNewValues == null)
+            {
+                // Use a temp row, to have one setValues with one values changed event on dataRow.
+                newRow.setValues(clearColumns, null);
+                newRow.setValue(columnName, pNotValidatedValue);
+            }
+            else
+            {
+                newRow.setValues(columnNames, pNewValues);
+            }
+
+            if (additionalClearColumns != null && additionalClearColumns.length > 0 && !newRow.equals(oldRow, columnNames))
+            {
+                newRow.setValues(additionalClearColumns, null);
+                dataRow.setValues(allColumns, newRow.getValues(allColumns));
+            }
+            else
+            {
+                dataRow.setValues(columnNames, newRow.getValues(columnNames));
+            }
+    	}
+    	
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public void saveEditing() throws ModelException
+    	{
+    		try
+    		{
+	    		if (popupChanged && referencedDataBook.getSelectedRow() >= 0)
+				{
+	    			setValuesAndClearIfNecessary(referencedDataBook.getValues(referencedColumnNames), null);
+				}
+				else
+				{
+		    		Object item = cellEditorComponent.getEditor().getItem();
+		    		
+		    		if (item == null || "".equals(item))
+		    		{
+						setValuesAndClearIfNecessary(null, null);
+		    		}
+		    		else
+		    		{
+			    		referencedDataBook.setFilter(cellEditor.getSearchCondition(dataRow, cellEditor.getItemSearchCondition(false, getRelevantSearchColumnName(), item)));
+			    		if (referencedDataBook.getDataRow(0) != null && referencedDataBook.getDataRow(1) == null)
+			    		{
+			    			setValuesAndClearIfNecessary(referencedDataBook.getDataRow(0).getValues(referencedColumnNames), null);
+			    		}
+			    		else
+			    		{
+		    				if (cellEditor.isValidationEnabled())
+		    				{
+				        		referencedDataBook.setFilter(cellEditor.getSearchCondition(dataRow, 
+				        				cellEditor.getItemSearchCondition(true, getRelevantSearchColumnName(), item)));
+				        		if (referencedDataBook.getDataRow(0) != null && referencedDataBook.getDataRow(1) == null)
+				        		{
+					    			setValuesAndClearIfNecessary(referencedDataBook.getDataRow(0).getValues(referencedColumnNames), null);
+				    			}
+				    			else
+				    			{
+					    			setValuesAndClearIfNecessary(dataRow.getValues(columnNames), null);
+			    				}
+			    			}
+		    				else
+		    				{
+		    					try
+		    					{
+		    						item = dataRow.getRowDefinition().getColumnDefinition(columnName).getDataType().convertAndCheckToTypeClass(item);
+		    					}
+		    					catch (Exception ex)
+		    					{
+					    			setValuesAndClearIfNecessary(dataRow.getValues(columnNames), null);
+					    			return;
+		    					}
+	    						setValuesAndClearIfNecessary(null, item);
+		    				}
+			    		}
+		    		}
+				}
+    		}
+    		finally
+    		{
+    			popupChanged = false;
+    		}
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public void cancelEditing() throws ModelException
+    	{
+    		if (!ignoreEvent)
+    		{
+	    		ignoreEvent = true;
+	    		try
+	    		{
+	    			ColumnDefinition columnDef = dataRow.getRowDefinition().getColumnDefinition(columnName);
+	    			
+	        		cellEditorComponent.setTranslation(cellEditorListener.getControl().getTranslation());
+	        		cellEditorComponent.setTranslationEnabled(cellEditorListener.getControl().isTranslationEnabled());
+
+	        		synchronized (cellEditorComponent.getTreeLock())
+		    		{
+	        			cellEditorComponent.setSelectedItem(cellEditor.getDisplayValue(dataRow, columnName));
+		    		}
+	    			
+					CellFormat cellFormat = null;
+					
+					Container conParent = cellEditorComponent.getParent();
+					
+					boolean bParentEnabled = conParent == null || conParent.isEnabled();
+					
+		    		if (dataRow instanceof IDataBook)
+		    		{
+		    			IDataBook dataBook = (IDataBook)dataRow;
+		    			boolean editable = bParentEnabled
+		    					        && dataBook.isUpdateAllowed() 
+		    							&& !columnDef.isReadOnly();
+		    			if (editable && dataBook.getReadOnlyChecker() != null)
+		    			{
+		    				try
+							{
+		    					editable = !dataBook.getReadOnlyChecker().isReadOnly(dataBook, dataBook.getDataPage(), dataBook, columnName, dataBook.getSelectedRow(), -1);
+							}
+							catch (Throwable pTh)
+							{
+								// Ignore
+							}
+		    			}
+		    			cellEditorComponent.setEditorEditable(editable);
+		    		}
+					else
+					{
+						cellEditorComponent.setEditorEditable(bParentEnabled && !columnDef.isReadOnly());
+					}
+		    		
+					if (cellEditorListener.getCellFormatter() != null)
+					{
+						IDataBook curDataBook = null;
+						IDataPage curDataPage = null;
+						int curSelectedRow = -1;
+						
+						if (dataRow instanceof IDataBook)
+						{
+							curDataBook = (IDataBook)dataRow;
+							curDataPage = curDataBook.getDataPage();
+							curSelectedRow = curDataBook.getSelectedRow();
+						}
+						else if (dataRow instanceof IChangeableDataRow)
+						{
+							curDataPage = ((IChangeableDataRow)dataRow).getDataPage();
+							curSelectedRow = ((IChangeableDataRow)dataRow).getRowIndex();
+							if (curDataPage != null)
+							{
+								curDataBook = curDataPage.getDataBook();
+							}
+						}
+						
+						try
+						{
+							cellFormat = cellEditorListener.getCellFormatter().getCellFormat(
+									curDataBook, curDataPage, dataRow, columnName, curSelectedRow, -1);
+						}
+						catch (Throwable pThrowable)
+						{
+							// Do nothing
+						}
+					}
+		    		
+					Color background;
+					Color foreground;
+					Font  font;
+					if (cellFormat == null)
+					{
+						background = null;
+						foreground = null;
+						font = null;
+					}
+					else
+					{
+						background = cellFormat.getBackground();
+						foreground = cellFormat.getForeground();
+						font = cellFormat.getFont();
+					}
+					if (font == null)
+					{
+						font = ((Component)cellEditorListener).getFont();
+					}
+					if (foreground == null && ((Component)cellEditorListener).isForegroundSet())
+					{
+						foreground = ((Component)cellEditorListener).getForeground();
+					}
+					if (background == null && ((Component)cellEditorListener).isBackgroundSet())
+					{
+						background = ((Component)cellEditorListener).getBackground();
+					}
+
+					cellEditorComponent.getEditorComponent().setFont(font);
+		    		if (cellEditorComponent.isEditorEditable())
+		    		{
+		    			if (background == null)
+		    			{
+			    			if (columnDef.isNullable())
+			    			{
+			    				background = JVxUtil.getSystemColor(IColor.CONTROL_BACKGROUND);
+			    			}
+			    			else
+			    			{
+			    				background = JVxUtil.getSystemColor(IColor.CONTROL_MANDATORY_BACKGROUND);
+			    			}
+		    			}
+		    			if (cellEditorComponent.getEditorComponent().hasFocus())
+						{
+							cellEditorComponent.getEditorComponent().selectAll();
+						}
+						else
+						{
+							cellEditorComponent.getEditorComponent().select(0, 0);
+						}
+		    		}
+		    		else if (background == null)
+		    		{
+		    			background = JVxUtil.getSystemColor(IColor.CONTROL_READ_ONLY_BACKGROUND);
+						cellEditorComponent.getEditorComponent().select(0, 0);
+		    		}
+	    			cellEditorComponent.getEditorComponent().setBackground(background);
+	    			cellEditorComponent.getEditorComponent().setForeground(foreground);
+	    			cellEditorComponent.setBackground(background); // Synthetica Look&Feel ignores the editor colors.
+	    			cellEditorComponent.setForeground(foreground);
+		
+	    			if (dynamicAlignment != null)
+		    		{
+		    			int hAlign = dynamicAlignment.getHorizontalAlignment();
+		    			if (hAlign == IAlignmentConstants.ALIGN_DEFAULT)
+		    			{
+		    				hAlign = cellEditor.getDefaultHorizontalAlignment(dataRow, columnName);
+		    			}
+		    			((JTextField)cellEditorComponent.getEditorComponent()).setHorizontalAlignment(SwingFactory.getHorizontalSwingAlignment(hAlign));
+		    		}
+		    		
+		    		if (conParent instanceof JComponent)
+		    		{
+		    			cellEditorComponent.getEditorComponent().putClientProperty("tabIndex", ((JComponent)conParent).getClientProperty("tabIndex"));
+		    		}
+
+					if (cellEditorListener.getControl() instanceof IPlaceholder)
+					{
+						PromptSupport.setPrompt(cellEditorComponent.getEditorComponent(), 
+								                cellEditor.getPlaceholderText((IPlaceholder)cellEditorListener.getControl()));
+					}
+		    		
+	    			// Forward the Cell Formatter of the underlaying Control to the lookup table.
+	           		table.setCellFormatter(cellEditorListener.getCellFormatter());
+	    		}
+	    		catch (Exception pException)
+	    		{
+	        		synchronized (cellEditorComponent.getTreeLock())
+		    		{
+	        			cellEditorComponent.setSelectedItem(null);
+		    		}
+	    			cellEditorComponent.setEditorEditable(false);
+	    			cellEditorComponent.getEditorComponent().setBackground(JVxUtil.getSystemColor(IColor.CONTROL_READ_ONLY_BACKGROUND));
+	    			
+	    			throw new ModelException("Editor cannot be restored!", pException);
+	    		}
+	    		finally
+	    		{
+	    			firstEditingStarted = true;
+	    			ignoreEvent = false;
+	    		}
+    		}
+    	}
+    	
+    	// ComboBoxModel
+    	
+		/**
+		 * {@inheritDoc}
+		 */
+		public Object getSelectedItem()
+		{
+			try
+			{
+				if (popupChanged && referencedDataBook.getSelectedRow() >= 0)
+				{
+					return referencedDataBook.getValue(referencedColumnName);
+				}
+			}
+			catch (Exception ex)
+			{
+				// Cancel
+			}
+			
+	    	//cellEditorComponent.setPopupCanceled(true);
+			return cellEditorComponent.getEditor().getItem();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setSelectedItem(Object pItem)
+		{
+			try
+			{
+				if (firstEditingStarted || autoOpen)
+				{
+				    autoOpen = false;
+				    
+					referencedDataBook.setFilter(cellEditor.getSearchCondition(dataRow, null));
+					if (cellEditor.isSortByColumnName())
+					{
+						referencedDataBook.setSort(new SortDefinition(referencedColumnName));
+					}
+					
+					Object searchValue = cellEditor.displayReferencedColumnName != null ? pItem : dataRow.getValue(columnName);
+					if (searchValue != null)
+					{
+						long start = System.currentTimeMillis();
+						
+                        Equals searchCondition = new Equals(getRelevantSearchColumnName(), searchValue);
+						referencedDataBook.setSelectedRow(-1);
+						int i = 0;
+						IDataRow row = referencedDataBook.getDataRow(i);
+						while (row != null && referencedDataBook.getSelectedRow() < 0 && System.currentTimeMillis() - start < 1000)
+						{
+							if (searchCondition.isFulfilled(row))
+							{
+								referencedDataBook.setSelectedRow(i);
+							}
+							else
+							{
+								i++;
+								row = referencedDataBook.getDataRow(i);
+							}
+						}
+					}
+				}
+				else
+				{
+					if (pItem == null)
+					{
+						referencedDataBook.setFilter(cellEditor.getSearchCondition(dataRow, null));
+					}
+					else
+					{
+						referencedDataBook.setFilter(cellEditor.getSearchCondition(dataRow, 
+								cellEditor.getItemSearchCondition(true, getRelevantSearchColumnName(), pItem)));
+					}
+					cellEditor.updateCurrentCachedPage();
+				}
+
+	    		table.setColumnView(cellEditor.getColumnView());
+	    		if (cellEditor.isAutoTableHeaderVisibility())
+	    		{
+	    		    table.setTableHeaderVisible(referencedDataBook.getDataRow(0) != null && table.getColumnView().getColumnCount() > 2);
+	    		}
+	    		else
+	    		{
+	    			table.setTableHeaderVisible(referencedDataBook.getDataRow(0) != null && cellEditor.isTableHeaderVisible());
+	    		}
+			}
+			catch (ModelException pModelException)
+			{
+				// Do Nothing
+			    pModelException.printStackTrace();
+			}
+			popupChanged = false;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public Object getElementAt(int pIndex)
+		{
+			return null;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public int getSize()
+		{
+			return 0;
+		}
+
+    	// DocumentListener
+    	
+    	/**
+    	 * {@inheritDoc}
+    	 */
+        public void insertUpdate(DocumentEvent pDocumentEvent) 
+        {
+       		if (!(EventQueue.getCurrentEvent() instanceof FocusEvent) && cellEditorComponent.isEditorEditable())
+       		{
+       			fireEditingStarted();
+       			if (cellEditorComponent.isPopupVisible())
+       			{
+       				cellEditorComponent.setPopupVisible(true);
+       			}
+        	}
+        }
+        
+    	/**
+    	 * {@inheritDoc}
+    	 */
+        public void removeUpdate(DocumentEvent pDocumentEvent) 
+        {
+       		if (!(EventQueue.getCurrentEvent() instanceof FocusEvent) && cellEditorComponent.isEditorEditable())
+       		{
+       			fireEditingStarted();
+       			if (cellEditorComponent.isPopupVisible())
+       			{
+       				cellEditorComponent.setPopupVisible(true);
+       			}
+        	}
+        }
+        
+    	/**
+    	 * {@inheritDoc}
+    	 */
+        public void changedUpdate(DocumentEvent pDocumentEvent) 
+        {
+        }
+
+    	// KeyListener
+    	
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void keyPressed(KeyEvent pKeyEvent)
+		{
+			if (!pKeyEvent.isConsumed())
+			{
+				switch (pKeyEvent.getKeyCode())
+				{
+					case KeyEvent.VK_ESCAPE: 
+						pKeyEvent.consume(); 
+						cellEditorComponent.setPopupCanceled(true);
+						cellEditorComponent.setPopupVisible(false);
+				        fireEditingComplete(ICellEditorListener.ESCAPE_KEY, true);
+				        break;
+					case KeyEvent.VK_ENTER: 
+						pKeyEvent.consume(); 
+						if (cellEditorComponent.isPopupVisible())
+						{
+							// Force closing, the popup and write back the popup selection.
+							popupChanged = true;
+							fireEditingStarted();
+							cellEditorComponent.setPopupVisible(false);
+						}
+						if (pKeyEvent.isShiftDown())
+						{
+					        fireEditingComplete(ICellEditorListener.SHIFT_ENTER_KEY, true);
+						}
+						else
+						{
+					        fireEditingComplete(ICellEditorListener.ENTER_KEY, true);
+						}
+				        break;
+					case KeyEvent.VK_TAB: 
+						pKeyEvent.consume(); 
+						if (pKeyEvent.isShiftDown())
+						{
+					        fireEditingComplete(ICellEditorListener.SHIFT_TAB_KEY, true);
+						}
+						else
+						{
+					        fireEditingComplete(ICellEditorListener.TAB_KEY, true);
+						}
+				        break;
+					case KeyEvent.VK_DOWN: 
+					case KeyEvent.VK_UP: 
+						if (cellEditorComponent.isPopupVisible())
+						{
+							table.keyPressed(pKeyEvent);
+						}
+				        break;
+				    default:
+				    	// Nothing to do
+				}
+			}
+		}
+		
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void keyReleased(KeyEvent pKeyEvent)
+		{
+			if (!pKeyEvent.isConsumed())
+			{
+				switch (pKeyEvent.getKeyCode())
+				{
+					case KeyEvent.VK_DOWN: 
+					case KeyEvent.VK_UP: 
+						if (cellEditorComponent.isPopupVisible())
+						{
+							table.keyReleased(pKeyEvent);
+						}
+				        break;
+				    default:
+				    	// Nothing to do
+				}
+			}
+		}
+		
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void keyTyped(KeyEvent pKeyEvent)
+		{
+		}
+
+    	// PopupMenuListener
+    	
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void popupMenuCanceled(PopupMenuEvent pPopupMenuEvent)
+		{
+		    // We do not restore, in case the popup is cancelled.
+		    // This should ensure, that the last entered chars should be used for saving the editor
+//		    fireEditingComplete(ICellEditorListener.ESCAPE_KEY, false);
+		}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void popupMenuWillBecomeInvisible(PopupMenuEvent pPopupMenuEvent)
+		{
+			cellEditorComponent.getEditorComponent().select(
+					cellEditorComponent.getEditorComponent().getSelectionStart(),
+					cellEditorComponent.getEditorComponent().getSelectionEnd());
+		}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void popupMenuWillBecomeVisible(PopupMenuEvent pPopupMenuEvent)
+		{
+    		try
+			{
+				referencedDataBook.setReadOnly(cellEditor.isTableReadonly());
+			}
+			catch (ModelException pModelException)
+			{
+				// Do nothing, it only tries to set data book readonly.
+			}
+
+			if (firstEditingStarted)
+			{
+				if (cellEditorComponent.isTextInputEnabled())
+				{
+					cellEditorComponent.getEditorComponent().selectAll();
+				}
+			}
+
+       		SwingUtilities.invokeLater(this);
+		}
+		
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void run()
+		{
+	   		table.scrollToSelectedCell();
+		}
+
+    	// FocusListener
+    	
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void focusGained(FocusEvent pFocusEvent)
+		{
+			if (!cellEditorComponent.isPopupVisible() && cellEditorComponent.isEditorEditable())
+			{
+				cellEditorComponent.getEditorComponent().selectAll();
+			}
+		}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void focusLost(FocusEvent pFocusEvent)
+		{
+			if (!pFocusEvent.isTemporary() && !cellEditorComponent.isPopupFocusEvent(pFocusEvent))
+			{
+				fireEditingComplete(ICellEditorListener.FOCUS_LOST, true);
+			}
+		}
+		
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void mouseClicked(MouseEvent pMouseEvent)
+		{
+		}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void mouseEntered(MouseEvent pMouseEvent)
+		{
+		}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void mouseExited(MouseEvent pMouseEvent)
+		{
+		}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void mousePressed(MouseEvent pMouseEvent)
+		{
+		}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void mouseReleased(MouseEvent pMouseEvent)
+		{
+			// Force closing, the popup and write back the popup selection.
+			popupChanged = true;
+			fireEditingStarted();
+			fireEditingComplete(ICellEditorListener.ENTER_KEY, true);
+		}
+    	
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    	// User-defined methods
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+		/**
+		 * Delegates the event to the ICellEditorListener.
+		 * It takes care, that the event occurs only one time.
+		 */
+		protected void fireEditingStarted()
+		{
+        	if (firstEditingStarted && !ignoreEvent && cellEditorListener != null)
+        	{
+                firstEditingStarted = false;
+                cellEditorListener.editingStarted();
+				if (cellEditor.isAutoOpenPopup() && !cellEditorComponent.isPopupVisible())
+				{
+				    autoOpen = true;
+					cellEditorComponent.setPopupVisible(true);
+				}
+        	}
+		}
+		
+		/**
+		 * Delegates the event to the ICellEditorListener.
+		 * It takes care, that editing started will be called before,
+		 * if it is not called until jet.
+		 * 
+		 * @param pCompleteType the editing complete type.
+		 * @param pClosePopup try closing the popup.
+		 */
+		protected void fireEditingComplete(String pCompleteType, boolean pClosePopup)
+		{
+			if (!ignoreEvent && cellEditorListener != null)
+			{
+				if (pClosePopup && cellEditorComponent.isPopupVisible())
+				{
+					ignoreEvent = true;
+					cellEditorComponent.setPopupCanceled(true);
+					cellEditorComponent.setPopupVisible(false);
+					ignoreEvent = false;
+				}
+				cellEditorListener.editingComplete(pCompleteType);
+			}
+		}
+
+		/**
+		 * Returns the relevant search column. If a {@code displayColumnName} is set,
+		 * then that one will be returned, otherwise it will return {@code referencedColumnName}.
+		 * 
+		 * @return the relevant search column name.
+		 */
+		private String getRelevantSearchColumnName()
+		{
+			if (cellEditor.displayReferencedColumnName != null)
+			{
+				return cellEditor.displayReferencedColumnName;
+			}
+			else
+			{
+				return referencedColumnName;
+			}
+		}
+
+    }	// CellEditorHandler
+
+}	// JVxLinkedCellEditor

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+   <include>/config_import.properties</include>
+   <securitymanager>
+      <accesscontroller>dummy value</accesscontroller>
+   </securitymanager>
+   <property name="property.value" value="${testproperty}"/>
+   <sysproperty>${sys:testproperty}</sysproperty>
+   <imppoperty>${imp:testproperty}</imppoperty>
+   <partialproperty>${testproperty2}_concat_${sys:testproperty}</partialproperty>
+   <invalid>${invalid</invalid>
+</application>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+  <securitymanager>
+    <class>com.sibvisions.rad.server.security.DBSecurityManager</class>
+    <database>
+      <driver>org.hsqldb.jdbcDriver</driver>
+      <url>jdbc:hsqldb:hsql://localhost/demodb;ifexists=true</url>
+      <username>sa</username>
+      <password></password>
+    </database>
+  </securitymanager>
+
+  <!-- optional database configuration -->
+  <databaseobjects>
+    <yesvalue>Y</yesvalue>
+    <NUSERS>TBL_USERS</NUSERS>
+    <NUSERS_CHANGE_PASSWORD>CHANGE_PASSWORD</NUSERS_CHANGE_PASSWORD>
+    <NUSERS_VALID_FROM>COL_VALID_FROM</NUSERS_VALID_FROM>
+    <NUSERS_VALID_TO>COL_VALID_TO</NUSERS_VALID_TO>
+    <NUSERS_ACTIVE>COL_ACTIVE</NUSERS_ACTIVE>
+  </databaseobjects>
+  
+    <!-- predefined life-cycle object names -->
+  <lifecycle>
+    <mastersession>democopy.Session</mastersession>
+    <application>democopy.Application</application>
+  </lifecycle>
+  
+</application>

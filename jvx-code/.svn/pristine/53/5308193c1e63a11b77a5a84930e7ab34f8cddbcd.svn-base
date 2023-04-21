@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<server>
+  <text>
+  <![CDATA[  This is some
+	funny
+		multine
+text<<<>>
+ 	  which should make trouble.]]>
+  </text>
+  <nocdata>  This is some
+	funny
+		multine
+text
+ 	  which should make trouble.</nocdata>
+  <linebreak>
+  Line 1
+  Line 2
+Line 3
+  Line 4
+  </linebreak>
+  <emptycdata><![CDATA[]]></emptycdata>
+  <emptytext></emptytext>
+  <mixed>mixed text - <![CDATA[cdata in mixed text]]> - text after cdata</mixed>
+</server>

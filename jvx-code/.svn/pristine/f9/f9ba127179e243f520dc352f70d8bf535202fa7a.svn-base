@@ -1,0 +1,4 @@
+securitymanager.class = securitymanager
+securitymanager.accesscontroller = accesscontroller
+testproperty = impvalue
+testproperty2 = impvalue2

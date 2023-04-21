@@ -1,0 +1,6 @@
+<FindBugsFilter>
+  <!-- Testklassen nicht berücksichtigen -->
+  <Match classregex="$Test.*" />
+  <Match classregex=".*\.Test.*" />
+  <Match classregex="research.*" />
+</FindBugsFilter>  

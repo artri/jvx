@@ -1,0 +1,476 @@
+@import "jvx_ie.scss";
+
+
+.fa,
+.FontAwesomeLabelAddon
+{
+    font-family: 'FontAwesome';
+}
+
+.Vaadin-Icons 
+{
+    font-family: 'Vaadin-Icons';
+}
+
+@mixin jvxbase
+{
+    @include jvx_ie;
+
+	/* WINDOW ********************************************************************/
+
+    .v-window
+    {
+    	min-width: 320px !important;
+    	min-height: 130px !important;
+    }
+    
+	.upload .v-window-contents
+	{
+		padding-top: 30px !important;
+	}
+	
+	/* LAYOUT ********************************************************************/
+
+	.v-gridlayout-spacing-on
+	{
+		padding-left: 3px;
+		padding-top: 3px;
+	}
+
+	.overflowvisible .v-jvx-panel-canvas 
+	{
+    	overflow: visible!important;
+	}
+
+	/* MENU **********************************************************************/
+
+	.v-menubar.jvxmenubar 
+	{
+		width: 100%;
+	}	
+
+	/* INPUT *********************************************************************/
+
+	.v-scrolling
+    {
+    	overflow: auto;    
+    }
+
+	.v-textarea
+    {
+    	overflow: auto;
+    }
+
+    .v-textfield-noborder 
+	{
+	    border: none !important;
+	}
+
+	/* ICON **********************************************************************/
+
+	.jvxicon,
+	.jvxinnericon 
+	{
+		background-color: transparent;
+	}
+	
+	.v-icon-16 div.v-window-header .v-icon
+	{
+		width: 16px;
+		height: 16px;
+		padding-right: 5px;
+	}
+
+	/* GROUP PANEL ***************************************************************/
+
+    .v-grouppanel .v-panel-content
+    {
+    	overflow: hidden;
+    }
+    
+	/* DATEFIELD **********************************************************************/
+
+	.v-datefield .v-datefield-button-readonly
+	{
+		display: inline-block;
+		cursor: default;
+	}
+	
+	.v-datefield .v-textfield-readonly
+	{
+		background: transparent;
+		opacity: 1;
+		filter: none;
+	}	
+
+	/* DATE CELL EDITOR **********************************************************/
+
+	/*
+	It's better UX to show the button
+	 
+	.v-datefield-popupcalendar.no-popup-button .v-datefield-button
+	{
+		display: none;
+		visibility: hidden;
+	}
+	*/
+	
+    .v-timeselection
+    {
+		min-width: 70px;
+    }
+    
+    .v-timeselection .v-datefield-calendarpanel-header
+    {
+    	display: none;
+    }
+    
+    .v-timeselection .v-datefield-calendarpanel-body
+    {
+    	display: none;
+    }   
+
+	/* NUMBER *************************************************************************/
+
+	.v-number .v-filterselect-input
+	{
+		text-align: right;
+	}	
+	
+	.v-filterselect-suggestpopup-v-number
+	{
+		text-align: right;
+	}
+
+	/* TABLE **************************************************************************/
+    
+	.v-table .v-selected td
+	{
+		text-shadow: none;
+	}
+
+	.v-table-header-wrap
+	{
+		box-sizing: border-box;
+	}
+
+	.v-table-body
+	{
+		box-sizing: border-box;
+	}
+
+  	.v-table-cell-content-vborderhidden .v-table-cell-content 
+  	{
+  		border-right: 1px hidden #aaa;
+  	}	
+  	
+  	.v-table-cell-content-hborder .v-table-cell-content 
+  	{
+  		border-bottom: 1px solid #aaa;
+  	}
+
+ 	.v-table-components-inside .v-table-cell-content 
+ 	{
+ 		vertical-align: middle;
+	}		
+
+    .v-table-cell-wrapper
+	{
+		height: 100%;
+	}
+    
+    .v-table-cell-not-nullable
+	{
+		background-color: #FFF4D2;
+	}
+	
+	.v-table-row-odd .v-table-cell-not-nullable
+	{
+		background-color: rgba(253,244,214,0.53);
+	}    
+	
+	.v-table .v-selected .v-table-cell-not-nullable
+	{
+		background-color: transparent;
+	}
+	
+	.v-table-cell-readonly
+	{
+		background-color: #EEEEEE;
+	}
+	
+	.v-table-row-odd .v-table-cell-readonly
+	{
+		background-color: #EAEAEA;
+	}
+	
+	.v-table .v-selected .v-table-cell-readonly
+	{
+		background-color: transparent;
+	}
+
+    .v-table-cell-content-deleting
+    {
+    	background: transparent url('images/strike.png') 0 50% repeat-x !important;
+    } 	
+    
+	/* TABLE **************************************************************************/
+	
+	.v-grid-cell
+	{
+		padding: 0px;
+	}
+	
+	.v-grid-cell > *:not(.v-grid-column-resize-handle)
+	{
+		width: 100%;
+	}
+	
+	.v-grid-editor-cells > div > *
+	{
+		height: 100%;
+	}
+	
+	.v-grid-column-header-content,
+	.v-grid-cell-content
+	{
+		height: 100%;
+		padding: 0px 10px;
+		vertical-align: middle;
+	}	
+	
+	.v-grid-cell-content
+	{
+		height: 25px;
+	}
+	
+	.v-grid-row-selected > .v-grid-cell
+	{
+		background: #5486A9 !important;
+		background-color: #5486A9 !important;
+	}
+	
+	.v-grid-header .v-grid-cell,
+	.v-grid-footer .v-grid-cell,
+	.v-grid-header-deco,
+	.v-grid-footer-deco,
+	.v-grid-horizontal-scrollbar-deco
+	{
+		background-size: 100% 100%;
+	}
+	
+	.v-table-cell-bottom-border .v-grid-cell
+	{
+		border-bottom: 1px solid #d4d4d4 !important;
+	}
+	
+	.v-table-cell-bottom-border-none .v-grid-cell
+	{
+		border-bottom: none !important;
+	}
+	
+	.v-table-cell-left-border .v-grid-cell
+	{
+		border-left: 1px solid #d4d4d4 !important;
+	}
+	
+	.v-table-cell-left-border-none .v-grid-cell
+	{
+		border-left: none !important;
+	}
+  	
+  	.v-grid-tablewrapper
+  	{
+  		background-color: #FFFFFF;
+  	}	
+
+	/* CURSOR *************************************************************************/
+	
+	.cursor-auto 
+	{
+		cursor: auto;
+	}
+	
+	.cursor-default 
+	{
+		cursor: default;
+	}
+	
+	.cursor-crosshair 
+	{
+		cursor: crosshair;
+	}
+	
+	.cursor-text 
+	{
+		cursor: text;
+	}
+	
+	.cursor-wait 
+	{
+		cursor: wait;
+	}	
+	
+	.cursor-sw-resize 
+	{
+		cursor: sw-resize;
+	}
+	
+	.cursor-se-resize 
+	{
+		cursor: se-resize;
+	}
+	
+	.cursor-nw-resize 
+	{
+		cursor: nw-resize;
+	}
+	
+	.cursor-ne-resize 
+	{
+		cursor: ne-resize;
+	}	
+	
+	.cursor-n-resize 
+	{
+		cursor: n-resize;
+	}	
+	
+	.cursor-s-resize 
+	{
+		cursor: s-resize;
+	}	
+	
+	.cursor-w-resize 
+	{
+		cursor: w-resize;
+	}
+	
+	.cursor-e-resize 
+	{
+		cursor: w-resize;
+	}	
+	
+	.cursor-e-resize 
+	{
+		cursor: w-resize;
+	}	
+	
+	.cursor-hand 
+	{
+		cursor: pointer;
+	}
+			
+	.cursor-move 
+	{
+		cursor: move;
+	}														
+
+	/* PORTLET ************************************************************************/
+
+	.jvxPortlet .jvxapp 
+	{
+		position: relative !important;
+	}
+	
+	.jvxPortlet .v-layout 
+	{
+		position: relative !important;
+	}
+
+	.jvxPortlet .v-simplepanel 
+	{
+		background: transparent;
+	}
+
+	.jvxPortlet .jvxtoolbar 
+	{
+	    border: 1px solid #C2C3C4;
+	}
+	
+	#v-app-loading-indicator-image 
+	{
+        width: 24px;
+        height: 24px;
+        min-width: 24px;
+        min-height: 24px;
+	}
+	
+	/* CHOICE *************************************************************************/
+
+	.v-choicefield
+	{
+		border: none;
+	}	
+	
+	.v-choicefield:focus
+	{
+		outline: 0;
+		border: none;
+		border-color: transparent !important;
+		box-shadow:none !important;
+	}	
+	
+	.v-choicefield .v-icon 
+	{
+		margin: 0px;
+		padding: 0px;
+	}
+	
+	.v-icon-border .v-icon 
+	{
+  		border: 1px solid rgba(81, 203, 238, 1);
+  		padding-right: 0px;
+  		margin-left: 3px;
+  	}
+  
+  	.v-button-caption-nooutline .v-button-caption 
+  	{
+	    outline: none !important;
+	    text-align: center;
+	    border: 1px;
+	}
+	
+	/* SPLIT **************************************************************************/
+
+	.v-splitpanel-hsplitter,
+	.v-splitpanel-hsplitter-locked,	
+	.v-splitpanel-hsplitter div 
+	{
+	    width: 2px;
+	}
+
+	.v-splitpanel-vsplitter,
+	.v-splitpanel-vsplitter-locked,	
+	.v-splitpanel-vsplitter div 
+	{
+	    height: 2px;
+	}
+
+	/* RECONNECT **********************************************************************/
+	
+	.v-reconnect-dialog
+	{
+	    border-radius: 4px;
+	    opacity: 0.8;
+	}
+	
+	/* IMAGE **************************************************************************/
+	
+	.v-image.jvximage.imghidden
+	{
+	    display: none;
+	    height: 0 !important;
+	    width: 0 !important;
+	}
+	
+	/* TAG EDITOR *********************************************************************/
+
+    .tageditor .tagpanel
+    {
+    	border-radius: 5px 5px 5px 5px;
+		border: 1px solid #c9c8c7;
+		border-top-color: #d8d7d6;
+    }
+	
+}

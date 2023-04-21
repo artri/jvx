@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties>
+
+  <entry key="Your new password">Ihr neues Passwort</entry>
+  <entry key="One-time password:">Ihr Einmal-Passwort:</entry>
+
+</properties>

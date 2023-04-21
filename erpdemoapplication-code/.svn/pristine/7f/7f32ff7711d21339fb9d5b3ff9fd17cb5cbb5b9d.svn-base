@@ -1,0 +1,25 @@
+SIB Visions Demo ERP
+Copyright 2013 SIB Visions GmbH
+
+This product includes software developed by
+SIB Visions GmbH (http://www.sibvisions.com/).
+
+
+===
+
+LICENSE INFORMATION REGARDING BUNDLED THIRD-PARTY SOFTWARE
+
+The following third party software is distributed with this application 
+and is provided under other licenses and/or has source 
+available from other locations.
+
+* Apache Commons Fileupload
+* Apache RESTlet
+* Jackson
+* Vaadin
+* iText
+* POI
+* Lucene
+* PDFBox
+* Oracle JDBC
+* MySql JDBC

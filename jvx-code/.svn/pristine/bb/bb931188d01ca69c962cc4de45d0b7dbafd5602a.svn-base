@@ -1,0 +1,32 @@
+<project name="JVx" default="complete">
+  <description>CI</description>
+  
+  <property name="build.nightly" value=" (nightly)" />
+
+  <target name="complete">
+    <ant dir="${basedir}/library" antfile="build.xml" target="start.complete.maven"/>
+  </target>
+  <target name="complete.java6">
+    <ant dir="${basedir}/library" antfile="build.xml" target="start.complete.maven.phase1"/>
+  </target>
+   <target name="complete.java8">
+    <ant dir="${basedir}/library" antfile="build.xml" target="start.complete.maven.phase2"/>
+  </target> 
+  
+  <target name="ci.intern">
+    <ant dir="${basedir}/library" antfile="build.xml" target="start.ci.intern"/>
+  </target>
+
+  <target name="ci">
+    <ant dir="${basedir}/library" antfile="build.xml" target="start.ci"/>
+  </target>
+  
+  <target name="quality">
+    <ant dir="${basedir}/library" antfile="build.xml" target="start.quality"/>
+  </target>
+  
+  <target name="check">
+    <ant dir="${basedir}/library" antfile="build.xml" target="check"/>
+  </target>
+  
+</project>

@@ -1,0 +1,188 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 19.11.2009 - [HM] - creation
+ * 23.04.2014 - [RZ] - #1014: implemented display column
+ */
+package com.sibvisions.rad.ui.web.impl.celleditor;
+
+import javax.rad.model.IDataBook;
+import javax.rad.model.IDataRow;
+import javax.rad.model.ModelException;
+import javax.rad.model.SortDefinition;
+import javax.rad.model.condition.ICondition;
+import javax.rad.model.reference.ReferenceDefinition;
+import javax.rad.model.ui.ICellEditorHandler;
+import javax.rad.model.ui.ICellEditorListener;
+
+import com.sibvisions.rad.ui.celleditor.AbstractLinkedCellEditor;
+import com.sibvisions.rad.ui.web.impl.WebDimension;
+import com.sibvisions.rad.ui.web.impl.WebFactory;
+
+/**
+ * Web server implementation of {@link javax.rad.ui.celleditor.ILinkedCellEditor}.
+ * 
+ * @author Martin Handsteiner
+ */
+public class WebLinkedCellEditor extends AbstractLinkedCellEditor
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Creates a new instance of <code>WebLinkedCellEditor</code>.
+	 *
+	 * @see javax.rad.ui.celleditor.ILinkedCellEditor
+	 */
+	public WebLinkedCellEditor()
+	{
+		popupSize = new WebDimension(400, 200);
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Interface implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public ICellEditorHandler createCellEditorHandler(ICellEditorListener pCellEditorListener, IDataRow pDataRow, String pColumnName)
+	{
+		ReferenceDefinition linkRef = getLinkReference();
+		
+		IDataBook referencedDataBook = linkRef.getReferencedDataBook();
+		referencedDataBook.setSelectionMode(IDataBook.SelectionMode.DESELECTED);
+		
+		return new DefaultCellEditorHandler(this, pCellEditorListener, pDataRow, pColumnName);
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// User-defined methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Gets the search condition for the given search value.
+	 * 
+	 * @param pRow the data row
+	 * @param pColumn the search column name
+	 * @param pValue the search value
+	 * @return the search condition
+	 * @throws ModelException if setting initial sort fails
+	 */
+	public ICondition getSearchCondition(IDataRow pRow, String pColumn, Object pValue) throws ModelException
+	{
+		ReferenceDefinition ref = getLinkReference();
+		
+		String sRefColumn = ref.getReferencedColumnName(pColumn);
+		
+		//initial sort
+		if (pValue == null)
+		{
+    		if (isSortByColumnName())
+    		{
+    			ref.getReferencedDataBook().setSort(new SortDefinition(sRefColumn));
+    		}
+		}
+		
+		return super.getSearchCondition(pRow, pValue != null ? getItemSearchCondition(true, getRelevantSearchColumnName(sRefColumn), pValue) : null);
+	}
+	
+	/**
+	 * Selects the correct row, if possible.
+	 * 
+	 * @param pRow the row
+	 * @param pColumn the search column name
+	 * @param pDataBook the data book
+	 */
+	public void selectedRowWhenPossible(IDataRow pRow, String pColumn, IDataBook pDataBook)
+	{
+	    try
+	    {
+    	    String searchValue = getDisplayValue(pRow, pColumn);
+    	    
+    	    if (searchValue != null)
+    	    {
+    	    	String sSearchColumnName = getRelevantSearchColumnName(pColumn);
+    	    	
+        	    String[] compareColumns = new String[] {sSearchColumnName};
+        	    
+        	    IDataRow searchRow = pDataBook.createEmptyDataRow(null);
+        	    searchRow.setValue(sSearchColumnName, searchValue);
+        	        
+        	    long start = System.currentTimeMillis();
+        	        
+        	    pDataBook.setSelectedRow(-1);
+        	    
+        	    int i = 0;
+        	    
+        	    IDataRow row = pDataBook.getDataRow(i);
+        	    
+        	    while (row != null && pDataBook.getSelectedRow() < 0 && System.currentTimeMillis() - start < 1000)
+        	    {
+        	        if (searchRow.equals(row, compareColumns))
+        	        {
+        	            pDataBook.setSelectedRow(i);
+        	        }
+        	        else
+        	        {
+        	            i++;
+        	            row = pDataBook.getDataRow(i);
+        	        }
+        	    }
+    	    }
+	    }
+	    catch (Throwable ex)
+	    {
+	        // ignore
+	    }
+	}
+	    
+
+	/**
+	 * Returns the relevant search column. If a {@code displayColumnName} is set,
+	 * then that one will be returned, otherwise it will return {@code referencedColumnName}.
+	 * 
+	 * @param pColumnName the search column name 
+	 * @return the relevant search column name
+	 */
+	private String getRelevantSearchColumnName(String pColumnName)
+	{
+		String sColumn = getDisplayReferencedColumnName();
+
+		if (sColumn != null)
+		{
+			return sColumn;
+		}
+		else
+		{
+			return pColumnName;
+		}
+	}
+	
+	/**
+	 * Gets the class name.
+	 * 
+	 * @return the class name
+	 */
+	public String getClassName()
+	{
+		return WebFactory.getClassName(this);
+	}	
+	
+}	// WebLinkedCellEditor

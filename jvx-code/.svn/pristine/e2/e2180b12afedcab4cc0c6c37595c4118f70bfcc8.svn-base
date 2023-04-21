@@ -1,0 +1,110 @@
+/*
+ * Copyright 2021 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 01.08.2021 - [JR] - creation
+ */
+package com.sibvisions.rad.ui.web.impl;
+
+/**
+ * The <code>WebContext</code> is simple context for accessing request relevant 
+ * information.
+ * 
+ * @author René Jahn
+ */
+public class WebContext
+{
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Class members
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    /** the current VaadinContext instance. */
+    private static ThreadLocal<WebContext> instance = new ThreadLocal<WebContext>();
+    
+    /** the initial thread. */
+    private Thread thread;
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Initialization
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    /**
+     * Creates a new instance of <code>WebContext</code> for the current thread.
+     */
+    public WebContext()
+    {
+        thread = Thread.currentThread();
+        
+        setInstance(this);
+    }
+    
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // User-defined methods
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+    /**
+     * Gets the current instance of <code>WebContext</code>.
+     * 
+     * @return the current instance
+     */
+    public static WebContext getCurrentInstance()
+    {
+        return instance.get();
+    }
+    
+    /**
+     * Sets the current context instance.
+     * 
+     * @param pContext the context instance
+     */
+    protected synchronized void setInstance(WebContext pContext)
+    {
+        instance.set(pContext);
+    }
+    
+    /**
+     * Release any resources associated with this <code>WebContext</code> instance.
+     *
+     * @see #isReleased
+     */
+    public final synchronized void release()
+    {
+        instance.set(null);
+    }    
+    
+    /**
+     * Gets the release state of this <code>WebContext</code>.
+     *  
+     * @return <code>true</code> if there is no current instance of <code>WebContext</code> (means
+     *         that the <code>WebContext</code> is released); otherwise <code>false</code>
+     */
+    public boolean isReleased()
+    {
+        return instance.get() == null;
+    }
+    
+    /**
+     * The initial thread at constructor time.
+     * 
+     * @return the initial thread
+     */
+    public Thread getInitialThread()
+    {
+        return thread;
+    }
+    
+}   // WebContext	

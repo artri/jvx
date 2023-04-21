@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+
+  <!--
+   Context configuration 
+   -->
+
+  <display-name>JVx - First application</display-name>
+
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+  <!--
+   Servlet configuration 
+   -->
+
+  <servlet>
+    <servlet-name>ServletServer</servlet-name>
+    <display-name>Servlet based server</display-name>
+    <servlet-class>com.sibvisions.rad.server.http.ServletServer</servlet-class>
+  </servlet>
+      
+  <servlet-mapping>
+    <servlet-name>ServletServer</servlet-name>
+    <url-pattern>/services/Server</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>DownloadServlet</servlet-name>
+    <display-name>DownloadServlet server</display-name>
+    <servlet-class>com.sibvisions.rad.server.http.DownloadServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>DownloadServlet</servlet-name>
+    <url-pattern>/services/Download</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
+    <servlet-name>UploadServlet</servlet-name>
+    <display-name>Servlet based file upload</display-name>
+    <servlet-class>com.sibvisions.rad.server.http.UploadServlet</servlet-class>
+  </servlet>
+      
+  <servlet-mapping>
+    <servlet-name>UploadServlet</servlet-name>
+    <url-pattern>/services/Upload</url-pattern>
+  </servlet-mapping>
+
+  <!-- 
+    Application mime-type mappings 
+   -->
+  
+  <mime-mapping> 
+    <extension>csv</extension> 
+    <mime-type>application/vnd.ms-excel</mime-type> 
+  </mime-mapping>
+
+</web-app>

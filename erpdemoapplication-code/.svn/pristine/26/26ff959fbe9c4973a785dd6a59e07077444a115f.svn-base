@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project xmlns="http://www.netbeans.org/ns/project/1">
+  <type>org.netbeans.modules.web.project</type>
+  <configuration>
+    <data xmlns="http://www.netbeans.org/ns/web-project/3">
+      <name>Demoerp</name>
+      <minimum-ant-version>1.6.5</minimum-ant-version>
+      <web-module-libraries>
+        <library dirs="200">
+          <file>${file.reference.libs/server/appserver.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/com.fasterxml.jackson.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/commons-fileupload-1.2.2.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/commons-io-2.2.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/commons-logging-1.1.3.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/db2jcc.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/db2jcc_license_cu.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/dom4j-1.6.1.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/flute-1.3.0.gg2.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/iText-4.2.0.mpl.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/iText-rtf-4.2.0.mpl.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/jtds-1.2.8.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/jvx.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/jvxhelp-server.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/jvxhelp-themes.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/jvxmobile-addons.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/jvxmobile.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/jvxvaadin-client.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/jvxvaadin-themes.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/jvxvaadincharts-server.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/jvxweb.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/oracle_12c.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/org.restlet.ext.fileupload.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/org.restlet.ext.jackson.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/org.restlet.ext.servlet.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/org.restlet.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/poi-3.9-20121203.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/poi-ooxml-3.9-20121203.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/poi-ooxml-schemas-3.9-20121203.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/projxvaadin-server.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/sac-1.3.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/sqljdbc4.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/stax-api-1.0.1.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-slf4j-jdk14-1.6.1.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/validation-api-1.0.0.GA.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/xmlbeans-2.3.0.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/zxing.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/client/appsclient.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/client/dndtabpane.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/client/jcommon-1.0.16.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/client/jfreechart-1.0.13.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/client/jvxfx.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/client/projx.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/javax.mail-1.5.4.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/fontbox-2.0.2.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/jsoup-1.8.3.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/lucene-analyzers-common-4.7.2.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/lucene-core-4.7.2.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/lucene-queryparser-4.7.2.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/pdfbox-2.0.2.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-sass-compiler-0.9.13.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/atmosphere-runtime-2.4.11.vaadin2.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/font-awesome-label-1.4.0.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/gentyref-1.2.0.vaadin1.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-charts-4.0.0.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-charts-model-4.0.0.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-client-compiled-8.1.6.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-compatibility-client-compiled-8.1.6.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-compatibility-server-8.1.6.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-compatibility-shared-8.1.6.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-compatibility-themes-8.1.6.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-context-menu-2.0.0.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-push-8.1.6.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-server-8.1.6.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-shared-8.1.6.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/vaadin-themes-8.1.6.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/postgresql-42.2.2.jre6.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/activation-1.1.1.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/org.codehaus.woodstox.stax2api.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/org.codehaus.woodstox.core.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/server/mysql-connector-java-5.1.48-bin.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/client/commons-logging-1.1.3.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+        <library dirs="200">
+          <file>${file.reference.libs/client/jxmapviewer2-2.6-SNAPSHOT.jar}</file>
+          <path-in-war>WEB-INF/lib</path-in-war>
+        </library>
+      </web-module-libraries>
+      <web-module-additional-libraries/>
+      <source-roots>
+        <root id="src.dir" name="Source Client"/>
+        <root id="src.dir2" name="Source Server"/>
+      </source-roots>
+      <test-roots>
+        <root id="test.test.dir" name="Unit Tests"/>
+      </test-roots>
+    </data>
+  </configuration>
+</project>

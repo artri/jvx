@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+  <securitymanager>
+    <class>com.sibvisions.rad.server.security.DBSecurityManager</class>
+    <accesscontroller>com.sibvisions.apps.server.object.DBWorkScreenAccess</accesscontroller>
+    <passwordalgorithm>SHA</passwordalgorithm>
+  </securitymanager>
+  <connection>
+    <!-- GLOBAL | DATASOURCE | OFF -->
+    <property name="client.metadata_cacherole">OFF</property>
+  </connection>
+  <lifecycle>
+    <application>com.sibvisions.apps.demoerp.Application</application>
+    <mastersession>com.sibvisions.apps.demoerp.Session</mastersession>
+  </lifecycle>
+  <datasource>
+    <db name="default">
+      <url>jdbc:mysql://localhost:3306/DEMOERP</url>
+      <username>demoerp</username>
+      <password>demoerp</password>
+    </db>
+  </datasource>
+</application>

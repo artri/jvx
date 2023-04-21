@@ -1,0 +1,4 @@
+<!ELEMENT videos (music+) >
+<!ELEMENT music (title, artist+) >
+<!ELEMENT title (#PCDATA) >
+<!ELEMENT artist (#PCDATA) >

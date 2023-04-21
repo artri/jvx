@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+                
+    
+    
+    <wb-module deploy-name="JVx.Server">
+                                
+        
+        
+        <wb-resource deploy-path="/" source-path="/WebContent"/>
+                                
+        
+        
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/demo.server"/>
+                                
+        
+        
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/democopy.server"/>
+                        
+        
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src.jvx"/>
+                        
+        
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+                        
+        
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/intern.jvx"/>
+                        
+        
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/test.jvx"/>
+                        
+        
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/test"/>
+                                
+        
+        
+        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/hsqldb.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+                                
+        
+        
+        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/org.restlet.ext.servlet.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+                                
+        
+        
+        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/org.restlet.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+                                
+        
+        
+        <dependent-module deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/org.restlet.ext.jackson.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+                                
+        
+        
+        <dependent-module archiveName="jcifs-1.3.17.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/jcifs-1.3.17.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+                                
+        
+        
+        <dependent-module archiveName="commons-fileupload-1.2.2.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/commons-fileupload-1.2.2.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+                                
+        
+        
+        <dependent-module archiveName="com.fasterxml.jackson.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/com.fasterxml.jackson.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+                                
+        
+        
+        <dependent-module archiveName="oracle_21_9.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/oracle_21_9.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+                                
+        
+        
+        <dependent-module archiveName="log4j-1.2.17.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/log4j/log4j-1.2.17.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+                                
+        
+        
+        <dependent-module archiveName="derby.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/derby.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+                                
+        
+        
+        <dependent-module archiveName="derbyclient.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/derbyclient.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+                                
+        
+        
+        <dependent-module archiveName="javax.mail-1.5.4.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/javax.mail-1.5.4.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+                                
+        
+        
+        <dependent-module archiveName="postgresql-42.2.2.jre6.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/postgresql-42.2.2.jre6.jar">
+                                                
+            
+            
+            <dependency-type>uses</dependency-type>
+                                            
+        
+        
+        </dependent-module>
+        <dependent-module archiveName="xmpcore-6.1.11.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/imageio/xmpcore-6.1.11.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="metadata-extractor-2.18.0.jar" deploy-path="/WEB-INF/lib" handle="module:/classpath/lib/JVx/lib/imageio/metadata-extractor-2.18.0.jar">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+                                
+        
+        
+        <property name="java-output-path" value="build/classes"/>
+                                
+        
+        
+        <property name="context-root" value="JVx.Server"/>
+                            
+    
+    
+    </wb-module>
+            
+
+
+</project-modules>

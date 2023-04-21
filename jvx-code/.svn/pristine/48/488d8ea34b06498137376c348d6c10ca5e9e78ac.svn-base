@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+  <!-- Connection parameters -->
+  
+  <Application.serverbase>http://localhost/showcase</Application.serverbase>  
+  <_Launcher.codebase>[Application.serverbase]/services/CodeBase/</_Launcher.codebase>  
+  
+  <_Application.connectionClass>com.sibvisions.rad.remote.http.HttpConnection</_Application.connectionClass>
+  <Application.connectionClass>com.sibvisions.rad.server.DirectServerConnection</Application.connectionClass>
+  <Application.connectionParams>service</Application.connectionParams>
+  <Application.connectionParams.service>[Application.serverbase]/services/Server</Application.connectionParams.service>
+  
+</application>

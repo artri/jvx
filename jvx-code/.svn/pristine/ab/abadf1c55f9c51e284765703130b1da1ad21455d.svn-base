@@ -1,0 +1,180 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 08.04.2009 - [JR] - creation
+ */
+package com.sibvisions.util.type;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+/**
+ * Tests {@link CodecUtil} methods.
+ * 
+ * @author René Jahn
+ * @see CodecUtil
+ */
+public class TestCodecUtil
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Test methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		
+	/**
+	 * Tests the hex enc- and decoding.
+	 * 
+	 * @throws UnsupportedEncodingException if the encoding fails
+	 */
+	@Test
+	public void testHexEncDecoding() throws UnsupportedEncodingException
+	{
+		String sText = "Dieser Text soll konvertiert werden " + (char)165;
+		String sEnc  = CodecUtil.encodeHex(sText);
+		String sDec;
+		
+		Assert.assertEquals("446965736572205465787420736f6c6c206b6f6e76657274696572742077657264656e20c2a5", sEnc);
+
+		sDec = CodecUtil.decodeHex(sEnc);
+		
+		Assert.assertEquals(sText, sDec);
+	}
+	
+	/**
+	 * Tests the hex enc- and decoding with {@link java.io.InputStream}.
+	 * 
+	 * @throws IOException if the encoding fails
+	 */
+	@Test
+	public void testEncodeHexWithStream() throws IOException
+	{
+		String sText = "Dieser Text soll konvertiert werden " + (char)165;
+		//don't use UTF-8, use default encoding
+		String sEnc  = CodecUtil.encodeHex(new ByteArrayInputStream(sText.getBytes()));
+		String sDec;
+		
+		//don't use decodeHex, because the stream may not be UTF-8 encoded!
+		sDec = new String(CodecUtil.decodeHexAsBytes(sEnc));
+		
+		Assert.assertEquals(sText, sDec);
+	}
+	
+	/**
+	 * Tests the url encoding.
+	 * 
+	 * @throws UnsupportedEncodingException if the encoding fails
+	 */
+	@Test
+	public void testEncodeURL() throws UnsupportedEncodingException
+	{
+		Assert.assertEquals("key%3d%fczg%fcr%26susi", CodecUtil.encodeURLPart("key=üzgür&susi"));
+	}
+	
+	/**
+	 * Tests base64 enc- decoding.
+	 * 
+	 * @throws Exception if enc/decoding fails
+	 */
+	@Test
+	public void testBase64() throws Exception
+	{
+		String sText = "Welcome home";
+		String sEnc = CodecUtil.encodeBase64(sText.getBytes("UTF-8"));
+		
+		Assert.assertEquals(sText, new String(CodecUtil.decodeBase64(sEnc), "UTF-8"));
+	}
+	
+    /**
+     * Tests base64 decoding, if it checks the conformity.
+     * 
+     * @throws Exception conformity check fails.
+     */
+    @Test
+    public void testBase64Check() throws Exception
+    {
+        String sText = "Welcome home";
+        String sEnc = " " + CodecUtil.encodeBase64(sText.getBytes("UTF-8"));
+        
+        try
+        {
+            CodecUtil.decodeBase64(sEnc);
+            
+            Assert.fail("Decode does not check!");
+        }
+        catch (Exception ex)
+        {
+            // Everything is ok
+        }
+    }
+    
+    /**
+     * Tests html encoding.
+     * 
+     * @throws Exception conformity check fails.
+     */
+    @Test
+    public void testEncodeHtmll()
+    {
+		String sEncoded = "&lt;html&gt;Calculates a value based on dynamic or fixed data and sets the result into a column. The value can be calculated with any "
+						+ "values from other tables, with parameters or specific texts.&lt;p style='margin-top:10;margin-bottom:5'&gt;&lt;b&gt;&lt;u&gt;Available"
+						+ " number functions&lt;/u&gt;&lt;/b&gt;&lt;/p&gt;&lt;table&gt;&lt;tr&gt;&lt;td&gt;first([column])&lt;/br&gt;firstNull([column])&lt;/td&g"
+						+ "t;&lt;td&gt;Gets first not null value, or 0/null, if none exists&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;last([column])&lt;/br&"
+						+ "gt;lastNull([column])&lt;/td&gt;&lt;td&gt;Gets last not null value, or 0/null, if none exists&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt"
+						+ ";td&gt;min([column])&lt;/br&gt;minNull([column])&lt;/td&gt;&lt;td&gt;Gets the minimum, or 0/null, if none exists&lt;/td&gt;&lt;/"
+						+ "tr&gt;&lt;tr&gt;&lt;td&gt;max([column])&lt;/br&gt;maxNull([column])&lt;/td&gt;&lt;td&gt;Gets the maximum, or 0/null, if none exi"
+						+ "sts&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;avg([column])&lt;/br&gt;avgNull([column])&lt;/td&gt;&lt;td&gt;Gets the average, or 0/"
+						+ "null, if none exists&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;sumToCurrent([column])&lt;/br&gt;sumToCurrentNull([column])&lt;/td&gt;"
+						+ "&lt;td&gt;Gets the sum to selected row, or 0/null, if none exists&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;sumFromCurrent([colum"
+						+ "n])&lt;/br&gt;sumFromCurrentNull([column])&lt;/td&gt;&lt;td&gt;Gets the sum from selected row, or 0/null, if none exists&lt;/td&"
+						+ "gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;sum([column])&lt;/br&gt;sumNull([column])&lt;/td&gt;&lt;td&gt;Gets the sum, or 0/null, if none"
+						+ " exists&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;count([column])&lt;/td&gt;&lt;td&gt;Count the not null values&lt;/td&gt;&lt;/tr&gt;&l"
+						+ "t;tr&gt;&lt;td&gt;row([column])&lt;/td&gt;&lt;td&gt;Gets the selected row number&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;[column]&lt;"
+						+ "/br&gt;null([column])&lt;/td&gt;&lt;td&gt;Gets the value, or 0/null, if none exists&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;&lt;p sty"
+						+ "le='margin-top:10;margin-bottom:5'&gt;&lt;b&gt;&lt;u&gt;Available date functions&lt;/u&gt;&lt;/b&gt;&lt;/p&gt;&lt;table&gt;&lt;tr&gt;&"
+						+ "lt;td&gt;addYears(date, num)&lt;/td&gt;&lt;td&gt;Adds num years to the date&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;addMonths(date, n"
+						+ "um)&lt;/td&gt;&lt;td&gt;Adds num months to the date&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;addDays(date, num)&lt;/td&gt;&lt;td&gt;Ad"
+						+ "ds num days to the date&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;addHours(date, num)&lt;/td&gt;&lt;td&gt;Adds num hours to the date&lt"
+						+ ";/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;addMinutes(date, num)&lt;/td&gt;&lt;td&gt;Adds num minutes to the date&lt;/td&gt;&lt;/tr&gt;&lt"
+						+ ";tr&gt;&lt;td&gt;addSeconds(date, num)&lt;/td&gt;&lt;td&gt;Adds num seconds to the date&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;years"
+						+ "Between(date, date)&lt;/td&gt;&lt;td&gt;Calculates years between two dates&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;monthsBetween(date"
+						+ ", date)&lt;/td&gt;&lt;td&gt;Calculates months between two dates&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;daysBetween(date, date)&lt;/t"
+						+ "d&gt;&lt;td&gt;Calculates days between two dates&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;hoursBetween(date, date)&lt;/td&gt;&lt;td&gt"
+						+ ";Calculates hours between two dates&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;minutesBetween(date, date)&lt;/td&gt;&lt;td&gt;Calculates"
+						+ " minutes between two dates&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;secondsBetween(date, date)&lt;/td&gt;&lt;td&gt;Calculates seconds "
+						+ "between two dates&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;truncYear(date)&lt;/td&gt;&lt;td&gt;Truncates all beyond year&lt;/td&gt;&lt"
+						+ ";/tr&gt;&lt;tr&gt;&lt;td&gt;truncMonth(date)&lt;/td&gt;&lt;td&gt;Truncates all beyond month&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;t"
+						+ "runcDay(date)&lt;/td&gt;&lt;td&gt;Truncates all beyond day&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;truncHour(date)&lt;/td&gt;&lt;td&g"
+						+ "t;Truncates all beyond hour&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;truncMinute(date)&lt;/td&gt;&lt;td&gt;Truncates all beyond minute"
+						+ "&lt;/td&gt;&lt;/tr&gt;&lt;tr&gt;&lt;td&gt;truncSecond(date)&lt;/td&gt;&lt;td&gt;Truncates all beyond second&lt;/td&gt;&lt;/tr&gt;&lt;t"
+						+ "r&gt;&lt;td&gt;now()&lt;/td&gt;&lt;td&gt;Gets the current timestamp&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;";
+		
+		String sHtml = CodecUtil.decodeHtml(sEncoded);
+		
+		String sNewEncoded = CodecUtil.encodeHtml(sHtml);
+		
+		Assert.assertEquals(sEncoded, sNewEncoded);
+		
+    	
+    	Assert.assertEquals("&lt;html&gt;test&lt;/html&gt;", CodecUtil.encodeHtml("<html>test</html>"));
+    	Assert.assertEquals("&lt;html&gt;test&lt;  /html&gt;", CodecUtil.encodeHtml("<html>test<  /html>"));
+    }
+    
+}	// TestCodecUtil

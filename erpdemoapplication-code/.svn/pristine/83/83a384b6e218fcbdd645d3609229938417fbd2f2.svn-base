@@ -1,0 +1,16 @@
+<jboss-deployment-structure>
+
+   <deployment>
+
+      <dependencies>
+         <module name="sun.jdk" />
+         <system>
+           <paths>                   
+              <path name="com/sun/net/httpserver"/>
+           </paths>
+         </system>
+      </dependencies>
+
+   </deployment>
+
+</jboss-deployment-structure>

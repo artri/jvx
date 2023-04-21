@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jnlp spec="1.0+" codebase="http://localhost/Demoerp/">
+  <information>
+    <title>DemoERP</title>
+    <vendor>SIB Visions GmbH</vendor>
+    <description>DemoERP</description>
+    <description kind="short">DemoERP (1.0)</description>
+  </information>
+  <resources>
+    <j2se version="1.5+" java-vm-args="-Xmx256M"/>
+    <!-- first library should contain the main class -->
+    <jar href="DemoERP_all_signed.jar" main="true"/>
+  </resources>
+  <security>
+    <all-permissions/>
+  </security>
+  <applet-desc documentbase="http://localhost/Demoerp/" name="DemoERP" main-class="com.sibvisions.rad.ui.swing.impl.SwingApplet" width="1024" height="768">
+    <param name="main" value="com.sibvisions.apps.projx.ProjX"/>
+    <param name="config" value="/com/sibvisions/apps/demoerp/application.xml"/>
+    <param name="Application.connectionClass" value="com.sibvisions.rad.remote.http.HttpConnection"/>
+    <param name="Application.Menu.exit.visible" value="true"/>
+  </applet-desc>
+</jnlp>

@@ -1,0 +1,28 @@
+body 
+{ 
+  background-color:#DFE8F6;
+}
+
+.infotext 
+{ 
+  color:#15428b; 
+  font:15px tahoma,arial,verdana,sans-serif; 
+  font-weight:bold;
+}
+
+.error 
+{ 
+  color:#CC0000; 
+  font-size:13px; 
+  font-weight:bold;
+}
+
+.spacer15 
+{ 
+  height:15px; 
+}
+
+.spacer20 
+{ 
+  height:20px; 
+}

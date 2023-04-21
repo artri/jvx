@@ -1,0 +1,643 @@
+/*
+ * Copyright 2014 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 27.03.2014 - [HM] - creation
+ */
+package com.sibvisions.rad.ui.swing.ext.celleditor;
+
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+
+import javax.rad.model.IDataBook;
+import javax.rad.model.IDataPage;
+import javax.rad.model.IDataRow;
+import javax.rad.model.ModelException;
+import javax.rad.model.ui.ICellEditor;
+import javax.rad.model.ui.ICellEditorHandler;
+import javax.rad.model.ui.ICellEditorListener;
+import javax.rad.model.ui.IControl;
+import javax.rad.model.ui.IEditorControl;
+import javax.rad.ui.IAlignmentConstants;
+import javax.rad.ui.Style;
+import javax.rad.ui.component.IEditable;
+import javax.swing.AbstractButton;
+import javax.swing.JComponent;
+
+import com.sibvisions.rad.ui.celleditor.AbstractCheckBoxCellEditor;
+import com.sibvisions.rad.ui.swing.ext.JVxButton;
+import com.sibvisions.rad.ui.swing.ext.JVxCheckBox;
+import com.sibvisions.rad.ui.swing.ext.JVxRadioButton;
+import com.sibvisions.rad.ui.swing.ext.JVxSwitch;
+import com.sibvisions.rad.ui.swing.ext.JVxToggleButton;
+import com.sibvisions.rad.ui.swing.ext.cellrenderer.JVxButtonRenderer;
+import com.sibvisions.rad.ui.swing.ext.cellrenderer.JVxCheckBoxRenderer;
+import com.sibvisions.rad.ui.swing.ext.cellrenderer.JVxRadioButtonRenderer;
+import com.sibvisions.rad.ui.swing.ext.cellrenderer.JVxRendererContainer;
+import com.sibvisions.rad.ui.swing.ext.cellrenderer.JVxSwitchRenderer;
+import com.sibvisions.rad.ui.swing.ext.cellrenderer.JVxToggleButtonRenderer;
+import com.sibvisions.rad.ui.swing.ext.layout.JVxSequenceLayout;
+import com.sibvisions.rad.ui.swing.impl.SwingFactory;
+
+/**
+ * The <code>JVxCheckBoxCellEditor</code> provides the generation of the 
+ * physical check box editor component, handles correct all events, and 
+ * gives standard access to edited values.
+ * 
+ * @author Martin Handsteiner
+ */
+public class JVxCheckBoxCellEditor extends AbstractCheckBoxCellEditor<Component>
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /** The cell renderer. */
+    private JComponent cellRenderer = null;
+	/** The cell renderer. */
+	private AbstractButton cellRendererButton = null;
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Constructs a new JVxCheckBoxCellEditor.
+	 */
+	public JVxCheckBoxCellEditor()
+	{
+		this(null, null, null);
+	}
+	
+	/**
+	 * Constructs a new JVxCheckBoxCellEditor with the given selected and deselected values.
+	 * 
+	 * @param pSelectedValue the selected value.
+	 * @param pDeselectedValue the deselected value.
+	 */
+	public JVxCheckBoxCellEditor(Object pSelectedValue, Object pDeselectedValue)
+	{
+		this(pSelectedValue, pDeselectedValue, null);
+	}
+	
+	/**
+	 * Constructs a new JVxCheckBoxCellEditor with the given selected and deselected values.
+	 * 
+	 * @param pSelectedValue the selected value.
+	 * @param pDeselectedValue the deselected value.
+	 * @param pText the text.
+	 */
+	public JVxCheckBoxCellEditor(Object pSelectedValue, Object pDeselectedValue, String pText)
+	{
+		super(pSelectedValue, pDeselectedValue, pText);
+		
+		setHorizontalAlignment(ALIGN_CENTER);
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Interface implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public ICellEditorHandler<JComponent> createCellEditorHandler(ICellEditorListener pCellEditorListener, 
+										                          IDataRow pDataRow, String pColumnName) 
+	{
+		return new CellEditorHandler(this, pCellEditorListener, pDataRow, pColumnName);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Component getCellRendererComponent(Component pParentComponent,
+								              IDataPage pDataPage,
+									          int       pRowNumber,
+									          IDataRow  pDataRow,
+									          String    pColumnName,
+									          boolean   pIsSelected,
+									          boolean   pHasFocus)
+	{
+		if (cellRenderer == null)
+		{
+		    Style style = getStyle();
+		    if (style.containsStyleName(STYLE_RADIOBUTTON))
+		    {
+		        cellRendererButton = new JVxRadioButtonRenderer();
+		        cellRenderer = cellRendererButton;
+		    }
+		    else if (style.containsStyleName(STYLE_SWITCH))
+		    {
+		        cellRendererButton = new JVxSwitchRenderer();
+                cellRenderer = cellRendererButton;
+		    }
+            else if (style.containsStyleName(STYLE_TOGGLEBUTTON))
+            {
+                cellRendererButton = new JVxToggleButtonRenderer();
+                cellRenderer = new JVxRendererContainer(new JVxSequenceLayout());
+                cellRenderer.add(cellRendererButton);
+            }
+            else if (style.containsStyleName(STYLE_BUTTON))
+            {
+                cellRendererButton = new JVxButtonRenderer();
+                cellRenderer = new JVxRendererContainer(new JVxSequenceLayout());
+                cellRenderer.add(cellRendererButton);
+            }
+            else
+            {
+                cellRendererButton = new JVxCheckBoxRenderer();
+                cellRenderer = cellRendererButton;
+            }
+		}
+
+		if (cellRenderer == cellRendererButton)
+		{
+    		cellRendererButton.setHorizontalAlignment(SwingFactory.getHorizontalSwingAlignment(getHorizontalAlignment()));
+    		cellRendererButton.setVerticalAlignment(SwingFactory.getVerticalSwingAlignment(getVerticalAlignment()));
+		}
+		else
+		{
+		    JVxSequenceLayout layout = (JVxSequenceLayout)cellRenderer.getLayout();
+		    layout.setHorizontalAlignment(SwingFactory.getHorizontalSwingAlignment(getHorizontalAlignment()));
+		    layout.setVerticalAlignment(SwingFactory.getVerticalSwingAlignment(getVerticalAlignment()));
+
+		    String translatedText = text;
+		    if (translatedText == null)
+            {
+		        try
+		        {
+		            translatedText = pDataRow.getRowDefinition().getColumnDefinition(pColumnName).getLabel();
+		        }
+		        catch (Exception ex)
+		        {
+		            // ignore
+		        }
+            }
+		    if (pParentComponent instanceof IControl)
+		    {
+		        translatedText = ((IControl)pParentComponent).translate(translatedText);
+		    }
+		    else if (pParentComponent instanceof ICellEditorListener)
+		    {
+                translatedText = ((ICellEditorListener)pParentComponent).getControl().translate(translatedText);
+		    }
+		    
+            cellRendererButton.setText(translatedText);
+		}
+
+		try
+		{
+		    IDataBook dataBook = pDataPage.getDataBook();
+		    
+		    boolean editable = (pParentComponent == null || pParentComponent.isEnabled())
+                                && pDataPage.getDataBook().isUpdateEnabled()
+                                && !dataBook.getRowDefinition().getColumnDefinition(pColumnName).isReadOnly();
+		    if (editable && pParentComponent instanceof IEditable && !((IEditable)pParentComponent).isEditable())
+		    {
+		        editable = false;
+		    }
+            if (editable && dataBook.getReadOnlyChecker() != null)
+            {
+                try
+                {
+                    editable = !dataBook.getReadOnlyChecker().isReadOnly(dataBook, pDataPage, pDataRow, pColumnName, pRowNumber, -1);
+                }
+                catch (Throwable pTh)
+                {
+                    // Ignore
+                }
+            }
+            cellRendererButton.setEnabled(editable);
+        }
+        catch (Exception pException)
+        {
+            cellRendererButton.setEnabled(true);
+        }
+		    
+        try
+        {
+            cellRendererButton.setSelected(selectedValue != null && selectedValue.equals(pDataRow.getValue(pColumnName)));
+		}
+		catch (Exception pException)
+		{
+		    cellRendererButton.setSelected(false);
+		}
+
+		return cellRenderer;
+	}
+
+	//****************************************************************
+	// Subclass definition
+	//****************************************************************
+
+    /**
+     * Sets the internal changed Flag, and informs the CellEditorListener 
+     * if editing is completed.
+     * 
+     * @author Martin Handsteiner
+     */
+    private static class CellEditorHandler implements ICellEditorHandler<JComponent>,
+                                                      ItemListener, 
+                                                      KeyListener,
+                                                      FocusListener
+    {
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    	// Class members
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    	/** The CellEditor, that created this handler. */
+    	private JVxCheckBoxCellEditor cellEditor;
+    	
+    	/** The CellEditorListener to inform, if editing is started or completed. */
+    	private ICellEditorListener cellEditorListener;
+    	
+    	/** The data row that is edited. */
+    	private IDataRow dataRow;
+    	
+    	/** The column name of the edited column. */
+    	private String columnName;
+
+    	/** The CellEditorListener to inform, if editing is completed. */
+    	private AbstractButton cellEditorComponent;
+    	
+    	/** Dynamic alignment. */
+    	private IAlignmentConstants dynamicAlignment = null;
+    	
+    	/** Tells the listener to ignore the events. */
+    	private boolean ignoreEvent = false;
+    	
+    	/** True, if it's the first editing started event. */
+    	private boolean firstEditingStarted = true;
+
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    	// Initialization
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    	/**
+    	 * Constructs a new CellEditorHandler.
+    	 * 
+    	 * @param pCellEditor the CellEditor that created this handler.
+    	 * @param pCellEditorListener CellEditorListener to inform, if editing is started or completed.
+    	 * @param pDataRow the data row that is edited.
+    	 * @param pColumnName the column name of the edited column.
+    	 */
+    	public CellEditorHandler(JVxCheckBoxCellEditor pCellEditor, ICellEditorListener pCellEditorListener, 
+				 				 IDataRow pDataRow, String pColumnName)
+    	{
+    		cellEditor = pCellEditor;
+    		cellEditorListener = pCellEditorListener;
+    		dataRow = pDataRow;
+    		columnName = pColumnName;
+
+            Style style = cellEditor.getStyle();
+            if (style.containsStyleName(STYLE_RADIOBUTTON))
+            {
+                cellEditorComponent = new JVxRadioButton();
+            }
+            else if (style.containsStyleName(STYLE_SWITCH))
+            {
+                cellEditorComponent = new JVxSwitch();
+            }
+            else if (style.containsStyleName(STYLE_TOGGLEBUTTON))
+            {
+                cellEditorComponent = new JVxToggleButton();
+                cellEditorComponent.putClientProperty("cellEditor", cellEditor);
+            }
+            else if (style.containsStyleName(STYLE_BUTTON))
+            {
+                cellEditorComponent = new JVxButton();
+                cellEditorComponent.putClientProperty("cellEditor", cellEditor);
+            }
+            else
+            {
+                cellEditorComponent = new JVxCheckBox();
+            }
+    		cellEditorComponent.setBackground(null);
+//    		cellEditorComponent.setBorder(BorderFactory.createEmptyBorder(2, 2, 2, 2));
+    		
+			if (cellEditorListener.getControl() instanceof IAlignmentConstants && cellEditorListener.getControl() instanceof IEditorControl)
+			{	// use alignment of editors, if possible.
+				dynamicAlignment = (IAlignmentConstants)cellEditorListener.getControl();
+			}
+			else
+			{
+        		cellEditorComponent.setHorizontalAlignment(SwingFactory.getHorizontalSwingAlignment(cellEditor.getHorizontalAlignment()));
+        		cellEditorComponent.setVerticalAlignment(SwingFactory.getVerticalSwingAlignment(cellEditor.getVerticalAlignment()));
+			}
+
+    		cellEditorComponent.setFocusTraversalKeysEnabled(false);
+    		cellEditorComponent.addItemListener(this);
+    		cellEditorComponent.addKeyListener(this);
+    		cellEditorComponent.addFocusListener(this);
+    	}
+    	
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    	// Interface implementation
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    	// ICellEditorHandler
+    	
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public void uninstallEditor()
+    	{
+    		cellEditorComponent.removeItemListener(this);
+    		cellEditorComponent.removeKeyListener(this);
+    		cellEditorComponent.removeFocusListener(this);
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public ICellEditor getCellEditor()
+    	{
+    		return cellEditor;
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public ICellEditorListener getCellEditorListener()
+    	{
+    		return cellEditorListener;
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public IDataRow getDataRow()
+    	{
+    		return dataRow;
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public String getColumnName()
+    	{
+    		return columnName;
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public JComponent getCellEditorComponent()
+    	{
+    		return cellEditorComponent;
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public void saveEditing() throws ModelException
+    	{
+    		if (cellEditorComponent.isSelected())
+    		{
+       			dataRow.setValue(columnName, cellEditor.selectedValue);
+    		}
+    		else
+    		{
+       			dataRow.setValue(columnName, cellEditor.deselectedValue);
+    		}
+    	}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	public void cancelEditing() throws ModelException
+    	{
+    		if (!ignoreEvent)
+    		{
+	    		ignoreEvent = true;
+	    		
+				Container conParent = cellEditorComponent.getParent();
+				
+				boolean bParentEnabled = conParent == null || conParent.isEnabled();
+	    		
+	    		try
+	    		{
+	    			cellEditorComponent.setSelected(cellEditor.selectedValue != null && cellEditor.selectedValue.equals(dataRow.getValue(columnName)));
+	    		
+	    			if (cellEditorListener.getControl() instanceof IEditorControl
+	    			        || cellEditorComponent.getClientProperty("cellEditor") != null)
+	    			{
+	    				IControl control = cellEditorListener.getControl();
+
+		    			if (cellEditor.text == null)
+		    			{
+		    				cellEditorComponent.setText(control.translate(dataRow.getRowDefinition().getColumnDefinition(columnName).getLabel()));
+		    			}
+		    			else
+		    			{
+		    				cellEditorComponent.setText(control.translate(cellEditor.text));
+		    			}
+	    			}
+	    			
+		    		if (dataRow instanceof IDataBook)
+		    		{
+		    			IDataBook dataBook = (IDataBook)dataRow;
+		    			boolean editable = bParentEnabled
+		    					        && dataBook.isUpdateAllowed() 
+		    							&& !dataBook.getRowDefinition().getColumnDefinition(columnName).isReadOnly();
+		    							
+						if (editable && cellEditorListener.getControl() instanceof IEditable && !((IEditable)cellEditorListener.getControl()).isEditable())
+						{
+						    editable = false;
+						}
+		    			if (editable && dataBook.getReadOnlyChecker() != null)
+		    			{
+		    				try
+							{
+		    					editable = !dataBook.getReadOnlyChecker().isReadOnly(dataBook, dataBook.getDataPage(), dataBook, columnName, dataBook.getSelectedRow(), -1);
+							}
+							catch (Throwable pTh)
+							{
+								// Ignore
+							}
+		    			}
+		    			cellEditorComponent.setEnabled(editable);
+		    		}
+		    		else
+		    		{
+		    			cellEditorComponent.setEnabled(bParentEnabled 
+		    					                        && !dataRow.getRowDefinition().getColumnDefinition(columnName).isReadOnly());
+		    		}
+		    		
+	    			if (dynamicAlignment != null)
+		    		{
+		    			int hAlign = dynamicAlignment.getHorizontalAlignment();
+		    			if (hAlign == IAlignmentConstants.ALIGN_DEFAULT)
+		    			{
+		    				hAlign = cellEditor.getHorizontalAlignment();
+		    			}
+		        		cellEditorComponent.setHorizontalAlignment(SwingFactory.getHorizontalSwingAlignment(hAlign));
+		    			int vAlign = dynamicAlignment.getVerticalAlignment();
+		    			if (vAlign == IAlignmentConstants.ALIGN_DEFAULT)
+		    			{
+		    				vAlign = cellEditor.getVerticalAlignment();
+		    			}
+		        		cellEditorComponent.setVerticalAlignment(SwingFactory.getVerticalSwingAlignment(vAlign));
+		    		}
+	    		}
+	    		catch (Exception pException)
+	    		{
+	    			cellEditorComponent.setSelected(false);
+	    			cellEditorComponent.setEnabled(false);
+	    			
+	    			throw new ModelException("Editor cannot be restored!", pException);
+	    		}
+	    		finally
+	    		{
+	    			firstEditingStarted = true;
+	    			ignoreEvent = false;
+	    		}
+    		}
+    	}
+    	
+    	// ItemListener
+    	
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void itemStateChanged(ItemEvent pItemEvent)
+		{
+			if (!ignoreEvent)
+			{
+				fireEditingStarted();
+				fireEditingComplete(ICellEditorListener.ACTION_KEY);
+			}
+		}
+
+    	// KeyListener
+    	
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void keyPressed(KeyEvent pKeyEvent)
+		{
+			if (!pKeyEvent.isConsumed())
+			{
+				switch (pKeyEvent.getKeyCode())
+				{
+					case KeyEvent.VK_ESCAPE: 
+						pKeyEvent.consume(); 
+				        fireEditingComplete(ICellEditorListener.ESCAPE_KEY);
+				        break;
+					case KeyEvent.VK_ENTER: 
+						pKeyEvent.consume(); 
+						if (pKeyEvent.isShiftDown())
+						{
+					        fireEditingComplete(ICellEditorListener.SHIFT_ENTER_KEY);
+						}
+						else
+						{
+					        fireEditingComplete(ICellEditorListener.ENTER_KEY);
+						}
+				        break;
+					case KeyEvent.VK_TAB: 
+						pKeyEvent.consume(); 
+						if (pKeyEvent.isShiftDown())
+						{
+					        fireEditingComplete(ICellEditorListener.SHIFT_TAB_KEY);
+						}
+						else
+						{
+					        fireEditingComplete(ICellEditorListener.TAB_KEY);
+						}
+				        break;
+				    default:
+				    	// Nothing to do
+				}
+			}
+		}
+		
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void keyReleased(KeyEvent pKeyEvent)
+		{
+		}
+		
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void keyTyped(KeyEvent pKeyEvent)
+		{
+		}
+		
+    	// FocusListener
+    	
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void focusGained(FocusEvent pFocusEvent)
+		{
+		}
+
+    	/**
+    	 * {@inheritDoc}
+    	 */
+		public void focusLost(FocusEvent pFocusEvent)
+		{
+			if (!pFocusEvent.isTemporary())
+			{
+				fireEditingComplete(ICellEditorListener.FOCUS_LOST);
+			}
+		}
+		
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    	// User-defined methods
+    	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+		/**
+		 * Delegates the event to the ICellEditorListener.
+		 * It takes care, that the event occurs only one time.
+		 */
+		protected void fireEditingStarted()
+		{
+        	if (firstEditingStarted && !ignoreEvent && cellEditorListener != null)
+        	{
+           		firstEditingStarted = false;
+           		cellEditorListener.editingStarted();
+        	}
+		}
+		
+		/**
+		 * Delegates the event to the ICellEditorListener.
+		 * It takes care, that editing started will be called before,
+		 * if it is not called until jet.
+		 * 
+		 * @param pCompleteType the editing complete type.
+		 */
+		protected void fireEditingComplete(String pCompleteType)
+		{
+			if (!ignoreEvent && cellEditorListener != null)
+			{
+				cellEditorListener.editingComplete(pCompleteType);
+			}
+		}
+		
+    }	// CellEditorHandler
+	
+}	// JVxCheckBoxCellEditor

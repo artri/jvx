@@ -1,0 +1,3 @@
+Manifest-Version: 1.0
+Class-Path: libs/server/jvx.jar libs/server/hsqldb.jar
+Main-Class: com/sibvisions/rad/ui/swing/impl/SwingApplication

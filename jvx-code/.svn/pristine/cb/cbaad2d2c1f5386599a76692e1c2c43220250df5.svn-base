@@ -1,0 +1,8 @@
+/* Import all the mixins for this theme */
+@import "jvx.scss";
+
+/* The actual styles should be defined in jvx.scss */
+.jvx 
+{
+  @include jvx;
+}

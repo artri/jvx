@@ -1,0 +1,9 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
+<html>
+<head>
+</head>
+<body bgcolor="white">
+Contains interfaces and classes for creating platform an technology independent layouts. They can be used to create
+graphical user interfaces with AWT, Swing, SWT, JSF or whatever you want.
+</body>
+</html>

@@ -1,0 +1,58 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>[TITLE]</title> 
+    <link rel="stylesheet" href="Download?APPLICATION=[APPLICATION]&RESOURCE=download.css" type="text/css"/>
+    <script language="javascript" type="text/javascript">
+    var width  = 420;
+    var height = 250;
+    var x;
+    var y;
+    function configure()
+    {
+      if (window)
+      {
+        if (document.all)
+        {
+          //IE as browser
+          //height = 200;
+        }
+
+        x = (window.screen.width - width) / 2;
+        y = (window.screen.height - height) / 2;
+        
+        window.resizeTo(width, height);
+        window.moveTo(x, y);
+        window.focus();
+
+        window.location = '[URL]';
+      }
+    }
+    function download()
+    {
+        window.location = '[URL]';
+    }
+    
+    function cancel()
+    {
+        window.close();
+    }
+    </script>
+  </head>
+  <body onLoad="javascript:configure();">
+    <table height="100%" width="100%" cellspacing="0" cellpadding="0" border="0">
+      <tr>
+        <td align="center" valign="middle">
+	    <table cellspacing="0" cellpadding="0" border="0">	    	  
+          <tr><td colspan="2" align="left" valign="middle"><span class="infotext">[INFOTEXT]</span></td></tr>
+		  <tr><td colspan="2" class="spacer20"><img src="Download?APPLICATION=[APPLICATION]&RESOURCE=images/1x1.gif" class="spacer20"></td></tr>
+		  <tr>
+		    <td align="left"><input type="submit" id="SUBMIT" value="[DOWNLOADBUTTON]" onClick="javascript:download();"/></td>
+		    <td align="right"><input type="submit" id="CANCEL" value="[CANCELBUTTON]" onClick="javascript:cancel();"/></td>
+		  </tr>
+	    </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>

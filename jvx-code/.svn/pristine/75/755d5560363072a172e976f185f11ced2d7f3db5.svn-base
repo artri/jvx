@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+
+<suppressions>
+
+    <suppress checks="VisibilityModifier"
+              files="TypeMap.java"/>
+    <suppress checks="VisibilityModifier"
+              files="Size.java"/>
+    <suppress checks="VisibilityModifier"
+              files="GVxInternalFrame.java"/>
+    <suppress checks="VisibilityModifier"
+              files="WebUI.java"/>
+    <suppress checks="FileLength"
+              files="src[\\/]com[\\/]sibvisions[\\/]rad[\\/]ui[\\/]gwt[\\/]client[\\/]GWTFactory.java"/>
+
+    <!-- special source folders -->
+    
+    <suppress checks="JavadocPackage"
+              files="java[\\/]web[\\/]test[\\/]*"/>
+    <suppress checks=".+"
+              files="java[\\/]web[\\/]intern[\\/].*"/>
+
+</suppressions>

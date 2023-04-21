@@ -1,0 +1,680 @@
+<!-- 
+Copyright 2013 SIB Visions GmbH
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+ 
+http://www.apache.org/licenses/LICENSE-2.0
+ 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+
+<project name="JVx.vaadin" default="start.complete" 
+         xmlns:artifact="antlib:org.apache.maven.artifact.ant"
+         xmlns:staging="antlib:org.sonatype.nexus.ant.staging">
+
+  <!-- 
+    ***************************************************************** 
+  	* information   
+  	***************************************************************** 
+  	-->
+    
+  <description>JVx Vaadin UI</description>
+ 
+  <!-- 
+  	***************************************************************** 
+  	* global properties   
+  	***************************************************************** 
+  	-->
+  
+  <property name="release.name" value="jvxvaadin"/>
+
+  <property name="jar.server.name" value="${release.name}-server.jar" />
+  <property name="jar.client.name" value="${release.name}-client.jar" />
+  <property name="jar.themes.name" value="${release.name}-themes.jar" />
+  
+  <!-- 
+  	***************************************************************** 
+  	* general properties   
+  	***************************************************************** 
+  	-->
+  
+  <property name="build" location="${basedir}/build/ant"/>
+  <property name="buildnumber" location="${build}/buildnumber" />
+  <property name="temp" location="${build}/temp" />
+  <property name="licence" location="${basedir}" />
+  <property name="quality" location="${build}/quality" />
+  <property name="classes" location="${temp}/classes" />
+  <property name="widgetset" location="${temp}/widgetset" />
+  <property name="webcontent" location="${basedir}/WebContent/" />
+  <property name="themes" location="${temp}/themes" />
+  
+  <property name="src" location="${basedir}/src"/>
+  <property name="libs" location="${basedir}/libs" />
+  <property name="libs.web" location="${webcontent}/WEB-INF/lib/"/>
+  <property name="maven" location="${basedir}/maven" />
+  
+  <property name="install" location="${build}/install" />
+  <property name="release" location="${build}/release" />
+  <property name="javadoc" location="${install}/doc" />
+  <property name="checkstyle" location="${install}/checkstyle" />
+  
+    <!-- if already set through nightly build script, the value is not set again! -->
+  <property name="build.nightly" value="" />
+  	
+  <!-- Maven snapshots and staging repository id and url -->
+  <property name="mvn.snapshotsrep.id" value="sonatype-nexus-snapshots" />
+  <property name="mvn.snapshotsrep.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
+  <property name="mvn.stagingrep.id" value="sonatype-nexus-staging" />
+  <property name="mvn.stagingrep.url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2" />
+
+	
+  <!-- Compile properties -->
+  <property name="target.source" value="1.8" />
+  <property name="target.version" value="1.8" />
+	
+  <property name="debug" value="on" />
+  <property name="debuglevel" value="lines,vars,source" />
+  
+  <!-- 
+  	***************************************************************** 
+  	* external taskdefinitions   
+  	***************************************************************** 
+  	-->
+	
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${build}/ant-contrib.jar" />
+
+  <taskdef resource="checkstyletask.properties" classpath="${build}/checkstyle-5.5-all.jar" />
+	
+  <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant" classpath="${build}/maven/maven-ant-tasks-2.1.3.jar" />
+  
+  <!-- 
+  	***************************************************************** 
+  	* logging   
+  	***************************************************************** 
+  	-->
+
+  <record name="${build}/build.log" />
+  
+  <!-- 
+  	***************************************************************** 
+  	* INTERNAL TASKS   
+  	***************************************************************** 
+  	-->
+  
+  <!--
+    * setup tasks
+    -->
+  
+  <target name="proxy.check">
+    <typedef name="canreach" classname="com.sibvisions.addons.ant.CanReach" classpath="${buildnumber}/addons.jar" />
+
+    <if>
+      <istrue value="true" />
+      <then>
+	    <condition property="proxy.enabled">
+	      <and>
+	        <canreach host="10.0.0.1" port="3128"/>
+	      </and>
+	    </condition>
+      </then>
+    </if>
+  </target>
+  
+  <target name="proxy" depends="proxy.check" if="proxy.enabled">
+    <stopwatch name="timer0"/>
+    
+    <property name="proxy.host" value="10.0.0.1"/>
+    <property name="proxy.port" value="3128"/>
+    <property name="proxy.user" value=""/>
+    <property name="proxy.pass" value=""/>
+      
+    <setproxy proxyhost="${proxy.host}" proxyport="${proxy.port}" proxyuser="${proxy.user}" proxypassword="${proxy.password}"/>
+    
+    <stopwatch name="timer0" action="total"/>
+  </target>
+  
+  <!-- 
+	* cleanup tasks 
+	-->
+
+  <target name="clean.start">
+    <stopwatch name="timer1"/>
+    
+    <delete dir="${temp}" />
+    <delete dir="${install}" />
+    <delete dir="${release}" />
+    <delete dir="${quality}" />
+    
+    <stopwatch name="timer1" action="total"/>
+  </target>
+
+  <target name="clean.stop">
+    <stopwatch name="timer2"/>
+    
+    <delete dir="${temp}" />
+    
+    <stopwatch name="timer2" action="total"/>
+  </target>
+
+  <!-- 
+	* compile, build tasks 
+	-->
+
+  <target name="compile">
+  	
+    <stopwatch name="timer3"/>
+      
+  	<mkdir dir="${classes}"/>
+  	
+    <javac srcdir="${src}" destdir="${classes}" debug="${debug}" debuglevel="${debuglevel}" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+      <compilerarg value="-implicit:none"/>
+	  <classpath>
+	    <fileset dir="${libs}">
+	      <include name="**/*.jar" />
+	    </fileset>	    
+	    <fileset dir="${libs.web}">
+	      <include name="**/*.jar" />
+	    </fileset>
+	  </classpath>
+  	</javac>
+  	
+    <!-- copy resource files -->
+    <copy todir="${classes}">
+      <fileset dir="src">
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="**/Widgetset.gwt.xml" />
+      </fileset>
+    </copy>
+    
+    <stopwatch name="timer3" action="total"/>
+  	
+  </target>
+  
+  <target name="scss">
+    
+    <mkdir dir="${themes}/VAADIN/themes/jvx" />
+    <mkdir dir="${themes}/VAADIN/themes/jvx_valo" />
+    
+    <java dir="${webcontent}/VAADIN/themes/jvx/"
+          classname="com.vaadin.sass.SassCompiler"
+          failonerror="true"
+          maxmemory="128m"
+          fork="true">
+      <arg value="styles.scss"/>
+      <arg value="${themes}/VAADIN/themes/jvx/styles.css"/>
+      <classpath>
+	    <fileset dir="${libs.web}">
+	      <include name="**/*.jar" />
+	    </fileset>
+	  </classpath>
+   </java>
+   
+   <java dir="${webcontent}/VAADIN/themes/jvx_valo/"
+         classname="com.vaadin.sass.SassCompiler"
+         failonerror="true"
+         maxmemory="128m"
+         fork="true">
+     <arg value="styles.scss"/>
+     <arg value="${themes}/VAADIN/themes/jvx_valo/styles.css"/>
+     <classpath>
+	   <fileset dir="${libs.web}">
+	     <include name="**/*.jar" />
+	   </fileset>
+	 </classpath>
+   </java>      
+      
+  </target>
+
+  <target name="widgetset" depends="compile">
+         
+	<mkdir dir="${widgetset}/VAADIN/widgetsets"/>
+    <mkdir dir="${widgetset}/VAADIN/gwt-unitCache"/>
+      
+    <java classname="com.google.gwt.dev.Compiler" failonerror="yes" fork="yes">
+	  <arg value="-war" />
+	  <arg value="${widgetset}/VAADIN/widgetsets" />
+	  <arg value="com.sibvisions.rad.ui.vaadin.ext.ui.Widgetset" />
+	  <arg value="-logLevel"/>
+  	  <arg value="ERROR"/>
+	  <arg value="-strict"/>
+<!-- 
+	  <arg value="-style"/>
+	  <arg value="DETAILED"/>
+-->	  
+      <jvmarg value="-Xmx1024M"/>
+      <jvmarg value="-Djava.awt.headless=true"/>
+      <classpath>
+	    <pathelement path="${src}"/>
+	    <pathelement path="${classes}"/>
+   	    <fileset dir="${libs}">
+	      <include name="**/*.jar" />
+	    </fileset>
+   	    <fileset dir="${libs.web}">
+	      <include name="**/*.jar" />
+	    </fileset>
+   	    <fileset dir="${ant.home}/lib">
+	      <include name="**/*.jar" />
+	    </fileset>
+  	  </classpath>
+	  <sysproperty key="vFailIfNotSerializable" value="true" />
+	</java>
+	
+	<!-- cleanup -->	
+	<delete dir="${widgetset}/VAADIN/gwt-unitCache"/>
+	<delete dir="${widgetset}/VAADIN/widgetsets/WEB-INF"/>
+	  
+  </target>  
+  
+  <target name="jar" depends="widgetset,scss">
+      
+    <stopwatch name="timer4"/>
+      
+    <mkdir dir="${install}"/>
+
+	<!-- buildnumber -->
+    <taskdef name="buildnr" classname="com.sibvisions.addons.ant.AntBuildNumber">
+   	  <classpath>
+	    <fileset dir="${libs.web}">
+	      <include name="vaadin-*.jar" />
+	    </fileset>	    
+	    <pathelement location="${buildnumber}/addons.jar"/>
+	    <pathelement location="${classes}"/>
+	  </classpath>
+    </taskdef>
+    <buildnr buildfile="${buildnumber}/buildnr.properties" class="com.sibvisions.rad.ui.vaadin.IPackageSetup" versionfield="VERSION" namefield="NAME"/> 
+    
+    <jar jarfile="${install}/${jar.server.name}">
+	  <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+      <fileset dir="${classes}" />
+    </jar>
+ 
+    <jar jarfile="${install}/${jar.client.name}">
+	  <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+      <fileset dir="${widgetset}" includes="VAADIN/**" />
+    </jar>
+
+    <jar jarfile="${install}/${jar.themes.name}">
+	  <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+      <fileset dir="${themes}" includes="VAADIN/**"/>
+      <fileset dir="${webcontent}" includes="VAADIN/themes/**"/>
+    </jar>
+   
+    <stopwatch name="timer4" action="total"/>
+   
+  </target>
+    
+  <target name="package">
+  
+    <copy file="${webcontent}/WEB-INF/web.xml" todir="${release}/WEB-INF/" />
+    
+    <replace file="${release}/WEB-INF/web.xml">
+        <replacetoken><![CDATA[<param-name>productionMode</param-name>
+	<param-value>false</param-value>]]></replacetoken>
+        <replacevalue><![CDATA[<param-name>productionMode</param-name>
+	<param-value>true</param-value>]]></replacevalue>
+    </replace>
+    
+    <copy todir="${release}/WEB-INF/lib">
+      <fileset dir="${install}">
+        <include name="*.jar"/>
+      </fileset>
+      <fileset dir="${libs.web}">
+        <include name="*.jar"/>
+      </fileset>
+    </copy>
+      
+  </target>
+  
+  <target name="opensource">
+      
+    <delete>
+      <fileset dir="${release}">
+        <include name="*.zip" />
+      </fileset>
+    </delete>
+
+    <taskdef name="buildnr" classname="com.sibvisions.addons.ant.AntBuildNumber" classpath="${buildnumber}/addons.jar" />
+    <buildnr buildfile="${buildnumber}/buildnr.properties" loadOnly="true"/> 
+  
+    <zip destfile="${release}/${release.name}-${build.version}.zip">
+      <zipfileset dir="${release}" prefix="">
+        <include name="**"/>
+        <exclude name="*.zip"/>
+      </zipfileset>
+	  <zipfileset dir="${basedir}" prefix="">
+	    <include name="LICENSE.txt" />
+	    <include name="NOTICE.txt" />
+	  </zipfileset>      
+    </zip>
+
+  	<delete dir="${temp}/manifest" />
+  	<mkdir dir="${temp}/manifest/META-INF" />
+  	
+	<manifest file="${temp}/manifest/META-INF/MANIFEST.MF">
+	  <attribute name="Vaadin-Widgetsets" value="com.sibvisions.rad.ui.vaadin.ext.ui.Widgetset" />
+      <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+      <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+      <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+    </manifest>
+  	
+    <zip destfile="${release}/${release.name}-${build.version}_src.zip">
+      <zipfileset dir="${basedir}/src" />
+	  <zipfileset dir="${temp}/manifest" />
+	  <zipfileset dir="${basedir}" prefix="">
+	    <include name="LICENSE.txt" />
+	    <include name="NOTICE.txt" />
+	  </zipfileset>      
+    </zip>
+
+    <zip destfile="${release}/${release.name}-${build.version}_javadoc.zip">
+      <zipfileset dir="${javadoc}" prefix="api" />
+	  <zipfileset dir="${basedir}" prefix="">
+	    <include name="LICENSE.txt" />
+	    <include name="NOTICE.txt" />
+	  </zipfileset>      
+    </zip>
+      
+  </target>
+  
+  <target name="maven.snapshot" depends="proxy">
+      
+    <property name="maven.version.postfix" value="-SNAPSHOT" />
+
+    <property name="mvn.id" value="${mvn.snapshotsrep.id}" />
+    <property name="mvn.url" value="${mvn.snapshotsrep.url}" />
+    
+  </target>
+  
+  <target name="maven" depends="proxy, compile">
+  
+    <property name="maven.version.postfix" value="" />
+
+    <condition property="gpgexecutable" value="C:\Program Files (x86)\GNU\GnuPG\pub\gpg.exe" else="gpg">
+      <and>
+        <os family="Windows" />
+      </and>
+    </condition>
+  
+    <!-- define late because of the classpath -->
+    <taskdef name="buildnr" classname="com.sibvisions.addons.ant.AntBuildNumber" classpath="${buildnumber}/addons.jar;${classes}" />
+    <buildnr buildfile="${buildnumber}/buildnr.properties" loadOnly="true"/> 
+
+    <taskdef name="fieldreader" classname="com.sibvisions.addons.ant.FieldReaderTask">
+	  <classpath>
+	    <fileset dir="${libs.web}">
+	      <include name="vaadin-*.jar" />
+	    </fileset>	    
+	    <pathelement location="${buildnumber}/addons.jar"/>
+	    <pathelement location="${classes}"/>
+	  </classpath>
+    </taskdef>
+    <fieldreader class="com.sibvisions.rad.ui.vaadin.IPackageSetup" fieldName="VAADIN_VERSION" propertyName="vaadin.version"/> 
+    
+    <!-- Maven coordinates -->
+    <property name="mvn.groupId" value="com.sibvisions" />
+
+    <propertyregex property="versionnumber" input="${build.version}" regexp=" " replace="_" global="true" defaultValue="${build.version}"/>
+
+    <!-- artifacts' name, which follows the convention of Maven -->
+  	<property name="mvn.jvxvaadin-client.jar" value="${release}/maven/${release.name}-client-${versionnumber}${maven.version.postfix}.jar" />
+	<property name="mvn.jvxvaadin-client.sources.jar" value="${release}/maven/${release.name}-client-${versionnumber}${maven.version.postfix}-sources.jar" />
+	<property name="mvn.jvxvaadin-client.javadoc.jar" value="${release}/maven/${release.name}-client-${versionnumber}${maven.version.postfix}-javadoc.jar" />
+  	<property name="mvn.jvxvaadin-server.jar" value="${release}/maven/${release.name}-server-${versionnumber}${maven.version.postfix}.jar" />
+	<property name="mvn.jvxvaadin-server.sources.jar" value="${release}/maven/${release.name}-server-${versionnumber}${maven.version.postfix}-sources.jar" />
+	<property name="mvn.jvxvaadin-server.javadoc.jar" value="${release}/maven/${release.name}-server-${versionnumber}${maven.version.postfix}-javadoc.jar" />
+  	<property name="mvn.jvxvaadin-themes.jar" value="${release}/maven/${release.name}-themes-${versionnumber}${maven.version.postfix}.jar" />
+	
+    <property name="mvn.id" value="${mvn.stagingrep.id}" />
+    <property name="mvn.url" value="${mvn.stagingrep.url}" />
+  
+    <mkdir dir="${release}/maven" />
+  
+    <zip destfile="${mvn.jvxvaadin-client.jar}">
+      <zipfileset src="${install}/${jar.client.name}"/>
+    </zip>
+
+    <zip destfile="${mvn.jvxvaadin-server.jar}">
+      <zipfileset src="${install}/${jar.server.name}"/>
+    </zip>
+    
+    <zip destfile="${mvn.jvxvaadin-themes.jar}">
+      <zipfileset src="${install}/${jar.themes.name}"/>
+    </zip>
+    
+    <zip destfile="${mvn.jvxvaadin-client.sources.jar}">
+      <zipfileset dir="${src}/" includes="com/sibvisions/rad/ui/vaadin/ext/ui/client/**" excludes="**/package.html" prefix=""/>
+    </zip>
+
+    <zip destfile="${mvn.jvxvaadin-server.sources.jar}">
+      <zipfileset dir="${src}/" excludes="com/sibvisions/rad/ui/vaadin/ext/ui/client/**, **/package.html" prefix=""/>
+    </zip>
+    
+    <unzip src="${release}/${release.name}-${build.version}_javadoc.zip" dest="${release}/maven/javadoc"/>
+
+    <zip destfile="${mvn.jvxvaadin-client.javadoc.jar}">
+      <zipfileset dir="${release}/maven/javadoc/api" />
+    </zip>
+
+    <copy file="${mvn.jvxvaadin-client.javadoc.jar}" tofile="${mvn.jvxvaadin-server.javadoc.jar}" />
+
+    <property name="maven.tmp" location="${temp}/maven" />
+        
+    <delete dir="${release}/maven/javadoc" />
+    <delete dir="${maven.tmp}" />
+    
+    <copy todir="${maven.tmp}">
+      <fileset dir="${maven}"/>
+    </copy>    
+    
+    <replace dir="${maven.tmp}">
+      <replacefilter token="&lt;version&gt;1.3&lt;/version&gt;" value="&lt;version&gt;${versionnumber}${maven.version.postfix}&lt;/version&gt;" />
+      <replacefilter token="&lt;version&gt;7.5.0&lt;/version&gt;" value="&lt;version&gt;${vaadin.version}&lt;/version&gt;" />
+      <include name="**/pom.xml" />
+    </replace>
+    
+    <!-- 
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      ~ Client
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    -->
+
+	<artifact:mvn>
+		<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.4:sign-and-deploy-file" />
+		<arg value="-Durl=${mvn.url}" />
+		<arg value="-DrepositoryId=${mvn.id}" />
+		<arg value="-DpomFile=${maven.tmp}/jvxvaadin-client/pom.xml" />
+		<arg value="-Dfile=${mvn.jvxvaadin-client.jar}" />
+		<arg value="-Dfiles=${mvn.jvxvaadin-client.sources.jar},${mvn.jvxvaadin-client.javadoc.jar}" />
+		<arg value="-Dclassifiers=sources,javadoc" />
+		<arg value="-Dtypes=jar,jar" />
+        <arg value="-Pgpg" />
+		<arg value="-Dgpg.executable=${gpgexecutable}" />
+	</artifact:mvn>
+ 
+    <!-- 
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      ~ Server 
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    -->
+ 
+ 	<artifact:mvn>
+		<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.4:sign-and-deploy-file" />
+		<arg value="-Durl=${mvn.url}" />
+		<arg value="-DrepositoryId=${mvn.id}" />
+		<arg value="-DpomFile=${maven.tmp}/jvxvaadin-server/pom.xml" />
+		<arg value="-Dfile=${mvn.jvxvaadin-server.jar}" />
+		<arg value="-Dfiles=${mvn.jvxvaadin-server.sources.jar},${mvn.jvxvaadin-server.javadoc.jar}" />
+		<arg value="-Dclassifiers=sources,javadoc" />
+		<arg value="-Dtypes=jar,jar" />
+        <arg value="-Pgpg" />
+		<arg value="-Dgpg.executable=${gpgexecutable}" />
+	</artifact:mvn>
+
+    <!-- 
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      ~ Themes 
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    -->
+ 
+ 	<artifact:mvn>
+		<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.4:sign-and-deploy-file" />
+		<arg value="-Durl=${mvn.url}" />
+		<arg value="-DrepositoryId=${mvn.id}" />
+		<arg value="-DpomFile=${maven.tmp}/jvxvaadin-themes/pom.xml" />
+		<arg value="-Dfile=${mvn.jvxvaadin-themes.jar}" />
+        <arg value="-Pgpg" />
+		<arg value="-Dgpg.executable=${gpgexecutable}" />
+	</artifact:mvn>	
+ 	
+  </target>
+  
+  <!-- 
+	* quality tasks 
+	-->
+	
+  <target name="checkstyle" depends="proxy">
+    <stopwatch name="timer5"/>
+    
+    <property name="checkstyle" location="${quality}/checkstyle" />
+
+    <!-- important because it is used in checkstyle.xml -->
+  	<property name="project_loc" location="${basedir}" />
+
+    <delete dir="${checkstyle}" />
+    <mkdir dir="${checkstyle}" />
+
+    <checkstyle configurl="http://sourceforge.net/p/jvx/code/HEAD/tree/trunk/java/library/checkstyle_opensource.xml?format=raw">
+	  <classpath>
+	    <fileset dir="${libs}">
+	      <include name="**/*.jar" />
+	    </fileset>	    
+	    <fileset dir="${libs.web}">
+	      <include name="**/*.jar" />
+	    </fileset>
+	  </classpath>
+      <fileset dir="${src}" includes="**/*.java" />
+      <formatter type="plain" />
+      <formatter type="xml" toFile="${checkstyle}/checkstyle_errors.xml" />
+    </checkstyle>
+
+    <xslt in="${checkstyle}/checkstyle_errors.xml" out="${checkstyle}/dummy.html" style="${build}/checkstyle-frames-errors.xsl" />
+    <xslt in="${checkstyle}/checkstyle_errors.xml" out="${checkstyle}/index_simple.html" style="${build}/checkstyle-simple.xsl" />
+
+    <!-- cleanup -->
+    <delete file="${checkstyle}/dummy.html" />
+    <delete>
+      <fileset dir="${checkstyle}">
+        <include name="*.xml" />
+      </fileset>
+    </delete>
+
+    <stopwatch name="timer5" action="total"/>
+  </target>	
+	
+  <target name="javadoc" depends="proxy">
+     
+    <stopwatch name="timer6"/>
+    
+    <delete dir="${javadoc}" />
+ 	<mkdir dir="${javadoc}" />
+ 	
+    <javadoc packagenames="*" 
+      		 defaultexcludes="yes" 
+      		 excludepackagenames="com.vaadin.v7.*"
+             destdir="${javadoc}" 
+             author="false" 
+             version="false" 
+             use="true" 
+             windowtitle="JVx Vaadin UI"
+             source="1.8" 
+             encoding="ISO-8859-1">
+      <arg value="-J-Dhttp.proxyHost=${proxy.host}"/>
+      <arg value="-J-Dhttp.proxyPort=${proxy.port}"/>
+      <arg value="-J-Dhttp.proxyUser=${proxy.user}"/>
+      <arg value="-J-Dhttp.proxyPassword=${proxy.password}"/>
+      <arg value="-J-Dhttps.proxyHost=${proxy.host}"/>
+      <arg value="-J-Dhttps.proxyPort=${proxy.port}"/>
+      <arg value="-J-Dhttps.proxyUser=${proxy.user}"/>
+      <arg value="-J-Dhttps.proxyPassword=${proxy.password}"/>
+      	  <classpath>
+	    <fileset dir="${libs}">
+	      <include name="**/*.jar" />
+	    </fileset>	    
+	    <fileset dir="${libs.web}">
+	      <include name="**/*.jar" />
+	    </fileset>
+	  </classpath>
+      <sourcepath>
+        <pathelement location="${src}" />
+      </sourcepath>
+      <doctitle>
+        <![CDATA[<h1>JVx Vaadin UI</h1>]]>
+      </doctitle>
+      <bottom><![CDATA[<i>Copyright &#169; 2013 SIB Visions GmbH. All Rights Reserved.</i>]]></bottom>
+      <link href="https://vaadin.com/api/8.1.1/"/>
+      <link href="http://www.sibvisions.com/files/jvx/2.5.1/api/"/>
+      <link href="http://docs.oracle.com/javase/8/docs/api/"/>
+    </javadoc>
+
+    <stopwatch name="timer6" action="total"/>
+    
+  </target>	
+	
+  <!-- 
+  	***************************************************************** 
+  	* PUBLIC START TASKS   
+  	***************************************************************** 
+  	-->
+ 
+  <target name="start.quality" depends="clean.start, checkstyle, javadoc, clean.stop" description="Checks quality"/>
+  
+  <target name="start.complete" depends="clean.start, jar, javadoc, package, opensource, clean.stop" description="Creates release libraries"/> 
+  <!-- for nightly build (snapshot) -->
+  <target name="start.complete.maven" depends="clean.start, maven.snapshot, jar, javadoc, package, opensource, maven, clean.stop" description="Complete build and maven snaphot publishing"/>
+  
+  <target name="start.maven" depends="clean.start, jar, javadoc, package, opensource, maven" description="Publishing a maven release"/>
+  <target name="start.maven.snapshot" depends="clean.start, maven.snapshot, jar, javadoc, package, opensource, maven" description="Publishing a maven snapshot"/>
+  
+  <target name="start.widgetset_dev" depends="clean.start, widgetset" description="Creates widgetset for development">
+      
+    <delete dir="${webcontent}/VAADIN/widgetsets/com.sibvisions.rad.ui.vaadin.ext.ui.Widgetset" />
+      
+    <copy todir="${webcontent}">
+      <fileset dir="${widgetset}">
+        <include name="**" />
+      </fileset>  
+    </copy>
+  </target>
+  
+  <target name="start.updatelibs" description="Updates all needed libraries">
+  
+    <property name="install.jvx" location="../build/release" />
+    
+    <copy todir="${libs.web}">
+      <fileset dir="${install.jvx}">
+        <include name="jvx.jar" />
+      </fileset>
+    </copy>
+    
+  </target>
+ 
+</project>

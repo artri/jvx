@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration>
+  
+  <Appenders>
+    <Console name="STDOUT" target="SYSTEM_OUT">
+      <PatternLayout pattern="%d %-5p [%t] %C{1} (%F:%L) - %m%n"/>
+    </Console>
+  </Appenders>
+  
+  <Loggers>
+    <Root level="error">
+      <AppenderRef ref="STDOUT"/>
+    </Root>
+    <Logger name="com.sibvisions" level="off"/>
+    <Logger name="testLogger" level="all"/>
+  </Loggers>
+  
+</Configuration>

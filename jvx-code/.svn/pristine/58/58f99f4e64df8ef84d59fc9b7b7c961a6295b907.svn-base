@@ -1,0 +1,249 @@
+Changelog: JVx 0.7 (beta2)
+
+##################################################################
+#                          General                               #
+##################################################################
+
+- new featureas
+- bugfixes
+
+
+##################################################################
+#                          Library                               #
+##################################################################
+
+[BUGFIX]
+
+  - ILauncher
+    * local "registry" access is now application and codebase dependent
+    
+  - SwingApplication
+    * Table export fails with remote server
+    
+  - SwingApplet, ServletServer
+    * Cookies were added too often
+
+[NEW FEATURE]
+
+  - DBStorage, DBAccess, RemoteDataBook
+    * Automatic Lookup detection through database modell (Foreign keys)
+
+  - DBAccess
+    * Support for password user-defined validators
+    * Added a default password validator (change options via config.xml)
+    * Added support to set JDBC properties
+    
+  - ISession
+    * It's now possible to put objects to the object store through the
+      SessionContext
+      
+  - MySQLDBAccess
+    * workaround for datetime columns with default value 0000-00-00 00:00:00
+    
+  - cell editors
+    * coloring of mandatory columns
+  
+  
+
+--------------------------------------------------------------------------------
+Changelog: JVx 0.7 (beta)
+
+##################################################################
+#                          General                               #
+##################################################################
+
+- User friendly UI adaptions
+- New UI components
+- Derby DB support
+- Memory optimization
+- Performance improvement
+- smaller bugfixes, not listed below
+
+
+##################################################################
+#                          Library                               #
+##################################################################
+
+[BUGFIX]
+
+  - DBAccess
+    * executeQuery function deleted because it's not necessary anymore. 
+      It caused a bug by wrapping a sqlexception by a datasourceexception.
+    * setNull, for empty insert statements in DBAccess fixed
+    
+  - OracleDBAccess
+    * nls_sort is set to binary to force using indexes on order by
+
+  - MemDataBook
+    * filter StackOverflow error
+    * setFilter(xx), with isMemFilter == true, on an RemoteDataBook, 
+      didn't fetch all rows, before it filters in mem.
+    * dbCurrentPage always != null
+
+  - RemoteDataBook
+    * WritebackIsolationLevel = DATASOURCE doesn't save as expected
+    * if not all DataBooks has the same writebackisolationlevel, all are stored. 
+      Now only the DataBooks with the right writebackisolationlevel are stored
+    
+  - DBSecurityManager
+    * close all open statements
+
+  - DirectServerConnection
+    * sync properties in any case
+    * only transfers java.lang.String properties to the client
+
+  - SwingApplet
+    * showDocument: open a single instance of the document
+    * Applets use jscript preferred because a Frame is always there
+    * Applets setTitle changes the title
+  
+  - JVxTabbedPane
+    * no title exception fixed
+  
+  - JVxTable, JVxTree
+    * check if databooks are open  
+
+  - Internalize
+    * Memory optimization. MAX_SIZE added, and OutOfMemory detection  
+
+  
+[NEW FEATURE]
+
+  - ILauncher
+    * local "registry" access implemented
+
+  - ISecurityManager
+    * use ISession instead of AbstractSession
+    * change password is only possible with old and new password
+    * logout when a session will be destroyed
+
+  - IPanel
+    * support for panel background images
+  
+  - IInsets, IDimension, IRectangle
+    * Simple setter, with int parameters, for complex types
+
+  - ITable  
+    * setSortOnHeaderEnabled support added in ITable
+
+  - IActionComponent
+    * new
+
+  - IToggleActionComponent
+    * new
+
+  - IButton
+    * extends IActionComponent
+    * pressed/over icons
+    
+  - IToggleButton
+    * extends IToggleActionComponent
+  
+  - ICheckBoxMenuItem
+    * extends IToggleActionComponent
+    
+  - IMenuItem
+    * extends IActionComponent
+
+  - INodeFormatter
+    * new
+ 
+  - IDataSource
+    * restoreAllDataBooks added
+
+  - IStyledCellEditor
+    * supports Alignment, TimestampType has setDateFormat getDateFormat
+
+  - IImageViewer
+    * new
+
+  - JdkLogger
+    * change loglevel for sub logger automatically
+
+  - Configuration
+    * search parents for configuration (not only when the base directory is 
+      configured)
+
+  - AbstractConnection
+    * vararg support
+    * changed AbstractConnection call methods: ICallBackListener is now the 
+      first parameter
+
+  - ServletServer
+    * cookie support for server
+
+  - DBSecurityManager
+    * auto login with key
+
+  - DBAccess
+    * static getDBAccess added (DB independent)
+  
+  - DBStorage
+    * fetch single bean
+    * insert/update/delete of IBean without specifying all columns
+    * default filter
+    * restrict condition
+    
+  - MemDataBook    
+    * Memory filter and Memory Sort, made public
+
+  - RemoteDataBook
+    * fetchAll with one request -> fecthToRow(-1)=fetchAll
+
+  - MemDataSource
+    * close restores all DataBooks
+
+  - Application, WorkScreen
+    * simple info/error/question methods
+
+  - JVxChoiceCellEditor, JVxDateCellEditor, JVxImageViewer, JVxLinkedCellEditor, 
+    JVxTextCellEditor
+    * call ExceptionHandler.show, if Exception occurs in cancelEditing
+    
+  - JVxTable, JVxTree
+    * show Busy cursur while accessing model
+
+  - SwingTree
+    * read only support (includes self join support)
+
+  - SwingApplet
+    * JNLP-Applet Upload: send WEBSTART to servlet, servlet opens a new 
+      subwindow to keep the browser as it is
+      
+  - SwingComponent
+    - transparent background supported
+
+  - JSBridge
+    * cookie support
+    * document cache implemented
+  
+  - ExceptionHandler
+    * added show()
+    
+  - Reflective
+    * vararg support
+
+  - UIImage    
+    * ImageLibrary supports import/register of images
+    * Added up/down default image to the ImageLibrary
+    
+  - UIImageViewer
+    * new
+    
+  - DerbyDBAccess
+    * new
+    
+  - MailUtil
+    * new
+
+  - ImageUtil
+    * new
+    
+  - DateUtil
+    * new
+  
+  - JVxImageViewer
+    * new
+    
+  - AbstractUIActionComponent
+    * new

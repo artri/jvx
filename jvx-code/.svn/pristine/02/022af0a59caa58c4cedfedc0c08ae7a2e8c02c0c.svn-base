@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+  <securitymanager>
+    <class>com.sibvisions.rad.server.security.XmlSecurityManager</class>
+    <userfile>users.xml</userfile>
+  </securitymanager>
+  
+  <!-- predefined life-cycle object names -->
+  <lifecycle>
+    <mastersession>com.sibvisions.apps.simpleapp.Session</mastersession>
+    <application />
+  </lifecycle>
+  
+</application>

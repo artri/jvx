@@ -1,0 +1,1431 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 21.01.2010 - [JR] - creation
+ * 29.04.2010 - [JR] - #119: init implemented
+ */
+package com.sibvisions.rad.remote;
+
+import java.beans.Transient;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Locale;
+import java.util.Properties;
+import java.util.Set;
+import java.util.TimeZone;
+import java.util.Vector;
+
+import javax.rad.model.condition.Equals;
+import javax.rad.model.condition.Not;
+import javax.rad.persist.ColumnMetaData;
+import javax.rad.persist.MetaData;
+import javax.rad.persist.MetaData.Feature;
+import javax.rad.remote.ConnectionInfo;
+import javax.rad.remote.IConnection;
+import javax.rad.remote.IConnectionConstants;
+import javax.rad.type.bean.Bean;
+import javax.rad.type.bean.BeanType;
+
+import org.junit.Assert;
+import org.junit.Test;
+
+import com.sibvisions.rad.IPackageSetup;
+import com.sibvisions.util.ArrayUtil;
+import com.sibvisions.util.ImmutableTimestamp;
+import com.sibvisions.util.type.CodecUtil;
+import com.sibvisions.util.type.ExceptionUtil;
+import com.sibvisions.util.type.StringUtil;
+import com.sibvisions.util.xml.XmlNode;
+
+import remote.net.VMConnection;
+
+/**
+ * Tests the serialization and deserialization of objects with the <code>ByteSerializer</code> class.
+ * 
+ * @author René Jahn
+ */
+public class TestUniversalSerializer
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/** the serializer. */
+	private UniversalSerializer serializer = new UniversalSerializer();
+
+	/** a simple enum. */
+	public enum EnumTest
+	{
+		/** String. */
+		String,
+		/** Number. */
+		Number
+	};
+	
+	/** the stream. */
+	private byte[] stream;
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Writes the given Object into a byte stream.
+	 *  
+	 * @param pObject the value to write.
+	 * @throws Exception if an exception occures.
+	 */
+	public void write(Object pObject) throws Exception
+	{
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		
+		serializer.write(dos, pObject);
+		
+		dos.flush();
+		stream = bos.toByteArray();
+		
+		System.out.println("Written: " + CodecUtil.encodeHex(stream) + 
+				           " from Class: " + (pObject == null ? null : pObject.getClass().getName()) + 
+				           " Value: " + pObject);
+	}
+	
+	/**
+	 * Reads from a byte stream.
+	 *  
+	 * @return the value
+	 * @throws Exception if an exception occures.
+	 */
+	public Object read() throws Exception
+	{
+		Object result = serializer.read(new DataInputStream(new ByteArrayInputStream(stream)));
+		
+		System.out.println("Read:    " + CodecUtil.encodeHex(stream) + 
+				           " from Class: " + (result == null ? null : result.getClass().getName()) + 
+				           " Value: " + result);
+		
+		return result;
+	}
+	
+	/**
+	 * Tests all given elements.
+	 * 
+	 * @param pValue the elements.
+	 * @throws Exception if test fails
+	 */
+	public void testValue(Object pValue) throws Exception
+	{
+		write(pValue);
+			
+		Assert.assertEquals(pValue, read());
+	}
+	
+	/**
+	 * Tests all given elements.
+	 * 
+	 * @param pValues the elements.
+	 * @throws Exception if test fails
+	 */
+	public void testValues(Object... pValues) throws Exception
+	{
+		for (int i = 0; i < pValues.length; i++)
+		{
+			write(pValues[i]);
+			
+			Assert.assertEquals(pValues[i], read());
+		}
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Test methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Test null object.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testNull() throws Exception
+	{
+		testValue(null);
+	}
+	
+	/**
+	 * Test Byte class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testByte() throws Exception
+	{
+		testValues(Byte.valueOf(Byte.MIN_VALUE), Byte.valueOf((byte)0), Byte.valueOf(Byte.MAX_VALUE));
+	}
+
+	/**
+	 * Test Character class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testCharacter() throws Exception
+	{
+		testValues(Character.valueOf('Ä'), Character.valueOf('µ'));
+	}
+
+	/**
+	 * Test Boolean class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testBoolean() throws Exception
+	{
+		testValues(Boolean.TRUE, Boolean.FALSE);
+	}
+	
+	/**
+	 * Test Float class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testFloat() throws Exception
+	{
+		testValues(Float.valueOf(Float.MIN_VALUE), Float.valueOf(0f), Float.valueOf(Float.MAX_VALUE));
+	}
+
+	/**
+	 * Test Double class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testDouble() throws Exception
+	{
+		testValues(Double.valueOf(Double.MIN_VALUE), Double.valueOf(0d), Double.valueOf(Double.MAX_VALUE));
+	}
+	
+	/**
+	 * Test Short class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testShort() throws Exception
+	{
+		testValues(Short.valueOf(Short.MIN_VALUE), Short.valueOf((short)0), Short.valueOf(Short.MAX_VALUE));
+	}
+
+	/**
+	 * Test Integer class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testInteger() throws Exception
+	{
+		testValues(Integer.valueOf(Integer.MIN_VALUE), Integer.valueOf(0), Integer.valueOf(Integer.MAX_VALUE));
+	}
+	
+	/**
+	 * Test Long class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testLong() throws Exception
+	{
+		testValues(Long.valueOf(Long.MIN_VALUE), Long.valueOf(0L), Long.valueOf(Long.MAX_VALUE));
+	}
+	
+	/**
+	 * Test java.util.Date class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testUtilDate() throws Exception
+	{
+		testValue(new java.util.Date());
+	}
+	
+	/**
+	 * Test java.sql.Date class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testSqlDate() throws Exception
+	{
+		testValue(new java.sql.Date(System.currentTimeMillis()));
+	}
+	
+	/**
+	 * Test java.sql.Time class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testSqlTime() throws Exception
+	{
+		testValue(new java.sql.Time(System.currentTimeMillis()));
+	}
+	
+	/**
+	 * Test java.sql.Timestamp class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testSqlTimestamp() throws Exception
+	{
+		testValue(new java.sql.Timestamp(System.currentTimeMillis()));
+	}
+
+	/**
+	 * Test String class and the calculated type length.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testString() throws Exception
+	{
+		testValues("abcdefghijklmnopqrstuvwxyz@~µ²³{[]}öäüéáèàâê");
+	}
+	
+	/**
+	 * Test Set class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testSet() throws Exception
+	{
+		Set<String> set = new HashSet<String>();
+		set.add("First");
+		set.add("Second");
+		set.add("Third");
+		
+		try
+		{
+			write(set);
+			Object res = read();
+			
+			Assert.assertTrue(res instanceof HashSet);
+		}
+		catch (IOException ioe)
+		{
+			Assert.assertEquals("There is no ITypeSerializer registered for Objects of instance java.util.HashSet!", ioe.getMessage());
+		}
+	}
+	
+	/**
+	 * Test java.math.BigDecimal class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testBigDecimal() throws Exception
+	{
+		testValues(
+				new BigDecimal("0"),
+				new BigDecimal("1234567890123456789012345678901234567890"),
+				new BigDecimal("1234567890123456789012345678901234567890.123456789012345678901234567890123456789"));
+	}
+
+	/**
+	 * Test userdefined class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testObject() throws Exception
+	{
+		ColumnMetaData value = new ColumnMetaData("MARTIN"); 
+		write(value);
+		
+		Assert.assertEquals(value.getName(), ((ColumnMetaData)read()).getName());
+
+		write(value);
+		
+		Assert.assertEquals(value.getName(), ((ColumnMetaData)read()).getName());
+	}
+	
+	/**
+	 * Test Object[].
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testObjectArray() throws Exception
+	{
+		Object[] array = new Object[] {"Test", Integer.valueOf(1), new BigDecimal(10)};
+		
+		write(array);
+		
+		Assert.assertArrayEquals(array, (Object[])read());
+	}
+	
+	/**
+	 * Test Object[][].
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testObjectNDimArray() throws Exception
+	{
+		String[][][][][] array = new String[][][][][] {{{{{"Test", "Test2"}}}}};
+
+		write(array);
+
+		String[][][][][] result = (String[][][][][])read();
+		
+		Assert.assertArrayEquals(array[0][0][0][0], result[0][0][0][0]);
+	}
+	
+	/**
+	 * Test byte[].
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testPrimitiveByteArray() throws Exception
+	{
+		byte[] array = new byte[] { 0x48, 0x49, 0x50 };
+
+		write(array);
+		
+		byte[] result = (byte[])read();
+
+		Assert.assertArrayEquals(array, result);
+	}
+	
+	/**
+	 * Test boolean[].
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testPrimitiveBooleanArray() throws Exception
+	{
+		boolean[] array = new boolean[] { true, true, false, true, false };
+
+		write(array);
+		
+		boolean[] result = (boolean[])read();
+
+		for (int i = 0, anz = array.length; i < anz; i++)
+		{
+			Assert.assertEquals(Boolean.valueOf(array[i]), Boolean.valueOf(result[i]));
+		}
+	}
+	
+	/**
+	 * Test char[].
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testPrimitiveCharArray() throws Exception
+	{
+		char[] array = new char[] { 'A', 'B', 'Z' };
+
+		write(array);
+		
+		char[] result = (char[])read();
+
+		Assert.assertArrayEquals(array, result);
+	}
+	
+	/**
+	 * Test float[].
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testPrimitiveFloatArray() throws Exception
+	{
+		float[] array = new float[] { 100.5f, 88.9999999f, 0.4828139f };
+
+		write(array);
+		
+		float[] result = (float[])read();
+
+		for (int i = 0, anz = array.length; i < anz; i++)
+		{
+			Assert.assertEquals(array[i], result[i], 0);
+		}
+	}
+	
+	/**
+	 * Test double[].
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testPrimitiveDoubleArray() throws Exception
+	{
+		double[] array = new double[] { 100.5f, 88.9999999f, 0.4828139f };
+
+		write(array);
+		
+		double[] result = (double[])read();
+
+		for (int i = 0, anz = array.length; i < anz; i++)
+		{
+			Assert.assertEquals(array[i], result[i], 0);
+		}
+	}
+	
+	/**
+	 * Test short[].
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testPrimitiveShortArray() throws Exception
+	{
+		short[] array = new short[] { (short)5, (short)240, (short)255, (short)0 };
+
+		write(array);
+		
+		short[] result = (short[])read();
+
+		Assert.assertArrayEquals(array, result);
+	}
+	
+	/**
+	 * Test int[].
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testPrimitiveIntArray() throws Exception
+	{
+		int[] array = new int[] { 6, 7, 65535, 1050 };
+
+		write(array);
+		
+		int[] result = (int[])read();
+
+		Assert.assertArrayEquals(array, result);
+	}
+	
+	/**
+	 * Test long[].
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testPrimitiveLongArray() throws Exception
+	{
+		long[] array = new long[] { 9999999999999L, 102034010201L, 1038187379502998771L };
+
+		write(array);
+		
+		long[] result = (long[])read();
+
+		Assert.assertArrayEquals(array, result);
+	}
+	
+	/**
+	 * Test Integer[].
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testIntegerArray() throws Exception
+	{
+		Integer[] array = new Integer[] { Integer.valueOf(881), Integer.valueOf(13401987), Integer.valueOf(999999999) };
+
+		write(array);
+		
+		Integer[] result = (Integer[])read();
+
+		Assert.assertArrayEquals(array, result);
+	}
+
+	/**
+	 * Test Throwable.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testThrowable() throws Exception
+	{
+		Throwable value = new IllegalArgumentException("Everything wrong!"); 
+		write(value);
+		
+		Throwable result = ((Throwable)read());
+		
+		Assert.assertEquals(value.getClass(), result.getClass());
+		Assert.assertEquals(value.getMessage(), result.getMessage());
+		
+		Assert.assertEquals(ExceptionUtil.dump(value, true), ExceptionUtil.dump(result, true));
+	}
+	
+	/**
+	 * Test ArrayList.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testArrayList() throws Exception
+	{
+		ArrayList value = new ArrayList();
+		value.add("Hugo Boss");
+		value.add(Integer.valueOf(2));
+		
+		ColumnMetaData cmdata = new ColumnMetaData("COLUMN");
+		cmdata.setLabel("Column");
+		
+		value.add(cmdata);
+
+		write(value);
+		
+		ArrayList result = (ArrayList)read();
+		
+		Assert.assertEquals(StringUtil.toString(value), StringUtil.toString(result));
+	}
+
+	/**
+	 * Test ArrayUtil.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testArrayUtil() throws Exception
+	{
+		ArrayList value = new ArrayList();
+		value.add("Hugo Boss");
+		value.add(Integer.valueOf(2));
+		
+		ColumnMetaData cmdata = new ColumnMetaData("COLUMN");
+		cmdata.setLabel("Column");
+		
+		value.add(cmdata);
+
+		write(value);
+		
+		ArrayList result = (ArrayList)read();
+		
+		Assert.assertEquals(StringUtil.toString(value), StringUtil.toString(result));
+	}
+
+	/**
+	 * Test Vector.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testVector() throws Exception
+	{
+		Vector value = new Vector();
+		value.add("Hugo Boss");
+		value.add(Integer.valueOf(2));
+		
+		ColumnMetaData cmdata = new ColumnMetaData("COLUMN");
+		cmdata.setLabel("Column");
+		
+		value.add(cmdata);
+
+		write(value);
+		
+		Vector result = (Vector)read();
+		
+		Assert.assertEquals(StringUtil.toString(value), StringUtil.toString(result));
+	}
+	
+	/**
+	 * Test Hashtable.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testHashtable() throws Exception
+	{
+		Hashtable value = new Hashtable();
+		value.put(Integer.valueOf(1), "Hugo Boss im Vector");
+		value.put("KEY", Integer.valueOf(5));
+		
+		ColumnMetaData cmdata = new ColumnMetaData("COLUMN");
+		cmdata.setLabel("Column");
+		
+		value.put(Integer.valueOf(2), cmdata);
+		
+		write(value);
+		
+		Hashtable result = (Hashtable)read();
+		
+		Assert.assertEquals(StringUtil.toString(value), StringUtil.toString(result));
+	}
+	
+	/**
+	 * Test Bean.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testBean() throws Exception
+	{
+		BeanType type = new BeanType(new String[] {"ID", "NAME"});
+		
+		Bean value = new Bean(type);
+		value.put("ID", new BigDecimal(1));
+		value.put("NAME", "Hugo Boss im Vector");
+		
+		write(value);
+		
+		Bean result = (Bean)read();
+		
+		Assert.assertEquals(StringUtil.toString(value), StringUtil.toString(result));
+
+		value = new Bean();
+        
+        write(value);
+        result = (Bean)read();
+	}
+	
+	/**
+	 * Tests custom bean class.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testCustomBean() throws Exception
+	{
+		CustomBean value = new CustomBean();
+		value.setVName("Vertical Name is set!");
+		value.put("ID", new BigDecimal(1));
+		value.put("NAME", "Hugo Boss im Vector");
+		
+		write(value);
+		
+		CustomBean result = (CustomBean)read();
+		
+		Assert.assertEquals(StringUtil.toString(value), StringUtil.toString(result));
+		
+		result.put("COUNT", Integer.valueOf(100));
+		
+		write(value);
+		
+		result = (CustomBean)read();
+		
+		Assert.assertEquals(StringUtil.toString(value), StringUtil.toString(result));
+	}
+	
+	/**
+	 * Test HashMap.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testHashMap() throws Exception
+	{
+		HashMap value = new HashMap();
+		value.put(Integer.valueOf(1), "Hugo Boss im Vector");
+		value.put("KEY", Integer.valueOf(5));
+		
+		ColumnMetaData cmdata = new ColumnMetaData("COLUMN");
+		cmdata.setLabel("Column");
+		
+		value.put(Integer.valueOf(2), cmdata);
+		
+		write(value);
+		
+		HashMap result = (HashMap)read();
+		
+		Assert.assertEquals(StringUtil.toString(value), StringUtil.toString(result));
+	}
+	
+	/**
+	 * Test Properties.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testProperties() throws Exception
+	{
+		Properties value = new Properties();
+		value.put(Integer.valueOf(1), "Hugo Boss im Vector");
+		value.put("KEY", Integer.valueOf(5));
+		
+		ColumnMetaData cmdata = new ColumnMetaData("COLUMN");
+		cmdata.setLabel("Column");
+		
+		value.put(Integer.valueOf(2), cmdata);
+		
+		write(value);
+		
+		Properties result = (Properties)read();
+		
+		Assert.assertEquals(StringUtil.toString(value), StringUtil.toString(result));
+	}
+	
+	/**
+	 * Test Properties.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testSerializableArray() throws Exception
+	{
+		ColumnMetaData cmdataEins = new ColumnMetaData("EINS");
+		cmdataEins.setLabel("Eins");
+
+		ColumnMetaData cmdataZwei = new ColumnMetaData("ZWEI");
+		cmdataZwei.setLabel("Zwei");
+		
+		
+		ColumnMetaData[] array = new ColumnMetaData[] {cmdataEins, cmdataZwei};
+
+		write(array);
+		
+		ColumnMetaData[] result = (ColumnMetaData[])read();
+
+		Assert.assertEquals(StringUtil.toString(array), StringUtil.toString(result));
+	}
+	
+	/**
+	 * Test a multi dimensional object array with sub arrays of different types.
+	 * 
+	 * @throws Exception if the serialization fails
+	 */
+	@Test
+	public void testMultObjectArray() throws Exception
+	{
+		Object[] objArr = new Object[4];
+
+		int[] iArr = new int[3];
+
+		String[] sArr = new String[1];
+
+		BigDecimal[] dArr = new BigDecimal[1];
+
+		float[] fArr = new float[1];
+
+		
+		iArr[0] = 1;
+		iArr[1] = 120;
+		iArr[2] = 123456789;
+
+		sArr[0] = "Element - 0";
+		
+		dArr[0] = new BigDecimal(1231);
+		
+		fArr[0] = 0.5f;
+
+		objArr[0] = iArr;
+		objArr[1] = sArr;
+		objArr[2] = dArr;
+		objArr[3] = fArr;
+		
+
+		write(objArr);
+		
+		Object[] objOut = (Object[])read();
+
+		Assert.assertNotNull(objOut);
+		Assert.assertTrue(objOut.getClass() == Object[].class);
+		Assert.assertEquals(objArr.length, objOut.length);
+		Assert.assertTrue("Not an int[]", objOut[0].getClass() == int[].class);
+		Assert.assertTrue("Not a String[]", objOut[1].getClass() == String[].class);
+		Assert.assertTrue("Not a BigDecimal[]", objOut[2].getClass() == BigDecimal[].class);
+		Assert.assertTrue("Not a float[]", objOut[3].getClass() == float[].class);
+	}
+
+	/**
+	 * Tests if the init() call of the serializer works.
+	 * 
+	 * @throws Throwable if the init() not works as expected
+	 */
+	@Test
+	public void testInit() throws Throwable
+	{
+		Throwable thError = null;
+
+		UniversalSerializer uniser = new UniversalSerializer();
+		
+		IConnection con = new VMConnection(uniser);
+		
+		ConnectionInfo coninfo = new ConnectionInfo();
+		
+		
+		coninfo.getProperties().put(IConnectionConstants.APPLICATION, "demo");
+		coninfo.getProperties().put(IConnectionConstants.USERNAME, "rene");
+		coninfo.getProperties().put(IConnectionConstants.PASSWORD, "rene");
+
+		System.setProperty(IPackageSetup.CONFIG_BASEDIR, new File("").getAbsolutePath());
+		
+		try
+		{
+			con.open(coninfo);
+			
+			ColumnMetaData cmdIn = new ColumnMetaData("COLUMN-A");
+			
+			con.call(coninfo, new String[] {null}, new String[] {"getMetaData"}, new Object[][] {{cmdIn}}, null);
+			con.call(coninfo, new String[] {null}, new String[] {"getMetaData"}, new Object[][] {{cmdIn}}, null);
+			con.call(coninfo, new String[] {null}, new String[] {"getMetaData"}, new Object[][] {{cmdIn}}, null);
+			
+			con.close(coninfo);
+
+			//without reset of serializer the serialization will fail because the BeanType cache is wrong!
+			con.open(coninfo);
+			
+			con.call(coninfo, new String[] {null}, new String[] {"getMetaData"}, new Object[][] {{cmdIn}}, null);
+			con.call(coninfo, new String[] {null}, new String[] {"getMetaData"}, new Object[][] {{cmdIn}}, null);
+			con.call(coninfo, new String[] {null}, new String[] {"getMetaData"}, new Object[][] {{cmdIn}}, null);
+		}
+		catch (Throwable th)
+		{
+			thError = th;
+		}
+		finally
+		{
+			try
+			{
+				con.close(coninfo);
+			}
+			catch (Throwable th)
+			{
+				if (thError == null)
+				{
+					thError = th;
+				}
+			}
+			
+			if (thError != null)
+			{
+				throw thError;
+			}
+		}
+	}
+
+	/**
+	 * Tests enum serialization.
+	 * 
+	 * @throws Exception if serialization fails
+	 */
+	@Test
+	public void testEnum() throws Exception
+	{
+		write(EnumTest.String);
+		
+		Object oEnum = read();
+	
+		Assert.assertEquals(EnumTest.String, oEnum);
+		Assert.assertSame(EnumTest.String, oEnum);
+	}
+
+	/**
+	 * Tests MetaData' {@link Feature} serialization.
+	 * 
+	 * @throws Exception if serialization fails
+	 */
+	@Test
+	public void testMetaData() throws Exception
+	{
+		MetaData mdata = new MetaData();
+		mdata.setFeatures(Feature.WriteBack);
+		
+		write(mdata);
+		
+		mdata = (MetaData)read();
+		
+		Assert.assertTrue(ArrayUtil.contains(mdata.getFeatures(), Feature.WriteBack));
+		Assert.assertFalse(ArrayUtil.contains(mdata.getFeatures(), Feature.Sort));
+		Assert.assertFalse(ArrayUtil.contains(mdata.getFeatures(), Feature.Filter));
+	}
+
+	/**
+	 * Tests serialization of Not. Ticket 881.
+	 * 
+	 * @throws Exception if serialization fails
+	 */
+	@Test
+	public void testSerializeNot() throws Exception
+	{
+		Not not = new Not(new Equals("COLUMN", "G"));
+		
+		write(not);
+		
+		not = (Not)read();
+	}
+	
+	/**
+	 * Tests serialization of Not. Ticket 881.
+	 * 
+	 * @throws Exception if serialization fails
+	 */
+	@Test
+	public void testXmlNode() throws Exception
+	{
+		XmlNode main = new XmlNode("main");
+		main.add(new XmlNode("test"));
+		main.add(new XmlNode("test"));
+		main.add(new XmlNode("footer"));
+		
+		XmlNode root = XmlNode.createXmlDeclaration();
+		root.add(main);
+		
+		write(root);
+		
+		XmlNode result = (XmlNode)read();
+		
+		Assert.assertEquals(root.toString(), result.toString());
+	}
+
+    /**
+     * Tests serialization with transient fields. Ticket 881.
+     * 
+     * @throws Exception if serialization fails
+     */
+    @Test
+    public void testTransient() throws Exception
+    {
+        Bean bean = new Bean();
+        bean.put("A", "A");
+        bean.put("B", "B");
+        bean.getBeanType().getPropertyDefinition(1).setTransient(true);
+
+        write(bean);
+        Bean resBean = (Bean)read();
+
+        Pojo1 p1 = new Pojo1();
+        p1.setA("A");
+        p1.setB("B");
+        
+        write(p1);
+        Pojo1 resP1 = (Pojo1)read();
+
+        Pojo2 p2 = new Pojo2();
+        p2.setA("A");
+        p2.setB("B");
+        
+        write(p2);
+        Pojo2 resP2 = (Pojo2)read();
+
+        Pojo3 p3 = new Pojo3();
+        p3.setA("A");
+        p3.setB("B");
+        
+        write(p3);
+        Pojo3 resP3 = (Pojo3)read();
+
+        Pojo4 p4 = new Pojo4();
+        p4.setA("A");
+        p4.setB("B");
+        
+        write(p4);
+        Pojo4 resP4 = (Pojo4)read();
+
+        Assert.assertNotNull(resBean.get("A"));
+        Assert.assertNull(resBean.get("B"));
+
+        Assert.assertNotNull(resP1.getA());
+        Assert.assertNull(resP1.getB());
+        Assert.assertFalse(resP1.isBSet());
+
+        Assert.assertNotNull(resP2.getA());
+        Assert.assertNull(resP2.getB());
+        Assert.assertFalse(resP2.isBSet());
+
+        Assert.assertNotNull(resP3.getA());
+        Assert.assertNull(resP3.getB());
+        Assert.assertFalse(resP3.isBSet());
+
+        Assert.assertNotNull(resP4.getA());
+        Assert.assertNull(resP4.getB());
+        Assert.assertFalse(resP4.isBSet());
+    }
+	
+    /**
+     * Tests enum serialization.
+     * 
+     * @throws Exception if serialization fails
+     */
+    @Test
+    public void testImmutableTimestamp() throws Exception
+    {
+        TimeZone tz = TimeZone.getTimeZone(TimeZone.getAvailableIDs()[57]);
+        Locale   l  = Locale.getAvailableLocales()[17];
+        
+        ImmutableTimestamp ts1 = new ImmutableTimestamp(System.currentTimeMillis());
+        ImmutableTimestamp ts2 = new ImmutableTimestamp(System.currentTimeMillis(), tz);
+
+        write(tz);
+        TimeZone rtz = (TimeZone)read();
+        
+        write(l);
+        Locale rl = (Locale)read();
+        
+        write(ts1);
+        ImmutableTimestamp rts1 = (ImmutableTimestamp)read();
+    
+        write(ts2);
+        ImmutableTimestamp rts2 = (ImmutableTimestamp)read();
+
+        boolean x = tz.equals(rtz);
+        
+        Assert.assertEquals(tz,  rtz);
+        Assert.assertEquals(l,   rl);
+        Assert.assertEquals(ts1, rts1);
+        Assert.assertEquals(false, rts1.isTimeZoneSet());
+        Assert.assertEquals(ts2, rts2);
+        Assert.assertEquals(true, rts2.isTimeZoneSet());
+    }
+
+	
+    //****************************************************************
+    // Subclass definition
+    //****************************************************************	
+	
+	/**
+	 * A simple {@link Bean} extension.
+	 * 
+	 * @author René Jahn
+	 */
+	public static class CustomBean extends Bean
+	{
+		/**
+		 * Creates a new instance of <code>CustomBean</code>.
+		 */
+		public CustomBean()
+		{
+		}
+		
+		/**
+		 * Sets the V name.
+		 * 
+		 * @param pName the name
+		 */
+		public void setVName(String pName)
+		{
+			put("VNAME", pName);
+		}
+		
+		/**
+		 * Gets the V name.
+		 * 
+		 * @return the name
+		 */
+		public String getVName()
+		{
+			return (String)get("VNAME");
+		}
+		
+	}	// CustomBean
+
+    /**
+     * A pojo.
+     * 
+     * @author Martin Handsteiner
+     */
+    public static class Pojo1
+    {
+        /** field a. */
+        private String a;
+        /** field b. */
+        private String b;
+        /** if b is set. */
+        boolean bIsSet = false;
+        
+        /**
+         * Gets a.
+         * @return a
+         */
+        public String getA()
+        {
+            return a;
+        }
+        
+        /**
+         * Sets a.
+         * @param pA the a
+         */
+        public void setA(String pA)
+        {
+            a = pA;
+        }
+        
+        /**
+         * Gets b.
+         * @return the b
+         */
+        public String getB()
+        {
+            return b;
+        }
+        
+        /**
+         * Sets b.
+         * @param pB the b
+         */
+        @Transient
+        public void setB(String pB)
+        {
+            b = pB;
+            bIsSet = true;
+        }
+        
+        /**
+         * Gets whether b is set.
+         * @return whether b is set.
+         */
+        public boolean isBSet()
+        {
+            return bIsSet;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString()
+        {
+            return "{A=" + getA() + ", B=" + getB() + "}";
+        }
+        
+    }   // Pojo1
+
+    /**
+     * A pojo.
+     * 
+     * @author Martin Handsteiner
+     */
+    public static class Pojo2
+    {
+        /** field a. */
+        private String a;
+        /** field b. */
+        private String b;
+        /** if b is set. */
+        boolean bIsSet = false;
+        
+        /**
+         * Gets a.
+         * @return a
+         */
+        public String getA()
+        {
+            return a;
+        }
+        
+        /**
+         * Sets a.
+         * @param pA the a
+         */
+        public void setA(String pA)
+        {
+            a = pA;
+        }
+        
+        /**
+         * Gets b.
+         * @return the b
+         */
+        @Transient
+        public String getB()
+        {
+            return b;
+        }
+        
+        /**
+         * Sets b.
+         * @param pB the b
+         */
+        public void setB(String pB)
+        {
+            b = pB;
+            bIsSet = true;
+        }
+        
+        /**
+         * Gets whether b is set.
+         * @return whether b is set.
+         */
+        public boolean isBSet()
+        {
+            return bIsSet;
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString()
+        {
+            return "{A=" + getA() + ", B=" + getB() + "}";
+        }
+        
+    }   // Pojo2
+
+    /**
+     * A pojo.
+     * 
+     * @author Martin Handsteiner
+     */
+    public static class Pojo3
+    {
+        /** field a. */
+        private String a;
+        /** field b. */
+        private transient String b;
+        /** if b is set. */
+        boolean bIsSet = false;
+        
+        /**
+         * Gets a.
+         * @return a
+         */
+        public String getA()
+        {
+            return a;
+        }
+        
+        /**
+         * Sets a.
+         * @param pA the a
+         */
+        public void setA(String pA)
+        {
+            a = pA;
+        }
+        
+        /**
+         * Gets b.
+         * @return the b
+         */
+        public String getB()
+        {
+            return b;
+        }
+        
+        /**
+         * Sets b.
+         * @param pB the b
+         */
+        public void setB(String pB)
+        {
+            b = pB;
+            bIsSet = true;
+        }
+        
+        /**
+         * Gets whether b is set.
+         * @return whether b is set.
+         */
+        public boolean isBSet()
+        {
+            return bIsSet;
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString()
+        {
+            return "{A=" + getA() + ", B=" + getB() + "}";
+        }
+        
+    }   // Pojo3
+
+    /**
+     * A pojo.
+     * 
+     * @author Martin Handsteiner
+     */
+    public static class Pojo4
+    {
+        /** field a. */
+        private String sA;
+        /** field b. */
+        private transient String sB;
+        /** if b is set. */
+        boolean bIsSet = false;
+        
+        /**
+         * Gets a.
+         * @return a
+         */
+        public String getA()
+        {
+            return sA;
+        }
+        
+        /**
+         * Sets a.
+         * @param pA the a
+         */
+        public void setA(String pA)
+        {
+            sA = pA;
+        }
+        
+        /**
+         * Gets b.
+         * @return the b
+         */
+        public String getB()
+        {
+            return sB;
+        }
+        
+        /**
+         * Sets b.
+         * @param pB the b
+         */
+        public void setB(String pB)
+        {
+            sB = pB;
+            bIsSet = true;
+        }
+        
+        /**
+         * Gets whether b is set.
+         * @return whether b is set.
+         */
+        public boolean isBSet()
+        {
+            return bIsSet;
+        }
+        
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public String toString()
+        {
+            return "{A=" + getA() + ", B=" + getB() + "}";
+        }
+        
+    }   // Pojo4
+
+} 	// TestUniversalSerializer
+

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+  <datasource>
+    <name>zero</name>
+    <class>com.sibvisions.ds.Index0</class>
+  </datasource>
+  <datasource>
+    <class>com.sibvisions.ds.Index1</class>
+    <name>one</name>
+  </datasource>
+  <datasource>
+    <class>com.sibvisions.ds.Index2</class>
+    <name>two</name>
+  </datasource>
+</application>

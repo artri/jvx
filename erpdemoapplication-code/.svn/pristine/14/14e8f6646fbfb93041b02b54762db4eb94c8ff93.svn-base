@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+  <!--
+  **************************************************************************
+  Context configuration
+  **************************************************************************
+  -->
+  <display-name>DemoERP</display-name>
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+  <context-param>
+    <description>Vaadin production mode</description>
+    <param-name>productionMode</param-name>
+    <param-value>true</param-value>
+  </context-param>
+  <!--
+  **************************************************************************
+  JVx configuration
+  **************************************************************************
+  -->
+  <!-- Servlet for accessing the JVx server through http(s) streaming protocol. -->
+  <servlet>
+    <servlet-name>ServletServer</servlet-name>
+    <servlet-class>com.sibvisions.rad.server.http.ServletServer</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>ServletServer</servlet-name>
+    <url-pattern>/services/Server</url-pattern>
+  </servlet-mapping>
+  <!-- Servlet for downloading content (reports, csv export, any binary data). -->
+  <servlet>
+    <servlet-name>DownloadServlet</servlet-name>
+    <servlet-class>com.sibvisions.rad.server.http.DownloadServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>DownloadServlet</servlet-name>
+    <url-pattern>/services/Download</url-pattern>
+  </servlet-mapping>
+  <!-- Servlet for uploading content (images, import files, any binary data). -->
+  <servlet>
+    <servlet-name>UploadServlet</servlet-name>
+    <servlet-class>com.sibvisions.rad.server.http.UploadServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>UploadServlet</servlet-name>
+    <url-pattern>/services/Upload</url-pattern>
+  </servlet-mapping>
+  <!-- JNLP customizing -->
+  <filter>
+    <filter-name>JnlpFilter</filter-name>
+    <filter-class>com.sibvisions.apps.server.http.JnlpFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>JnlpFilter</filter-name>
+    <url-pattern>*.jnlp</url-pattern>
+  </filter-mapping>
+  <!-- Online Help integration. -->
+  <servlet>
+    <servlet-name>HelpRedirector</servlet-name>
+    <servlet-class>com.sibvisions.rad.help.UIRedirectorServlet</servlet-class>
+  </servlet>
+  <servlet>
+    <servlet-name>JVxOnlineHelpUI</servlet-name>
+    <servlet-class>com.vaadin.server.VaadinServlet</servlet-class>
+    <init-param>
+      <param-name>UI</param-name>
+      <param-value>com.sibvisions.rad.help.JVxOnlineHelpUI</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>HelpRedirector</servlet-name>
+    <url-pattern>/help/index.html</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>JVxOnlineHelpUI</servlet-name>
+    <url-pattern>/help/ui/*</url-pattern>
+  </servlet-mapping>
+  <servlet-mapping>
+    <servlet-name>JVxOnlineHelpUI</servlet-name>
+    <url-pattern>/VAADIN/*</url-pattern>
+  </servlet-mapping>
+  <!--
+  **************************************************************************
+  WebUI configuration
+  **************************************************************************
+  -->
+  <servlet>
+    <servlet-name>VaadinUI</servlet-name>
+    <servlet-class>com.sibvisions.rad.ui.vaadin.server.VaadinServlet</servlet-class>
+    <init-param>
+      <param-name>UI</param-name>
+      <param-value>com.sibvisions.rad.ui.vaadin.impl.VaadinUI</param-value>
+    </init-param>
+    <init-param>
+      <param-name>widgetset</param-name>
+      <param-value>com.sibvisions.rad.ui.vaadin.ext.ui.Widgetset</param-value>
+    </init-param>
+    <init-param>
+      <param-name>main</param-name>
+      <param-value>com.sibvisions.apps.projx.ProjX</param-value>
+    </init-param>
+    <init-param>
+      <param-name>config</param-name>
+      <param-value>/com/sibvisions/apps/demoerp/application.xml</param-value>
+    </init-param>
+    <init-param>
+      <param-name>Application.setup.classname</param-name>
+      <param-value>com.sibvisions.apps.vaadin.web.WebApplicationSetup</param-value>
+    </init-param>
+    <init-param>
+      <param-name>Launcher.uifactory</param-name>
+      <param-value>com.sibvisions.rad.ui.vaadin.impl.VaadinChartFactory</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>VaadinUI</servlet-name>
+    <url-pattern>/web/ui/*</url-pattern>
+  </servlet-mapping>
+  <!--
+  **************************************************************************
+  Mobile configuration
+  **************************************************************************
+  -->
+  <servlet>
+    <servlet-name>MobileServlet</servlet-name>
+    <servlet-class>com.sibvisions.rad.server.http.rest.ServerServlet</servlet-class>
+    <init-param>
+      <!-- Application class name -->
+      <param-name>org.restlet.application</param-name>
+      <param-value>com.sibvisions.rad.server.http.rest.MobileApplicationAdapter</param-value>
+    </init-param>
+    <init-param>
+      <param-name>session-timeout</param-name>
+      <param-value>15</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>MobileServlet</servlet-name>
+    <url-pattern>/services/mobile/*</url-pattern>
+  </servlet-mapping>
+  <listener>
+    <listener-class>com.sibvisions.rad.server.http.rest.SessionListener</listener-class>
+  </listener>
+  <!--
+  **************************************************************************
+  REST
+  **************************************************************************
+  -->
+  <servlet>
+    <servlet-name>RestletServlet</servlet-name>
+    <servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
+    <init-param>
+      <!-- Application class name -->
+      <param-name>org.restlet.application</param-name>
+      <param-value>com.sibvisions.rad.server.http.rest.RESTAdapter</param-value>
+    </init-param>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>RestletServlet</servlet-name>
+    <url-pattern>/services/rest/*</url-pattern>
+  </servlet-mapping>
+  <!--
+  **************************************************************************
+  Special mime-type mappings
+  **************************************************************************
+  -->
+  <!-- Mime type for csv export. -->
+  <mime-mapping>
+    <extension>csv</extension>
+    <mime-type>application/vnd.ms-excel</mime-type>
+  </mime-mapping>
+</web-app>

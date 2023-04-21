@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<jnlp
+  spec="1.0+"
+  codebase="http://localhost:8080/jvxfirstapp/">
+  <information>
+    <title>JVx First App</title>
+    <vendor>SIB Visions GmbH</vendor>
+    <description>First JVx application</description>
+    <description kind="short">JVx First App</description>
+  </information>
+
+  <resources>
+    <j2se version="1.5+"/> 
+    <jar href="jvxfirstapp_signed.jar" main="true"/>
+  </resources>
+  
+  <security>
+    <all-permissions/>
+  </security>
+  
+  <application-desc main-class="com.sibvisions.rad.ui.swing.impl.SwingApplication">
+    <argument>"apps.firstapp.FirstApplication"</argument>
+    <argument>"/apps/firstapp/application.xml"</argument>
+	<argument>"Application.serverbase=http://localhost:8080/jvxfirstapp/"</argument>
+	<argument>"Application.connectionClass=com.sibvisions.rad.remote.http.HttpConnection"</argument>
+	<argument>"Application.Menu.exit.visible=true"</argument>
+  </application-desc> 
+</jnlp> 

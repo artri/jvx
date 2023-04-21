@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jnlp spec="1.0+" codebase="http://localhost:8080/JVx.Server/">
+    <information>
+        <title>Dialog Test</title>
+        <vendor>VisionX</vendor>
+        <description>Dialog Test Application</description>
+        <description kind="short">Dialog Test</description>
+    </information>
+    
+    <resources>
+        <j2se version="1.5+" java-vm-args="-Xms512m -Xmx1024m"/>
+
+        <jar href="demoapp.jar" main="true"/>
+    </resources>
+    
+    <security>
+        <all-permissions/>
+    </security>
+    
+    <application-desc main-class="javax.rad.application.DialogTestApplication">
+    </application-desc>
+    
+</jnlp>

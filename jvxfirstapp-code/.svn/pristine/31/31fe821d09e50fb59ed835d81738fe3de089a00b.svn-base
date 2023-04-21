@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<jnlp
+  spec="1.0+"
+  codebase="http://localhost:8080/jvxfirstapp/">
+  <information>
+    <title>JVx First App</title>
+    <vendor>SIB Visions GmbH</vendor>
+    <description>First JVx application</description>
+    <description kind="short">JVx First App</description>
+  </information>
+
+  <resources>
+    <j2se version="1.5+" java-vm-args="-Xmx256M"/> 
+    <!-- first library should contain the main class -->
+    <jar href="jvxfirstapp_signed.jar" main="true"/>
+  </resources>
+  
+  <security>
+    <all-permissions/>
+  </security>
+  
+  <applet-desc
+    documentbase="http://localhost:8080/jvxfirstapp/"
+    name="JVx First App"
+    main-class="com.sibvisions.rad.ui.swing.impl.SwingApplet"
+    width="1024"
+    height="768">
+    <param name="main"                          value = "apps.firstapp.FirstApplication"/>
+    <param name="config"                        value = "/apps/firstapp/application.xml"/>
+	<param name="Application.connectionClass"   value = "com.sibvisions.rad.remote.http.HttpConnection"/>
+	<param name="Application.Menu.exit.visible" value = "true"/>
+  </applet-desc> 
+</jnlp> 

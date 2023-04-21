@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+
+<server>  
+  <timeout>
+    <!-- MasterSession timeout in minutes -->
+    <mastersession>60</mastersession>
+    <!-- SubSession timeout in minutes -->
+    <subsession>60</subsession>
+  </timeout>
+  
+  <!-- ON | OFF -->
+  <globalmetadatacache>OFF</globalmetadatacache>  
+</server>

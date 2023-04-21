@@ -1,0 +1,539 @@
+/*
+ * Copyright 2014 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 18.03.2014 - [TL] - creation
+ */
+package com.sibvisions.rad.ui.web.impl.layout;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import javax.rad.ui.IComponent;
+import javax.rad.ui.IInsets;
+import javax.rad.ui.layout.IGridLayout;
+
+import com.sibvisions.rad.ui.web.impl.IWebContainer;
+import com.sibvisions.rad.ui.web.impl.WebInsets;
+import com.sibvisions.rad.ui.web.impl.WebLayout;
+import com.sibvisions.rad.ui.web.impl.WebResource;
+import com.sibvisions.util.type.CommonUtil;
+
+/**
+ * Web server implementation of {@link IGridLayout}.
+ * 
+ * @author Thomas Lehner
+ */
+public class WebGridLayout extends WebLayout<IGridLayout.IGridConstraints> 
+						   implements IGridLayout
+{
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/** Stores all constraints. */
+	private final Map<IComponent, CellConstraints>	constraintMap;
+
+	/** the layout margins. */
+	private IInsets									margins	= new WebInsets(0, 0, 0, 0);
+
+	/** The number of rows. */
+	private int										rows	= 0;
+
+	/** The number of columns. */
+	private int										columns	= 0;
+
+	/** the horizontal gap between components. */
+	private int										horizontalGap;
+
+	/** the vertical gap between components. */
+	private int										verticalGap;
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Constructs a new GridLayout.
+	 * 
+	 * @param pColumns the column count
+	 * @param pRows the row count
+	 */
+	public WebGridLayout(int pColumns, int pRows)
+	{
+		setRows(pRows);
+		setColumns(pColumns);
+
+		constraintMap = new HashMap<IComponent, CellConstraints>();
+	}
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Abstract methods implementation
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected String getData(IWebContainer pContainer)
+	{
+		return null;
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Interface implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IGridConstraints getConstraints(IComponent pComponent)
+	{
+		return constraintMap.get(pComponent);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setConstraints(IComponent pComponent, IGridConstraints pConstraints)
+	{
+		super.setConstraints(pComponent, pConstraints);
+		
+		if (pConstraints == null)
+		{
+			constraintMap.remove(pComponent);
+		}
+		else
+		{
+			constraintMap.put(pComponent, (CellConstraints)pConstraints);
+		}
+		
+        markChanged();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebInsets getMargins()
+	{
+		return (WebInsets)margins;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setMargins(IInsets pMargins)
+	{
+		IInsets old = margins;
+		
+		if (pMargins == null)
+		{
+			margins = new WebInsets(0, 0, 0, 0);
+		}
+		else
+		{
+			margins = pMargins;
+		}
+		
+		if (!CommonUtil.equals(old, margins))
+		{
+			markChanged();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getHorizontalGap()
+	{
+		return horizontalGap;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setHorizontalGap(int pHorizontalGap)
+	{
+		int old = horizontalGap;
+		
+		horizontalGap = pHorizontalGap;
+		
+		if (old != horizontalGap)
+		{
+			markChanged();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getVerticalGap()
+	{
+		return verticalGap;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setVerticalGap(int pVerticalGap)
+	{
+		int old = verticalGap;
+		
+		verticalGap = pVerticalGap;
+		
+		if (old != verticalGap)
+		{
+			markChanged();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IGridConstraints getConstraints(int pColumns, int pRows)
+	{
+		return new CellConstraints(pColumns, pRows);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IGridConstraints getConstraints(int pColumns, int pRows, int pWidth, int pHeight)
+	{
+		return new CellConstraints(pColumns, pRows, pWidth, pHeight);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IGridConstraints getConstraints(int pColumns, int pRows, int pWidth, int pHeight, IInsets insets)
+	{
+		return new CellConstraints(pColumns, pRows, pWidth, pHeight, (WebInsets)insets);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setColumns(int pColumns)
+	{
+		int old = columns;
+		
+		columns = pColumns;
+		
+		if (old != columns)
+		{
+			markChanged();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getColumns()
+	{
+		return columns;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setRows(int pRows)
+	{
+		int old = rows;
+		
+		rows = pRows;
+		
+		if (old != rows)
+		{
+			markChanged();
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getRows()
+	{
+		return rows;
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Overwritten methods
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * {@inheritDoc}
+	 */
+    public String getAsString()
+    {
+        int targetColumns = columns;
+        int targetRows = rows;
+
+        for (Map.Entry<IComponent, CellConstraints> entry : constraintMap.entrySet())
+        {
+            IComponent component = entry.getKey();
+            
+            if (component.isVisible())
+            {
+                CellConstraints constraints = entry.getValue();
+                
+                if (columns <= 0 && constraints.gridX + constraints.gridWidth > targetColumns)
+                {
+                    targetColumns = constraints.gridX + constraints.gridWidth;
+                }
+                if (rows <= 0 && constraints.gridY + constraints.gridHeight > targetRows)
+                {
+                    targetRows = constraints.gridY + constraints.gridHeight;
+                }
+            }
+        }
+        
+    	return super.getAsString() + "," + targetRows + "," + targetColumns;
+    }	
+
+	//****************************************************************
+	// Subclass definition
+	//****************************************************************
+
+	/**
+	 * The CellConstraint stores the X and Y position, the Width and Height and
+	 * the insets of the component.
+	 * 
+	 * @author Thomas Lehner
+	 */
+	public static class CellConstraints extends WebResource 
+	                                    implements Cloneable, 
+	                                               IGridLayout.IGridConstraints
+	{
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Class members
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	    
+		/** Empty insets. */
+		private static final WebInsets	EMPTY_INSETS	= new WebInsets(0, 0, 0, 0);
+
+		/** The position on the x-axis. */
+		private int						gridX;
+
+		/** The position on the y-axis. */
+		private int						gridY;
+
+		/** The width of the component. */
+		private int						gridWidth;
+
+		/** The height of the component. */
+		private int						gridHeight;
+
+		/** The specified insets of the component. */
+		private WebInsets				insets;
+
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Initialization
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+		/**
+		 * Creates a new instance of <code>CellConstraints</code>.
+		 */
+		public CellConstraints()
+		{
+			this(0, 0);
+		}
+
+		/**
+		 * Constructs a new CellConstraint with the given parameters.
+		 * 
+		 * @param pGridX the position on the x-axis
+		 * @param pGridY the position on the y-axis
+		 */
+		public CellConstraints(int pGridX, int pGridY)
+		{
+			this(pGridX, pGridY, 1, 1, EMPTY_INSETS);
+		}
+
+		/**
+		 * Creates a new instance of <code>CellConstraints</code> with given
+		 * parameters.
+		 * 
+		 * @param pGridX the position on the x-axis
+		 * @param pGridY the position on the y-axis
+		 * @param pWidth the width of the component
+		 * @param pHeight the height of the component
+		 */
+		public CellConstraints(int pGridX, int pGridY, int pWidth, int pHeight)
+		{
+			this(pGridX, pGridY, pWidth, pHeight, EMPTY_INSETS);
+		}
+
+		/**
+		 * Constructs a new CellConstraint with the given parameters.
+		 * 
+		 * @param pGridX the position on the x-axis
+		 * @param pGridY the position on the y-axis
+		 * @param pWidth the width of the component
+		 * @param pHeight the height of the component
+		 * @param pInsets the specified insets
+		 */
+		public CellConstraints(int pGridX, int pGridY, int pWidth, int pHeight, WebInsets pInsets)
+		{
+			if (pGridX < 0)
+			{
+				throw new IndexOutOfBoundsException("The grid x must be a positive number.");
+			}
+
+			if (pGridY < 0)
+			{
+				throw new IndexOutOfBoundsException("The grid y must be a positive number.");
+			}
+
+			if (pWidth <= 0)
+			{
+				throw new IndexOutOfBoundsException("The grid width must be a positive number.");
+			}
+
+			if (pHeight <= 0)
+			{
+				throw new IndexOutOfBoundsException("The grid height must be a positive number.");
+			}
+
+			gridX = pGridX;
+			gridY = pGridY;
+			gridWidth = pWidth;
+			gridHeight = pHeight;
+			insets = pInsets;
+		}
+
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Interface implementation
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public int getGridX()
+		{
+			return gridX;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public int getGridY()
+		{
+			return gridY;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public int getGridWidth()
+		{
+			return gridWidth;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public int getGridHeight()
+		{
+			return gridHeight;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public WebInsets getInsets()
+		{
+			return insets;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setGridX(int pGridX)
+		{
+			gridX = pGridX;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setGridY(int pGridY)
+		{
+			gridY = pGridY;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setGridHeight(int pGridHeight)
+		{
+			gridHeight = pGridHeight;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setGridWidth(int pGridWidth)
+		{
+			gridWidth = pGridWidth;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void setInsets(IInsets pInsets)
+		{
+			insets = (WebInsets)pInsets;
+		}
+
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Overwritten methods
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public Object clone()
+		{
+			try
+			{
+				CellConstraints c = (CellConstraints)super.clone();
+				c.insets = (WebInsets)insets.clone();
+
+				return c;
+			}
+			catch (CloneNotSupportedException e)
+			{
+				// This shouldn't happen, since we are Cloneable.
+				throw new InternalError();
+			}
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		@Override
+		public String getAsString()
+		{
+			return gridX + ";" + gridY + ";" + gridWidth + ";" + gridHeight + ";" + insets.getAsString();
+		}
+		
+	}	// CellConstraints
+	
+}	//WebGridLayout

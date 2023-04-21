@@ -1,0 +1,104 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 26.11.2009 - [HM] - creation
+ */
+package com.sibvisions.rad.ui.web.impl.layout;
+
+import javax.rad.ui.IComponent;
+import javax.rad.ui.IContainer;
+import javax.rad.ui.layout.IBorderLayout;
+
+import com.sibvisions.rad.ui.web.impl.IWebContainer;
+import com.sibvisions.rad.ui.web.impl.WebComponent;
+import com.sibvisions.rad.ui.web.impl.WebLayout;
+
+/**
+ * Web server implementation of {@link IBorderLayout}.
+ * 
+ * @author Martin Handsteiner
+ */
+public class WebBorderLayout extends WebLayout<String>
+                             implements IBorderLayout
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	  
+    /**
+     * Creates a new instance of <code>WebBorderLayout</code>.
+     *
+     * @see javax.rad.ui.layout.IBorderLayout
+     */
+	public WebBorderLayout()
+	{
+		horizontalGap = 0;
+		verticalGap = 0;
+	}
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Abstract methods implementation
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected String getData(IWebContainer pContainer)
+	{
+		return null;
+	}	
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Overwritten methods
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setConstraints(IComponent pComponent, String pConstraints)
+    {
+		IContainer parent = pComponent.getParent();
+		
+		//add and not remove
+		if (parent != null && pConstraints == null)
+		{
+			pConstraints = CENTER;
+		}
+		
+		super.setConstraints(pComponent, pConstraints);
+
+		//add
+		if (parent != null && pConstraints != null)
+		{
+			IComponent comp;
+			
+			for (int i = parent.getComponentCount() - 1; i >= 0; i--)
+			{
+				comp = parent.getComponent(i);
+				
+				if (comp != pComponent && pConstraints.equals(((WebComponent)comp).getConstraints()))
+				{
+					parent.remove(i);
+				}
+			}
+		}		
+    }
+	
+}	// WebBorderLayout

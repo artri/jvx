@@ -1,0 +1,767 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<module type="JAVA_MODULE" version="4">
+  <component name="EclipseModuleManager">
+    <conelement value="org.eclipse.jst.server.core.container/org.eclipse.jst.server.tomcat.runtimeTarget/Apache Tomcat v6.0"/>
+    <conelement value="org.eclipse.jst.j2ee.internal.web.container"/>
+    <conelement value="org.eclipse.jst.j2ee.internal.module.container"/>
+    <src_description expected_position="0">
+      <src_folder value="file://$MODULE_DIR$/src.client" expected_position="0"/>
+      <src_folder value="file://$MODULE_DIR$/src.server" expected_position="1"/>
+      <src_folder value="file://$MODULE_DIR$/test" expected_position="2"/>
+    </src_description>
+    <libelement value="jar://$MODULE_DIR$/libs/server/appserver.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/com.fasterxml.jackson.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/commons-fileupload-1.2.2.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/commons-io-2.2.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/commons-logging-1.1.3.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/db2jcc.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/db2jcc_license_cu.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/dom4j-1.6.1.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/flute-1.3.0.gg2.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/iText-4.2.0.mpl.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/iText-rtf-4.2.0.mpl.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/jtds-1.2.8.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/jvx.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/jvxhelp-server.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/jvxhelp-themes.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/jvxmobile-addons.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/jvxmobile.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/jvxvaadin-client.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/jvxvaadin-themes.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/jvxvaadincharts-server.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/jvxweb.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/oracle_12c.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/org.restlet.ext.fileupload.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/org.restlet.ext.jackson.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/org.restlet.ext.servlet.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/org.restlet.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/poi-3.9-20121203.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/poi-ooxml-3.9-20121203.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/poi-ooxml-schemas-3.9-20121203.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/projxvaadin-server.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/sac-1.3.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/sqljdbc4.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/stax-api-1.0.1.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-slf4j-jdk14-1.6.1.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/validation-api-1.0.0.GA.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/xmlbeans-2.3.0.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/zxing.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/client/appsclient.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/client/dndtabpane.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/client/jcommon-1.0.16.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/client/jfreechart-1.0.13.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/client/jvxfx.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/client/projx.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/javax.mail-1.5.4.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/fontbox-2.0.2.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/jsoup-1.8.3.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/lucene-analyzers-common-4.7.2.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/lucene-core-4.7.2.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/lucene-queryparser-4.7.2.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/pdfbox-2.0.2.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-sass-compiler-0.9.13.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/atmosphere-runtime-2.4.11.vaadin2.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/font-awesome-label-1.4.0.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/gentyref-1.2.0.vaadin1.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-charts-4.0.0.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-charts-model-4.0.0.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-client-compiled-8.1.6.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-compatibility-client-compiled-8.1.6.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-compatibility-server-8.1.6.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-compatibility-shared-8.1.6.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-compatibility-themes-8.1.6.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-context-menu-2.0.0.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-push-8.1.6.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-server-8.1.6.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-shared-8.1.6.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/vaadin-themes-8.1.6.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/postgresql-42.2.2.jre6.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/activation-1.1.1.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/org.codehaus.woodstox.stax2api.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/org.codehaus.woodstox.core.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/server/mysql-connector-java-5.1.48-bin.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/client/commons-logging-1.1.3.jar!/"/>
+    <libelement value="jar://$MODULE_DIR$/libs/client/jxmapviewer2-2.6-SNAPSHOT.jar!/"/>
+  </component>
+  <component name="FacetManager">
+    <facet type="web" name="Web">
+      <configuration>
+        <descriptors>
+          <deploymentDescriptor name="web.xml" url="file://$MODULE_DIR$/WebContent/WEB-INF/web.xml"/>
+        </descriptors>
+        <webroots>
+          <root url="file://$MODULE_DIR$/WebContent" relative="/"/>
+        </webroots>
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file://$MODULE_DIR$/build/classes"/>
+    <exclude-output/>
+    <content url="file://$MODULE_DIR$">
+      <sourceFolder url="file://$MODULE_DIR$/src.client" isTestSource="false"/>
+      <sourceFolder url="file://$MODULE_DIR$/src.server" isTestSource="false"/>
+      <sourceFolder url="file://$MODULE_DIR$/test" isTestSource="false"/>
+    </content>
+    <orderEntry type="sourceFolder" forTests="false"/>
+    <orderEntry type="inheritedJdk"/>
+    <orderEntry type="module-library">
+      <library name="libs/server/appserver.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/appserver.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/com.fasterxml.jackson.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/com.fasterxml.jackson.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/commons-fileupload-1.2.2.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/commons-fileupload-1.2.2.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/commons-io-2.2.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/commons-io-2.2.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/commons-logging-1.1.3.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/commons-logging-1.1.3.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/db2jcc.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/db2jcc.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/db2jcc_license_cu.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/db2jcc_license_cu.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/dom4j-1.6.1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/dom4j-1.6.1.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/flute-1.3.0.gg2.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/flute-1.3.0.gg2.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/iText-4.2.0.mpl.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/iText-4.2.0.mpl.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/iText-rtf-4.2.0.mpl.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/iText-rtf-4.2.0.mpl.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/jtds-1.2.8.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/jtds-1.2.8.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/jvx.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/jvx.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/jvxhelp-server.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/jvxhelp-server.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/jvxhelp-themes.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/jvxhelp-themes.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/jvxmobile-addons.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/jvxmobile-addons.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/jvxmobile.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/jvxmobile.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/jvxvaadin-client.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/jvxvaadin-client.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/jvxvaadin-themes.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/jvxvaadin-themes.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/jvxvaadincharts-server.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/jvxvaadincharts-server.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/jvxweb.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/jvxweb.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/oracle_12c.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/oracle_12c.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/org.restlet.ext.fileupload.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/org.restlet.ext.fileupload.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/org.restlet.ext.jackson.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/org.restlet.ext.jackson.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/org.restlet.ext.servlet.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/org.restlet.ext.servlet.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/org.restlet.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/org.restlet.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/poi-3.9-20121203.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/poi-3.9-20121203.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/poi-ooxml-3.9-20121203.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/poi-ooxml-3.9-20121203.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/poi-ooxml-schemas-3.9-20121203.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/poi-ooxml-schemas-3.9-20121203.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/projxvaadin-server.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/projxvaadin-server.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/sac-1.3.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/sac-1.3.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/sqljdbc4.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/sqljdbc4.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/stax-api-1.0.1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/stax-api-1.0.1.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-slf4j-jdk14-1.6.1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-slf4j-jdk14-1.6.1.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/validation-api-1.0.0.GA.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/validation-api-1.0.0.GA.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/xmlbeans-2.3.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/xmlbeans-2.3.0.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/zxing.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/zxing.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/client/appsclient.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/client/appsclient.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/client/dndtabpane.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/client/dndtabpane.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/client/jcommon-1.0.16.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/client/jcommon-1.0.16.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/client/jfreechart-1.0.13.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/client/jfreechart-1.0.13.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/client/jvxfx.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/client/jvxfx.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/client/projx.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/client/projx.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/javax.mail-1.5.4.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/javax.mail-1.5.4.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/fontbox-2.0.2.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/fontbox-2.0.2.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/jsoup-1.8.3.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/jsoup-1.8.3.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/lucene-analyzers-common-4.7.2.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/lucene-analyzers-common-4.7.2.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/lucene-core-4.7.2.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/lucene-core-4.7.2.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/lucene-queryparser-4.7.2.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/lucene-queryparser-4.7.2.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/pdfbox-2.0.2.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/pdfbox-2.0.2.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-sass-compiler-0.9.13.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-sass-compiler-0.9.13.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/atmosphere-runtime-2.4.11.vaadin2.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/atmosphere-runtime-2.4.11.vaadin2.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/font-awesome-label-1.4.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/font-awesome-label-1.4.0.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/gentyref-1.2.0.vaadin1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/gentyref-1.2.0.vaadin1.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-charts-4.0.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-charts-4.0.0.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-charts-model-4.0.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-charts-model-4.0.0.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-client-compiled-8.1.6.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-client-compiled-8.1.6.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-compatibility-client-compiled-8.1.6.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-compatibility-client-compiled-8.1.6.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-compatibility-server-8.1.6.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-compatibility-server-8.1.6.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-compatibility-shared-8.1.6.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-compatibility-shared-8.1.6.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-compatibility-themes-8.1.6.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-compatibility-themes-8.1.6.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-context-menu-2.0.0.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-context-menu-2.0.0.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-push-8.1.6.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-push-8.1.6.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-server-8.1.6.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-server-8.1.6.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-shared-8.1.6.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-shared-8.1.6.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/vaadin-themes-8.1.6.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/vaadin-themes-8.1.6.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/postgresql-42.2.2.jre6.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/postgresql-42.2.2.jre6.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/activation-1.1.1.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/activation-1.1.1.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/org.codehaus.woodstox.stax2api.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/org.codehaus.woodstox.stax2api.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/org.codehaus.woodstox.core.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/org.codehaus.woodstox.core.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/server/mysql-connector-java-5.1.48-bin.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/server/mysql-connector-java-5.1.48-bin.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/client/commons-logging-1.1.3.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/client/commons-logging-1.1.3.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library">
+      <library name="libs/client/jxmapviewer2-2.6-SNAPSHOT.jar">
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/libs/client/jxmapviewer2-2.6-SNAPSHOT.jar!/"/>
+        </CLASSES>
+        <JAVADOC/>
+        <SOURCES/>
+      </library>
+    </orderEntry>
+  </component>
+</module>

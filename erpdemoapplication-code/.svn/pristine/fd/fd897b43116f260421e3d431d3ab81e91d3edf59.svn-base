@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+    <title>DemoERP</title>
+  </head>
+  <body marginwidth="0" marginheight="0" topmargin="0" leftmargin="0" bottommargin="0" rightmargin="0" scroll="no">
+
+    <script language="JavaScript" type="text/javascript">
+    <!--
+      var attributes = {'width':'100\%', 
+                        'height':'100\%',
+                        'align':'top',
+                        'vspace':'0',
+                        'hspace':'0'}; 
+      var parameters = {'codebase':'.',
+                        'code':'com.sibvisions.rad.ui.swing.impl.SwingApplet',
+                        'archive':'DemoERP_all_signed.jar',
+                        'name':'DemoERP',
+                        'image':'vxloader.gif',
+                        'boxborder':'false',
+                        'centerimage':'true',
+                        'mayscript':'true',
+                        'scriptable':'true',
+                        'jnlp_href':'applet_signed.jnlp?install=1',
+                        'separate_jvm':'false',
+                        'main':'com.sibvisions.apps.projx.ProjX',
+                        'config':'/com/sibvisions/apps/demoerp/application.xml',
+                        'Application.connectionClass':'com.sibvisions.rad.remote.http.HttpConnection',
+                        'Application.Menu.exit.visible':'false'}; 
+
+      var doc = '<object classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" ' +
+                        'codebase="http://java.sun.com/update/1.7.0/jinstall-7u25-windows-i586.cab"';
+      for (var attribute in attributes) {
+        doc += (' ' + attribute + '="' + attributes[attribute] + '"');
+      }
+      doc += '>';
+      for (var parameter in parameters) {
+        doc += '<param name="' + parameter + '" value="' + parameters[parameter] + '">';
+      }
+      doc += '<embed type="application/x-java-applet"';
+      for (var attribute in attributes) {
+        doc += (' ' + attribute + '="' + attributes[attribute] + '"');
+      }
+      for (var parameter in parameters) {
+        doc += (' ' + parameter + '="' + parameters[parameter] + '"');
+      }
+      doc += '></embed>';
+      doc += '</object>';
+
+      document.writeln(doc);
+    //-->
+    </script>
+
+  </body>
+</html>

@@ -1,0 +1,69 @@
+<HTML>
+<HEAD>
+<link rel="icon" href="favicon.ico" type="image/x-icon">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<TITLE>Showcase Application</TITLE>
+</HEAD>
+<BODY marginwidth="0" marginheight="0" topmargin="0" leftmargin="0" bottommargin="0" rightmargin="0" scroll=no>
+<script language="JavaScript" type="text/javascript"><!--
+    var _info = navigator.userAgent;
+    var _ns = false;
+    var _ns6 = false;
+    var _ie = (_info.indexOf("MSIE") > 0 && _info.indexOf("Win") > 0 && _info.indexOf("Windows 3.1") < 0);
+    var _ie7 = (document.all && !window.opera && window.XMLHttpRequest) ? true : false ;
+//--></script>
+    <comment>
+        <script language="JavaScript" type="text/javascript"><!--
+        var _ns = (navigator.appName.indexOf("Netscape") >= 0 && ((_info.indexOf("Win") > 0 && _info.indexOf("Win16") < 0 && java.lang.System.getProperty("os.version").indexOf("3.5") < 0) || (_info.indexOf("Sun") > 0) || (_info.indexOf("Linux") > 0) || (_info.indexOf("AIX") > 0) || (_info.indexOf("OS/2") > 0) || (_info.indexOf("IRIX") > 0)));
+        var _ns6 = ((_ns == true) && (_info.indexOf("Mozilla/5") >= 0));
+//--></script>
+    </comment>
+
+<script language="JavaScript" type="text/javascript"><!--
+    if( (_ie == true)  && (_ie7 == false) )
+		document.writeln('<object classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" WIDTH = "100%" HEIGHT = "100%" NAME = "Showcase Application" ALIGN = "top" VSPACE = "0" HSPACE = "0"  codebase="http://localhost/jvx/jre-6u12-windows-i586-p.exe#Version=5,0,0,4"><noembed><xmp>');
+	else
+    if( (_ie == true)  && (_ie7 == true) )
+		document.writeln('<object classid="clsid:8AD9C840-044E-11D1-B3E9-00805F499D93" WIDTH = "100%" HEIGHT = "100%" NAME = "Showcase Application" ALIGN = "top" VSPACE = "0" HSPACE = "0"  codebase="http://localhost/jvx/jre-6u12-windows-i586-p.exe#Version=5,0,0,4"><xmp>');
+    else if (_ns == true && _ns6 == false) document.writeln('<embed ' +
+	    'type="application/x-java-applet;version=1.5" \
+            CODE = "com.sibvisions.rad.ui.swing.impl.SwingApplet" \
+            JAVA_CODEBASE = "." \
+            ARCHIVE = "jvxclient.jar, showcase.jar" \
+            NAME = "Showcase Application" \
+            WIDTH = "100%" \
+            HEIGHT = "100%" \
+            ALIGN = "top" \
+            VSPACE = "0" \
+            HSPACE = "0" \
+            MAYSCRIPT = "true" \
+            main = "com.sibvisions.apps.showcase.Showcase" \
+            config = "/com/sibvisions/apps/showcase/application.xml" \
+            Application.connectionClass = "com.sibvisions.rad.remote.http.HttpConnection" \
+            Application.Menu.exit.visible = "false"' +
+	    'scriptable="false"' +
+	    'pluginspage="http://java.sun.com/products/plugin/index.html#download"><noembed><xmp>');
+//--></script>
+<applet  CODE = "com.sibvisions.rad.ui.swing.impl.SwingApplet" JAVA_CODEBASE = "." ARCHIVE = "jvxclient.jar, showcase.jar" WIDTH = "100%" HEIGHT = "100%" NAME = "Showcase Application" ALIGN = "top" VSPACE = "0" HSPACE = "0" MAYSCRIPT = true></xmp>
+    <PARAM NAME = "CODE" VALUE = "com.sibvisions.rad.ui.swing.impl.SwingApplet" >
+    <PARAM NAME = "CODEBASE" VALUE = "." >
+    <PARAM NAME = "NAME" VALUE = "Showcase Application" >
+    <PARAM NAME = "ARCHIVE" VALUE = "jvxclient.jar, showcase.jar" >
+    <PARAM NAME = "MAYSCRIPT" VALUE = "true" >
+    <param NAME = "TYPE" VALUE = "application/x-java-applet;version=1.5">
+    <param NAME = "SCRIPTABLE" VALUE = "false">
+    <PARAM NAME = "main" VALUE = "com.sibvisions.apps.showcase.Showcase">
+    <PARAM NAME = "config" VALUE = "/com/sibvisions/apps/showcase/application.xml"> 
+    <PARAM NAME = "Application.connectionClass" VALUE = "com.sibvisions.rad.remote.http.HttpConnection">
+    <PARAM NAME = "Application.Menu.exit.visible" VALUE = "false">
+</applet>
+<script language="JavaScript" type="text/javascript"><!--
+if( _ie7 == false )
+{
+  document.writeln('</noembed>');
+}
+//--></script>
+</embed>
+</object>
+</BODY>
+</HTML>

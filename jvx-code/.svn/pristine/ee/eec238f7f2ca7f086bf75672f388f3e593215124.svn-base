@@ -1,0 +1,76 @@
+<html>
+<head>
+  <meta charset="utf-8">
+<script>
+function doRest() {
+	
+	const http = new XMLHttpRequest();
+
+	const url='http://localhost:8080/JVx.Server/services/rest/demo/Session/action/getByteArray';
+	http.open("POST", url, true);
+	http.setRequestHeader("Authorization", "Basic " + btoa("rene:rene"));
+	http.withCredentials = true;
+	http.onreadystatechange=(e)=>
+	{
+		if (http.readyState == 4)
+		{
+	  		console.log(atob(eval(http.responseText)));
+		}
+	}
+	http.send("[11772299]");
+
+/*
+	//CORS Test
+//	const url='http://localhost:8081/services/rest/ProjectsDemo/Projects/data/projects/';
+	const url='https://cloud.sibvisions.com/ProjectsDemo/services/rest/ProjectsDemo/Projects/data/projects/';
+	
+	http.open("GET", url, true);
+//	http.setRequestHeader("Authorization", "Basic " + btoa("admin:admin"));
+	http.setRequestHeader("Authorization", "Basic " + btoa("admin:admin"));
+	http.withCredentials = true;
+	
+	http.onreadystatechange=(e)=>
+	{
+		if (http.readyState == 4)
+		{
+			console.log(http.responseText);
+		}
+	}
+
+	http.send();
+*/	
+}
+
+function doOptions() {
+/*	
+	
+	//CORS Test
+	const http = new XMLHttpRequest();
+
+//	const url='http://localhost:8081/services/rest/ProjectsDemo/Projects/data/projects/';
+	const url='https://cloud.sibvisions.com/ProjectsDemo/services/rest/ProjectsDemo/Projects/data/projects/';
+	
+	http.open("OPTIONS", url, true);
+	http.setRequestHeader("Authorization", "Basic " + btoa("admin:admin"));
+	http.withCredentials = true;
+	
+	http.onreadystatechange=(e)=>
+	{
+		if (http.readyState == 4)
+		{
+			console.log(http.responseText);
+		}
+	}
+
+	http.send();
+*/	
+}
+
+</script>
+</head>
+<body>
+<button type="button" onclick="doRest()">REST call</button>
+
+<button type="button" onclick="doOptions()">REST Options call</button>
+</body>
+</html>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<server>
+  <text>
+  Hans
+    <comment>C1</comment>
+Huber
+    <comment2>C2</comment2>
+Pauli
+  </text>
+  <text2>
+      Das ist ein Text
+von Hansi Huber.
+  </text2>
+  <text3>
+      Das ist ein Text
+   von Hansi Huber.
+  </text3>
+</server>
