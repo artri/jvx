@@ -1,0 +1,67 @@
+/*
+ * Copyright 2022 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ * 
+ * 07.01.2022 - [JR] - creation
+ */
+package com.sibvisions.rad.ui.web.impl;
+
+/**
+ * The <code>IWebFieldConstants</code> defines common names of field names for internal objects. It's more or less a 
+ * central interface to find references/usages.
+ * 
+ * @author René Jahn
+ */
+public interface IWebFieldConstants 
+{
+	/** the object name. */
+	public static final String NAME 			= "#name";
+	/** the object name for the cache. */
+	public static final String NAME_CACHED		= "#name#cached";
+	
+	/** the object prefix. */
+	public static final String PREFIX 			= "#prefix";
+
+	/** the object prefix. */
+	public static final String RESTATEID 		= "#restateId";
+
+	/** properties initialized marker. */
+	public static final String INITIALIZED 		= "#initialized";
+	
+	/** the index of a component in the parent component list. */
+	public static final String INDEXOF 			= "#indexOf";
+	
+	/** the mark for removing component later. */
+	public static final String REMOVE_LATER     = "#component#remove";
+	/** the mark for a changed component. */
+	public static final String MARK_CHANGED     = "#component#changed";
+	
+	/** the mark for a new component. */
+	public static final String NEW				= "~new";
+	/** the mark for an additional component. */
+	public static final String ADDITIONAL		= "~additional";
+	/** the mark for a removed component. */
+	public static final String REMOVE			= "~remove";
+	/** the mark for a destroyed component. */
+	public static final String DESTROY			= "~destroy";
+	
+	/** the column names field name. */
+	public static final String COLUMNNAMES      = "columnNames";
+	/** the layout data field name. */
+	public static final String LAYOUTDATA       = "layoutData";
+	
+}	// IWebFieldConstants

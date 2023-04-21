@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE videos SYSTEM "./test/com/sibvisions/util/xml/video.dtd">
+
+<videos>
+
+  <music2>
+    <title>Video Title 1</title>
+    <artist>Artist 1</artist>
+  </music2>
+  
+  <music2>
+    <title>Video Title 2</title>
+    <artist>Artist 2</artist>
+    <artist>Artist 3</artist>
+  </music2>
+  
+</videos>

@@ -1,0 +1,19 @@
+JVx Vaadin UI
+Copyright 2009 SIB Visions GmbH
+
+This product includes software developed by
+SIB Visions GmbH (http://www.sibvisions.com/).
+
+
+===
+
+LICENSE INFORMATION REGARDING BUNDLED THIRD-PARTY SOFTWARE
+
+The following third party software is distributed with JVx Vaadin UI
+and is provided under other licenses and/or has source 
+available from other locations.
+
+* vaadin
+  License: Apache License v. 2.0 (above)
+  Source code availability: http://www.vaadin.com/download
+  

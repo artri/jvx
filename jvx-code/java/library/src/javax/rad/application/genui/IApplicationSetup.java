@@ -1,0 +1,44 @@
+/*
+ * Copyright 2013 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ * 
+ * 21.03.2013 - [JR] - creation                 
+ */
+package javax.rad.application.genui;
+
+import javax.rad.application.IApplication;
+
+/**
+ * The <code>IApplicationSetup</code> should be used for the configuration of a new application. It will be called
+ * before the constructor of an application start to create objects.
+ * 
+ * @author René Jahn
+ */
+public interface IApplicationSetup
+{
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Method definitions
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Apply pre-configured settings.
+	 * 
+	 * @param pApplication the application
+	 */
+	public void apply(IApplication pApplication);
+	
+}	// IApplicationSetup

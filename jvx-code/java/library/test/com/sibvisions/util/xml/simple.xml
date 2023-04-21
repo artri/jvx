@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Vor Beginn! -->
+<server>
+ 
+  <leer/>
+  <leer></leer>
+
+  <!-- Test: STARTPORT -->
+  <startport>2001</startport>
+ 
+  <audio>off</audio>
+  <serial>COM1</serial>
+  <buttondelay>1000</buttondelay>
+
+  <media>
+    <directory>C:\Temp\smedia</directory>
+  </media>
+
+  <!-- Test: TCP Angaben 
+       in der zweiten Zeile
+       und in der dritten Zeile
+  
+  nach einer Leerzeile
+  -->
+  <tcp>
+    <bindaddress>0.0.0.0</bindaddress>
+    <user>user</user>
+    <pwd>password</pwd>
+  </tcp>
+  
+  <db>
+    <name>SERVER_1</name>
+    <path>c:\temp\pbxdb</path>
+    <user>user</user>
+    <pwd>password</pwd>
+  </db>
+  
+  <report name="Standard">
+    <fontdirectory>C:\temp\pdffonts</fontdirectory>
+    <format>pdf</format>
+  </report>
+  
+  <report name="User">
+    <fontdirectory>C:\temp\xlsfonts</fontdirectory>
+    <format>xls</format>
+  </report>
+  
+  <text>
+  Hans
+    <comment>Kommentar</comment>
+  Huber
+    <comment2>Kommentar2</comment2>
+  Pauli
+  </text>
+  
+  <text>Das ist ein Text
+von Hansi Huber
+  </text>
+  
+</server>
+<!--  Nach Ende -->

@@ -1,0 +1,507 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ * 
+ * 17.11.2008 - [JR] - creation
+ */
+package com.sibvisions.rad.ui.swing.ext.layout;
+
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.LayoutManager2;
+
+import com.sibvisions.rad.ui.swing.ext.JVxUtil;
+
+/**
+ * The <code>JVxBorderLayout</code> allows the positioning of components in 5 different locations.<br>
+ * North, East, West, South and Center.<br>
+ * North and South are above/underneath West, Center and East<br>
+ * East and West are left/right of center.<br>
+ *
+ * <table border="1">
+ * <tr>
+ *   <td colspan="3" style="text-align:center">NORTH</td>
+ * </tr>
+ * <tr>
+ *   <td>WEST</td><td>CENTER</td><td>EAST</td>
+ * </tr>
+ * <tr>
+ *   <td colspan="3" style="text-align:center">SOUTH</td>
+ * </tr>
+ * </table>
+ * @author René Jahn
+ */
+public class JVxBorderLayout implements LayoutManager2
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /** The north layout constraint (top of container). */
+    public static final String NORTH  = "North";
+    /** The south layout constraint (bottom of container). */
+    public static final String SOUTH  = "South";
+    /** The east layout constraint (right side of container). */
+    public static final String EAST   = "East";
+    /** The west layout constraint (left side of container). */
+    public static final String WEST   = "West";
+    /** The center layout constraint (middle of container). */
+    public static final String CENTER = "Center";
+
+	/** the layout margins. */
+	private Insets			insMargins 				= new Insets(0, 0, 0, 0);
+	
+	/** the horizontal gap between components. */
+	private int				iHorizontalGap;
+	/** the vertical gap between components. */
+	private int				iVerticalGap;
+
+	/** the north component. */
+	private Component		north;
+	/** the south component. */
+	private Component		south;
+	/** the east component. */
+	private Component		east;
+	/** the west component. */
+	private Component		west;
+	/** the center component. */
+	private Component		center;
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Creates a new instance of <code>JVxBorderLayout</code>.
+	 */
+	public JVxBorderLayout()
+	{
+		this(0, 0);
+	}
+
+	/**
+	 * Creates a new instance of <code>JVxBorderLayout</code> with the desired orientation
+	 * and gaps.
+	 * 
+	 * @param pHorizontalGap the horizontal gap
+	 * @param pVerticalGap the vertical gap
+	 */
+	public JVxBorderLayout(int pHorizontalGap, int pVerticalGap)
+	{
+		iHorizontalGap = pHorizontalGap;
+		iVerticalGap = pVerticalGap;
+	}
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Interface implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void addLayoutComponent(String pName, Component pComponent)
+	{
+    	// unused in LayoutManager2
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void removeLayoutComponent(Component pComponent)
+	{
+		if (pComponent == center) 
+		{
+		    center = null;
+		}
+		else if (pComponent == north) 
+		{
+		    north = null;
+		}
+		else if (pComponent == south) 
+		{
+		    south = null;
+		}
+		else if (pComponent == east) 
+		{
+		    east = null;
+		}
+		else if (pComponent == west) 
+		{
+		    west = null;
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void addLayoutComponent(Component pComponent, Object pConstraints)
+	{
+		if (pConstraints == null || CENTER.equals(pConstraints)) 
+		{
+		    center = pComponent;
+		}
+		else if (NORTH.equals(pConstraints)) 
+		{
+		    north = pComponent;
+		}
+		else if (SOUTH.equals(pConstraints)) 
+		{
+		    south = pComponent;
+		}
+		else if (EAST.equals(pConstraints)) 
+		{
+		    east = pComponent;
+		}
+		else if (WEST.equals(pConstraints)) 
+		{
+		    west = pComponent;
+		}
+		else 
+		{
+		    throw new IllegalArgumentException("cannot add to layout: unknown constraint: " + pConstraints);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public float getLayoutAlignmentX(Container target)
+	{
+    	return 0.5f;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public float getLayoutAlignmentY(Container target)
+	{
+    	return 0.5f;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void invalidateLayout(Container target)
+	{
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Dimension minimumLayoutSize(Container pTarget)
+	{
+    	if (pTarget.isMinimumSizeSet())
+    	{
+        	return pTarget.getMinimumSize();
+    	}
+    	else
+    	{
+			Dimension n;
+			if (north == null)
+			{
+				n = new Dimension(0, 0);
+			}
+			else
+			{
+				n = JVxUtil.getMinimumSize(north);
+				n.height += getVerticalGap();
+			}
+			Dimension w;
+			if (west == null)
+			{
+				w = new Dimension(0, 0);
+			}
+			else
+			{
+				w = JVxUtil.getMinimumSize(west);
+				w.width += getHorizontalGap();
+			}
+			Dimension c;
+			if (center == null)
+			{
+				c = new Dimension(0, 0);
+			}
+			else
+			{
+				c = JVxUtil.getMinimumSize(center);
+			}
+			Dimension e;
+			if (east == null)
+			{
+				e = new Dimension(0, 0);
+			}
+			else
+			{
+				e = JVxUtil.getMinimumSize(east);
+				e.width += getHorizontalGap();
+			}
+			Dimension s;
+			if (south == null)
+			{
+				s = new Dimension(0, 0);
+			}
+			else
+			{
+				s = JVxUtil.getMinimumSize(south);
+				s.height += getVerticalGap();
+			}
+			
+			return new Dimension(Math.max(Math.max(n.width, s.width), w.width + c.width + e.width), 
+					Math.max(Math.max(w.height, e.height), c.height) + n.height + s.height);
+    	}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Dimension maximumLayoutSize(Container pTarget)
+	{
+    	if (pTarget.isMaximumSizeSet())
+    	{
+        	return pTarget.getMaximumSize();
+    	}
+    	else
+    	{
+            return new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE);
+    	}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Dimension preferredLayoutSize(Container pContainer)
+	{
+		int width = 0;
+		int height = 0;
+		
+		int maxWidth = 0;
+		int maxHeight = 0;
+		if (north != null && north.isVisible())
+		{
+			Dimension size = JVxUtil.getPreferredSize(north);
+			
+			maxWidth = size.width;
+			height += size.height + iVerticalGap;
+		}
+		if (south != null && south.isVisible())
+		{
+			Dimension size = JVxUtil.getPreferredSize(south);
+			
+			if (size.width > maxWidth)
+			{
+				maxWidth = size.width;
+			}
+			height += size.height + iVerticalGap;
+		}
+		if (west != null && west.isVisible())
+		{
+			Dimension size = JVxUtil.getPreferredSize(west);
+
+			maxHeight = size.height;
+			width += size.width + iHorizontalGap;
+		}
+		if (east != null && east.isVisible())
+		{
+			Dimension size = JVxUtil.getPreferredSize(east);
+			
+			if (size.height > maxHeight)
+			{
+				maxHeight = size.height;
+			}
+			width += size.width + iHorizontalGap;
+		}
+		if (center != null && center.isVisible())
+		{
+			Dimension size = JVxUtil.getPreferredSize(center);
+			if (size.height > maxHeight)
+			{
+				maxHeight = size.height;
+			}
+			width += size.width;
+		}
+		height += maxHeight;
+		if (maxWidth > width)
+		{
+			width = maxWidth;
+		}
+		
+		Insets insets = pContainer.getInsets();
+		
+		return new Dimension(width + insets.left + insets.right + insMargins.left + insMargins.right, 
+				             height + insets.top + insets.bottom + insMargins.top + insMargins.bottom);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void layoutContainer(Container pContainer)
+	{
+		Dimension size = pContainer.getSize();
+		Insets insets = pContainer.getInsets();
+		
+		int x = insets.left + insMargins.left;
+		int y = insets.top + insMargins.top;
+		int width = size.width - x - insets.right - insMargins.right;
+		int height = size.height - y - insets.bottom - insMargins.bottom;
+		
+		if (north != null && north.isVisible())
+		{
+			Dimension s = JVxUtil.getPreferredSize(north);
+			
+			north.setBounds(x, y, width, s.height);
+			
+			y += s.height + iVerticalGap;
+			height -= s.height + iVerticalGap;
+		}
+		if (south != null && south.isVisible())
+		{
+			Dimension s = JVxUtil.getPreferredSize(south);
+			
+			south.setBounds(x, y + height - s.height, width, s.height);
+
+			height -= s.height + iVerticalGap;
+		}
+		if (west != null && west.isVisible())
+		{
+			Dimension s = JVxUtil.getPreferredSize(west);
+			
+			west.setBounds(x, y, s.width, height);
+
+			x += s.width + iHorizontalGap;
+			width -= s.width + iHorizontalGap;
+		}
+		if (east != null && east.isVisible())
+		{
+			Dimension s = JVxUtil.getPreferredSize(east);
+			
+			east.setBounds(x + width - s.width, y, s.width, height);
+
+			width -= s.width + iHorizontalGap;
+		}
+		if (center != null && center.isVisible())
+		{
+			center.setBounds(x, y, width, height);
+		}
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// User-defined methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Sets horizontal gap between components.
+	 *  
+	 * @param pGap the gap in pixel
+	 */
+	public void setHorizontalGap(int pGap)
+	{
+		iHorizontalGap = pGap;
+	}
+
+	/**
+	 * Gets the horizontal gap between components.
+	 * 
+	 * @return the gap in pixel
+	 */
+	public int getHorizontalGap()
+	{
+		return iHorizontalGap;
+	}
+
+	/**
+	 * Sets the vertical gap between components.
+	 * 
+	 * @param pGap the gap in pixel
+	 */
+	public void setVerticalGap(int pGap)
+	{
+		iVerticalGap = pGap;
+	}
+
+	/**
+	 * Gets the vertical gap between components.
+	 * 
+	 * @return the gap in pixel
+	 */
+	public int getVerticalGap()
+	{
+		return iVerticalGap;
+	}
+
+	/**
+	 * Sets the layout margins.
+	 * 
+	 * @param pMargins the margins
+	 */
+	public void setMargins(Insets pMargins)
+	{
+		if (pMargins == null)
+		{
+			insMargins = new Insets(0, 0, 0, 0);
+		}
+		else
+		{
+			insMargins = pMargins;
+		}
+	}
+	
+	/**
+	 * Gets the layout margins.
+	 * 
+	 * @return the margins
+	 */
+	public Insets getMargins()
+	{
+		return insMargins;
+	}
+
+    /**
+     * Gets the constraints for the specified component.
+     *
+     * @param   comp the component to be queried
+     * @return  the constraint for the specified component,
+     *          or null if component is null or is not present
+     *          in this layout
+     */
+	public Object getConstraints(Component comp) 
+	{
+		if (comp == center) 
+		{
+			return CENTER;
+		}
+		else if (comp == north) 
+		{
+			return NORTH;
+		}
+		else if (comp == south) 
+		{
+			return SOUTH;
+		}
+		else if (comp == west) 
+		{
+			return WEST;
+		}
+		else if (comp == east) 
+		{
+			return EAST;
+		}
+		return null;
+    }
+
+}	// JVxBorderLayout

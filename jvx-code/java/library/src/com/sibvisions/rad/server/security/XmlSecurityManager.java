@@ -1,0 +1,702 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ * 
+ * 26.05.2009 - [JR] - creation
+ * 04.10.2009 - [JR] - changePassword: old password is required
+ * 13.10.2009 - [JR] - changePassword: memory/disk password problem when exception during save [BUGFIX]
+ * 14.11.2009 - [JR] - #7
+ *                     changePassword: validatePassword called   
+ * 06.06.2010 - [JR] - #132: encryption support
+ *                   - #133: more than one user [BUGFIX] 
+ * 07.06.2010 - [JR] - #49: access control method implemented
+ * 20.06.2010 - [JR] - refactoring: removed getDirectory from IConfiguration
+ * 11.05.2011 - [JR] - release implemented  
+ * 17.05.2015 - [TK] - #1389: JNDI support                 
+ */
+package com.sibvisions.rad.server.security;
+
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.List;
+import java.util.UUID;
+
+import javax.naming.InitialContext;
+import javax.rad.remote.IConnectionConstants;
+import javax.rad.server.IConfiguration;
+import javax.rad.server.ISession;
+import javax.rad.server.InvalidPasswordException;
+import javax.rad.server.NotFoundException;
+
+import com.sibvisions.rad.server.config.ApplicationZone;
+import com.sibvisions.rad.server.config.Configuration;
+import com.sibvisions.rad.server.security.reset.IResetPasswordManager;
+import com.sibvisions.util.log.LoggerFactory;
+import com.sibvisions.util.type.CodecUtil;
+import com.sibvisions.util.type.CommonUtil;
+import com.sibvisions.util.type.ResourceUtil;
+import com.sibvisions.util.type.StringUtil;
+import com.sibvisions.util.xml.XmlNode;
+import com.sibvisions.util.xml.XmlWorker;
+
+/**
+ * The <code>XmlSecurityManager</code> uses a xml file to authenticate users. It requires
+ * the following information:
+ * <ul>
+ *   <li>usersfile (the file or JNDI resource with all users)</li>
+ * </ul>
+ * 
+ * @author René Jahn
+ */
+public class XmlSecurityManager extends AbstractSecurityManager
+                                implements IResetPasswordManager
+{
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Class members
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+	/** the internal automatic login marker property name. */
+	private static final String INTERNAL_AUTOLOGIN = "#internalautologin";
+	
+    /** the current user list. */
+    private XmlNode xmnUsers = null;
+    
+    /** the user file. */
+    private File fiUsers = null;
+    
+    /** whether, the user file was loaded as virtual resource. */
+    private boolean bVirtual = false;
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Interface implementation
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /**
+     * {@inheritDoc}
+     */
+    public synchronized void validateAuthentication(ISession pSession) throws Exception
+    {
+        //Exception will be thrown when the credentials are not valid!
+    	
+        XmlNode xmnUser = getAuthenticatedUserNode(pSession);
+
+        UserInfo user = new UserInfo();
+        
+        updateUserInfo(user, xmnUser);
+        
+        setUserInfo(pSession, user);
+        
+    	boolean bAutoLogin = Boolean.parseBoolean((String)pSession.getProperties().remove(INTERNAL_AUTOLOGIN));
+		boolean bAutoLoginEnabled = Boolean.valueOf((String)pSession.getProperty(IConnectionConstants.PREFIX_CLIENT + "login.auto")).booleanValue();
+
+		//Check if the user will be connected through automatic login key
+		String sAuthKey = (String)pSession.getProperty(IConnectionConstants.PREFIX_CLIENT + "login.key");
+
+		if (sAuthKey == null && bAutoLoginEnabled)
+		{
+			sAuthKey = UUID.randomUUID().toString();
+			
+			xmnUser.setNode("/authkey", new XmlNode(XmlNode.TYPE_ATTRIBUTE, "authkey", sAuthKey));
+			
+			saveUsers(pSession);
+			
+			pSession.setProperty(IConnectionConstants.PREFIX_CLIENT + "login.key", sAuthKey);
+		}
+		
+		String sSecEnv = getEnvironment(pSession.getConfig());
+		
+		if (!StringUtil.isEmpty(sSecEnv))
+		{
+			pSession.getProperties().put(IConnectionConstants.SECURITY_ENVIRONMENT, sSecEnv);
+		}
+
+		if (bAutoLogin)
+		{
+			//set the username if autologin
+			pSession.getProperties().put(IConnectionConstants.USERNAME, xmnUser.getNodeValue("/name"));
+		}
+		else if (!bAutoLoginEnabled)
+		{
+			//unset the key
+			pSession.setProperty(IConnectionConstants.PREFIX_CLIENT + "login.key", null);
+		}
+		
+        if (!bVirtual)
+        {
+	        String sOldPwd = (String)pSession.getProperty(IConnectionConstants.OLDPASSWORD);
+	        String sNewPwd = (String)pSession.getProperty(IConnectionConstants.NEWPASSWORD);
+
+	        if (sOldPwd != null && sNewPwd != null)
+	        {
+		        //-------------------------------------------------
+		        // Password pre-validation
+		        //-------------------------------------------------
+		        
+		        validatePassword(pSession, sOldPwd, sNewPwd);
+	        }
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public synchronized void changePassword(ISession pSession) throws Exception
+    {
+        if (bVirtual)
+        {
+            throw new SecurityException("Can't change password because the user file was loaded as virtual resource!");
+        }
+        
+        String sOldPwd = (String)pSession.getProperty(IConnectionConstants.OLDPASSWORD);
+        String sNewPwd = (String)pSession.getProperty(IConnectionConstants.NEWPASSWORD);
+
+        IConfiguration cfgSession = pSession.getConfig();
+        
+        //-------------------------------------------------
+        // Password validation
+        //-------------------------------------------------
+        
+        validatePassword(pSession, sOldPwd, sNewPwd);
+        
+        //-------------------------------------------------
+        // Change password
+        //-------------------------------------------------
+
+        XmlNode xmnUser = getAuthenticatedUserNode(pSession);
+        
+		String sAuthKey = (String)pSession.getProperty(IConnectionConstants.PREFIX_CLIENT + "login.key");
+
+        //check old password, because the session password is identical to the users password!
+        if ((sAuthKey == null && isOTPAuthentication(pSession)) 
+        	|| comparePassword(cfgSession, sOldPwd, xmnUser.getNodeValue("/password")))
+        {
+            xmnUser.setNode("/password", encryptPassword(cfgSession, sNewPwd));
+
+            FileOutputStream fosUsers = null;
+            
+            try
+            {
+                fosUsers = new FileOutputStream(fiUsers);
+
+                XmlWorker worker = new XmlWorker();
+                
+                worker.write(fosUsers, xmnUsers);
+            }
+            catch (Throwable th)
+            {
+            	th.printStackTrace();
+            	
+                //ensure that the memory contains the correct password!
+                xmnUser.setNode("/password", encryptPassword(cfgSession, sOldPwd));
+            }
+            finally
+            {
+                if (fosUsers != null)
+                {
+                    try
+                    {
+                        fosUsers.close();
+                    }
+                    catch (Exception e)
+                    {
+                        //nothing to be done
+                    }
+                }
+            }
+        }
+        else
+        {
+			if (isHideFailureReason(cfgSession))
+			{
+				debug("Invalid password for '" + pSession.getUserName() + "' and application '" + pSession.getApplicationName() + "'");
+				
+				throw new SecurityException("Invalid username or password");
+			}
+
+            throw new InvalidPasswordException("Invalid password for '" + pSession.getUserName() + "' and application '" + pSession.getApplicationName() + "'");
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public synchronized void logout(ISession pSession)
+    {
+		if (Boolean.valueOf((String)pSession.getProperty("userlogout")).booleanValue())
+		{		
+			try
+			{
+				resetAutoLogin(pSession);
+			}
+			catch (Exception e)
+			{
+				error(e);
+			}
+		}
+    }   
+    
+    /**
+     * {@inheritDoc}
+     */
+    public synchronized IAccessController getAccessController(ISession pSession)
+    {
+        return null;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public synchronized void release()
+    {
+    }
+    
+	/**
+	 * {@inheritDoc}
+	 */
+	public synchronized void resetPassword(ISession pSession) throws Exception
+	{
+		File fiUserList = getUsersFile(pSession.getApplicationName());
+		
+		if (fiUserList != null)
+		{
+			XmlNode xmnUserList = XmlWorker.readNode(fiUserList);
+			XmlNode xmnFound = null;
+            
+            List<XmlNode> liUsers = xmnUserList.getNodes("/users/user");
+        
+            //username could be an email or the username
+            String sIdentifier = pSession.getUserName();
+
+            int iFoundUser = 0;
+            
+            for (XmlNode xmnUser : liUsers)
+            {
+            	if (sIdentifier.equals(xmnUser.getNodeValue("/name"))
+            		|| (sIdentifier.indexOf('@') > 0 && sIdentifier.equals(xmnUser.getNodeValue("/email"))))
+                {
+            		iFoundUser++;
+            		
+            		xmnFound = xmnUser;
+                }
+            }
+            
+            boolean bHideFailure = isHideFailureReason(pSession.getConfig());
+            
+            if (iFoundUser == 0)
+            {
+        		if (bHideFailure)
+        		{
+        			debug("User '" + CommonUtil.nvl(sIdentifier, "<undefined>") + "' was not found for application '" + pSession.getApplicationName() + "'");
+        			
+        			//don't throw because it's possible to find out if a user exists
+        			//throw new SecurityException("Invalid username");
+        			
+        			return;
+        		}
+                
+                throw new NotFoundException("User '" + CommonUtil.nvl(sIdentifier, "<undefined>") + "' was not found for application '" + pSession.getApplicationName() + "'");
+            }
+            else if (iFoundUser > 1)
+            {
+        		if (bHideFailure)
+        		{
+        			debug("User '" + CommonUtil.nvl(sIdentifier, "<undefined>") + "' is not unique for application '" + pSession.getApplicationName() + "'");
+        			
+        			//don't throw because it's possible to find out if a user exists
+        			//throw new SecurityException("Invalid username");
+        			
+        			return;
+        		}
+                
+                throw new NotFoundException("User '" + CommonUtil.nvl(sIdentifier, "<undefined>") + "' is not unique for application '" + pSession.getApplicationName() + "'");
+            	
+            }
+            
+            UserInfo user = new UserInfo();
+            
+            updateUserInfo(user, xmnFound);
+            
+            createOTP(pSession, user);
+		}
+		else
+		{
+			throw new SecurityException("Userfile was not found for application '" + pSession.getApplicationName() + "'");
+		}
+	}
+    
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Overwritten methods
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected String saltPassword(String pEcnryptedPassword) throws Exception
+	{
+		return "#" + CodecUtil.encodeHex(pEcnryptedPassword) + "#";
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected boolean isPasswordEncrypted(String pPassword)
+	{
+		return pPassword != null && pPassword.length() > 2 && pPassword.length() % 2 == 0 && pPassword.startsWith("#") && pPassword.endsWith("#");
+	}
+	
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // User-defined methods
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /**
+     * Loads all users from the configured userfile.
+     * 
+     * @param pSession the accessing session
+     * @throws Exception if the userfile can not be loaded or the configuration is invalid
+     */
+    private void loadUsers(ISession pSession) throws Exception
+    {
+        if (xmnUsers == null)
+        {
+            IConfiguration config = pSession.getConfig();
+            
+            String sFile = config.getProperty("/application/securitymanager/userfile");
+            
+            if (sFile == null)
+            {
+                throw new SecurityException("Parameter 'userfile' is missing for application '" + pSession.getApplicationName() + "'");
+            }
+            
+            //first: try absolute path
+            File fiUserList = new File(sFile);
+            
+            InputStream isUsers = null;
+
+            if (!fiUserList.exists())
+            {
+                ApplicationZone zone = Configuration.getApplicationZone(pSession.getApplicationName());
+                
+                fiUserList = new File(zone.getDirectory(), sFile);
+                    
+                if (fiUserList.exists())
+                {
+                    isUsers = new FileInputStream(fiUserList);
+                }
+                else
+                {
+                	fiUserList = null;
+                	
+                    //try to load the user file as JNDI binding
+                    try
+                    {
+                        InitialContext ctxt = new InitialContext();
+                        
+                        try
+                        {
+                            Object objInstance = ctxt.lookup(sFile);
+                            
+                            if (objInstance instanceof String)
+                            {
+                                isUsers = ResourceUtil.getResourceAsStream((String)objInstance);
+                                
+                                if (isUsers == null)
+                                {
+                                    try
+                                    {
+                                        isUsers = new URL((String) objInstance).openStream();
+                                    }
+                                    catch (MalformedURLException exc)
+                                    {
+                                        // do nothing
+                                    }
+                                }
+                                
+                                if (isUsers == null)
+                                {
+                                    isUsers = new ByteArrayInputStream(((String)objInstance).getBytes("UTF-8"));
+                                    
+                                    //maybe XML (no special node checks)
+                                    XmlWorker.readNode(isUsers);
+                                    
+                                    isUsers.reset();
+                                }
+                            }
+                            else if (objInstance instanceof URL)
+                            {
+                                isUsers = ((URL)objInstance).openStream();
+                            }
+                            else if (objInstance instanceof InputStream)
+                            {
+                                isUsers = (InputStream)objInstance;
+                            }
+                        }
+                        finally
+                        {
+                            ctxt.close();
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        LoggerFactory.getInstance(Configuration.class).debug("Couldn't load user file '", sFile, "' via JNDI!", ex);
+                    }
+                    
+                    //try to load the user file as resource
+                    if (isUsers == null)
+                    {
+                        if (Configuration.isSearchClassPath())
+                        {                        
+                            isUsers = ResourceUtil.getResourceAsStream("/rad/apps/" + pSession.getApplicationName() + "/" + sFile);
+                        }
+                    }
+                    
+                    bVirtual = isUsers != null;
+                }
+            }
+            else
+            {
+                isUsers = new FileInputStream(fiUserList);
+            }
+            
+            if (isUsers == null)
+            {
+                throw new SecurityException("Userfile '" + sFile + "' doesn't exist!");
+            }
+
+            //read users from xml file
+            
+            XmlWorker worker = new XmlWorker();
+
+            try
+            {
+                xmnUsers = worker.read(isUsers);
+                
+                fiUsers = fiUserList;
+            }
+            finally
+            {
+                try
+                {
+                    isUsers.close();
+                }
+                catch (Exception e)
+                {
+                    //nothing to be done
+                }
+            }
+        }
+    }
+    
+    /**
+     * Saves the current user settings.
+     * 
+     * @param pSession the accessing session
+     * @throws Exception if saving fails
+     */
+    private void saveUsers(ISession pSession) throws Exception
+    {
+    	if (fiUsers != null && fiUsers.exists())
+    	{
+    		XmlWorker xmw = new XmlWorker();
+    		xmw.write(fiUsers, xmnUsers);
+    	}
+    }
+    
+    /**
+     * Gets the xml node from the usersfile with the username and password specified through the
+     * session.
+     * 
+     * @param pSession the accessing session
+     * @return the xml node for the session user
+     * @throws Exception if the credentials for the user are invalid
+     */
+    private XmlNode getAuthenticatedUserNode(ISession pSession) throws Exception
+    {
+        String sUserName = pSession.getUserName();
+        String sAutoKey = (String)pSession.getProperty(IConnectionConstants.PREFIX_CLIENT + "login.key");            
+
+        IConfiguration cfgSession = pSession.getConfig();
+
+        boolean bHideFailure = isHideFailureReason(cfgSession);
+
+        boolean bOTP = sAutoKey == null && isOTPAuthentication(pSession);
+        
+        if (sUserName != null || sAutoKey != null)
+        {
+            loadUsers(pSession);
+        
+            List<XmlNode> liUsers = xmnUsers.getNodes("/users/user");
+        
+            XmlNode xmnFoundUser = null;
+            
+            int iFoundKey = 0;
+            int iFoundUsers = 0;
+            
+            for (XmlNode xmnUser : liUsers)
+            {
+            	if (sAutoKey != null)
+            	{
+            		if (sAutoKey.equals(xmnUser.getNodeValue("/authkey")))
+            		{
+            			iFoundKey++;
+            				
+            			xmnFoundUser = xmnUser;
+            		}
+            	}
+            	else if (sUserName.equals(xmnUser.getNodeValue("/name")))
+                {
+                	iFoundUsers++;
+                	
+        			xmnFoundUser = xmnUser;
+                }
+            }
+            
+        	//authkey is not allowed for multiple user entries, so we check the count here!
+            if (xmnFoundUser != null)
+            {
+            	if (iFoundKey == 1 && iFoundUsers == 0)
+            	{
+	            	//avoid updating access time
+	            	pSession.getProperties().put(INTERNAL_AUTOLOGIN, Boolean.TRUE.toString());
+	            	
+	            	return xmnFoundUser;
+            	}
+            	else if (iFoundUsers == 1)
+                {
+                    if (bOTP 
+                        || comparePassword(cfgSession, pSession.getPassword(), xmnFoundUser.getNodeValue("/password")))
+                    {
+            			return xmnFoundUser;
+                    }
+                    else
+                    {
+    					if (bHideFailure)
+    					{
+    						debug("Invalid password for '" + pSession.getUserName() + "' and application '" + pSession.getApplicationName() + "'");
+    						
+    						throw new SecurityException("Invalid username or password");
+    					}
+
+                        throw new InvalidPasswordException("Invalid password for '" + pSession.getUserName() + "' and application '" + pSession.getApplicationName() + "'");
+                    }
+                }
+            }
+        }
+        
+		if (bHideFailure)
+		{
+			debug("User '" + CommonUtil.nvl(sUserName, "<undefined>") + "' was not found for application '" + pSession.getApplicationName() + "'");
+			
+			throw new SecurityException("Invalid username or password");
+		}
+        
+        throw new NotFoundException("User '" + CommonUtil.nvl(sUserName, "<undefined>") + "' was not found for application '" + pSession.getApplicationName() + "'");
+    }
+    
+    /**
+     * Deletes the autologin information.
+     * 
+     * @param pSession the accessing session
+     * @throws Exception if resetting autologin fails
+     */
+    protected void resetAutoLogin(ISession pSession) throws Exception
+    {
+		String sAutoKey = (String)pSession.getProperty(IConnectionConstants.PREFIX_CLIENT + "login.key");
+		
+		if (sAutoKey != null)
+		{
+			XmlNode xmnUser = getAuthenticatedUserNode(pSession);
+			xmnUser.removeNode("/authkey");
+
+			saveUsers(pSession);
+			
+			//unset the key
+			pSession.setProperty(IConnectionConstants.PREFIX_CLIENT + "login.key", null);
+		}
+    }
+    
+    /**
+     * Gets the user file if available.
+     * 
+     * @param pApplicationName the application name
+     * @return the found user file or <code>null</code> if file is not available
+     * @throws Exception if file detection fails
+     */
+    protected File getUsersFile(String pApplicationName) throws Exception
+    {
+        ApplicationZone zone = Configuration.getApplicationZone(pApplicationName);
+        
+        String sFile = zone.getProperty("/application/securitymanager/userfile");
+        
+        if (sFile == null)
+        {
+            throw new SecurityException("Parameter 'userfile' is missing for application '" + pApplicationName + "'");
+        }
+        
+        //first: try absolute path
+        File fiUserList = new File(sFile);
+        
+        if (fiUserList.exists() && fiUserList.canWrite())
+        {
+        	return fiUserList;
+        }
+        else
+        {
+            fiUserList = new File(zone.getDirectory(), sFile);
+                
+            if (fiUserList.exists() && fiUserList.canWrite())
+            {
+            	return fiUserList;
+            }
+            
+            return null;
+        }
+    }
+    
+	/**
+	 * Updates the user information with additional data from the user record.
+	 *  
+	 * @param pInfo the user information
+	 * @param pUser the user record
+	 */
+    private void updateUserInfo(UserInfo pInfo, XmlNode pUser)
+    {
+        String sNodeName;
+        
+        //add additional "user-defined" nodes
+        for (XmlNode xmn : pUser.getNodes())
+        {
+        	sNodeName = xmn.getName();
+        	
+    		if ("name".equals(sNodeName))
+    		{
+    			pInfo.put(UserInfo.USERNAME, xmn.getValue());
+    		}
+        	if (!"password".equals(sNodeName))
+        	{
+    			pInfo.put(sNodeName.toUpperCase(), xmn.getValue());
+        	}
+        }
+    }
+    
+}   // XmlSecurityManager

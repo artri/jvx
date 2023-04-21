@@ -1,0 +1,1555 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 19.11.2009 - [HM] - creation
+ * 18.03.2011 - [JR] - #313: component moved/resized implemented
+ * 22.10.2019 - [JR] - put/getObject implemented
+ */
+package com.sibvisions.rad.ui.web.impl;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.rad.ui.IColor;
+import javax.rad.ui.IComponent;
+import javax.rad.ui.IContainer;
+import javax.rad.ui.ICursor;
+import javax.rad.ui.IDimension;
+import javax.rad.ui.IFactory;
+import javax.rad.ui.IFactoryComponent;
+import javax.rad.ui.IFont;
+import javax.rad.ui.IImage;
+import javax.rad.ui.IPoint;
+import javax.rad.ui.IRectangle;
+import javax.rad.ui.Style;
+import javax.rad.ui.event.ComponentHandler;
+import javax.rad.ui.event.FocusHandler;
+import javax.rad.ui.event.KeyHandler;
+import javax.rad.ui.event.MouseHandler;
+import javax.rad.ui.event.UIComponentEvent;
+import javax.rad.ui.event.UIFocusEvent;
+import javax.rad.ui.event.UIMouseEvent;
+import javax.rad.ui.event.type.component.IComponentMovedListener;
+import javax.rad.ui.event.type.component.IComponentResizedListener;
+import javax.rad.ui.event.type.focus.IFocusGainedListener;
+import javax.rad.ui.event.type.focus.IFocusLostListener;
+import javax.rad.ui.event.type.key.IKeyPressedListener;
+import javax.rad.ui.event.type.key.IKeyReleasedListener;
+import javax.rad.ui.event.type.key.IKeyTypedListener;
+import javax.rad.ui.event.type.mouse.IMouseClickedListener;
+import javax.rad.ui.event.type.mouse.IMouseEnteredListener;
+import javax.rad.ui.event.type.mouse.IMouseExitedListener;
+import javax.rad.ui.event.type.mouse.IMousePressedListener;
+import javax.rad.ui.event.type.mouse.IMouseReleasedListener;
+
+import com.sibvisions.util.ChangedHashtable;
+import com.sibvisions.util.log.ILogger;
+import com.sibvisions.util.log.LoggerFactory;
+import com.sibvisions.util.type.StringUtil;
+import com.sibvisions.util.type.StringUtil.TextType;
+
+/**
+ * Web server implementation of {@link IComponent}.
+ * 
+ * @author Martin Handsteiner
+ */
+public class WebComponent extends WebResource 
+                          implements IFactoryComponent,
+                                     IPropertyHandler
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/** the counter for unique id. */
+	private static int counter = 0;
+	
+	/** the component logger. */
+	private ILogger logger = null;
+	
+	/** the name. */
+	private String sName;
+	
+	/** the id. */
+	private String componentId;
+	
+	/** the factory. */
+	private WebFactory factory;
+
+	/** Stores all Properties of the Resource, including the information, what is changed. */ 
+	private ChangedHashtable<String, Object> properties = null;
+	
+	/** Stores internal properties. */
+	private HashMap<String, Object> hmpObjects = null;
+	
+	/** Constraint as String. */
+	private Object lastSendConstraint = null;
+	
+	/** The Event Source. */
+	private IComponent eventSource = this;
+
+	/** EventHandler for mouePressed. */
+	private MouseHandler<IMousePressedListener>    eventMousePressed = null;
+	/** EventHandler for mouseReleased. */
+	private MouseHandler<IMouseReleasedListener>   eventMouseReleased = null;
+	/** EventHandler for mouseClicked. */
+	private MouseHandler<IMouseClickedListener>    eventMouseClicked = null;
+	/** EventHandler for mouseEntered. */
+	private MouseHandler<IMouseEnteredListener>    eventMouseEntered = null;
+	/** EventHandler for mouseExited. */
+	private MouseHandler<IMouseExitedListener>     eventMouseExited = null;
+	
+	/** EventHandler for keyPressed. */
+	private KeyHandler<IKeyPressedListener>    	eventKeyPressed = null;
+	/** EventHandler for keyReleased. */
+	private KeyHandler<IKeyReleasedListener>	eventKeyReleased = null;
+	/** EventHandler for keyTyped. */
+	private KeyHandler<IKeyTypedListener>      	eventKeyTyped = null;
+	
+	/** EventHandler for componentMoved. */
+	private ComponentHandler<IComponentMovedListener>      	eventComponentMoved = null;
+	/** EventHandler for componentResized. */
+	protected ComponentHandler<IComponentResizedListener> 	eventComponentResized = null;
+	
+	/** EventHandler for focusGained. */
+	private FocusHandler eventFocusGained = null;
+	/** EventHandler for focusLost. */
+	private FocusHandler eventFocusLost = null;
+	
+	/** List of additional subcomponents. */
+	protected ArrayList<WebComponent> componentsAdditional = new ArrayList<WebComponent>();	
+	
+	/** the custom command properties. */
+	private ArrayList<String> liCommandProperties = null;
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	  
+    /**
+     * Creates a new instance of <code>WebComponent</code>.
+     * 
+     * @see IComponent
+     */
+	protected WebComponent()
+	{
+		setProperty("className", WebFactory.getClassName(this));
+	}
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Overwritten methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void finalize() throws Throwable
+	{
+		//no access so far -> no notification necessary
+		if (componentId != null)
+		{
+			factory.getLauncher().finalizeComponent(componentId);
+		}
+		
+		super.finalize();
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Abstract methods implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /**
+	 * {@inheritDoc}
+	 */
+    @Override
+    public String getAsString()
+    {
+    	return getComponentId(); 
+    }
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Interface Implementation
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebFactory getFactory()
+    {
+    	return factory;
+    }
+	
+    /**
+     * {@inheritDoc}
+     */
+    public void setFactory(IFactory pFactory)
+    {
+        factory = (WebFactory)pFactory;
+    }
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getName()
+    {
+    	return sName;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setName(String pName)
+    {
+		sName = pName;
+		
+		setProperty("name", asId(pName));
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebDimension getPreferredSize()
+    {
+    	return cloneDimension((IDimension)getProperty("preferredSize", new WebDimension()));
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setPreferredSize(IDimension pPreferredSize)
+    {
+		setProperty("preferredSize", cloneDimension(pPreferredSize));
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isPreferredSizeSet()
+    {
+    	return getProperty("preferredSize", null) != null;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebDimension getMinimumSize()
+    {
+    	return cloneDimension((IDimension)getProperty("minimumSize", null));
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setMinimumSize(IDimension pMinimumSize)
+    {
+		setProperty("minimumSize", cloneDimension(pMinimumSize));
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isMinimumSizeSet()
+    {
+    	return getProperty("minimumSize", null) != null;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebDimension getMaximumSize()
+    {
+    	return cloneDimension((IDimension)getProperty("maximumSize", null));
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setMaximumSize(IDimension pMaximumSize)
+    {
+		setProperty("maximumSize", cloneDimension(pMaximumSize));
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isMaximumSizeSet()
+    {
+    	return getProperty("maximumSize", null) != null;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebColor getBackground()
+    {
+    	return getProperty("background", null);
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setBackground(IColor pBackground)
+    {
+		setProperty("background", pBackground);
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isBackgroundSet()
+    {
+    	return getProperty("background", null) != null;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebColor getForeground()
+    {
+    	return getProperty("foreground", null);
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setForeground(IColor pForeground)
+    {
+		setProperty("foreground", pForeground);
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isForegroundSet()
+    {
+    	return getProperty("foreground", null) != null;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebCursor getCursor()
+    {
+    	return getProperty("cursor", null);
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setCursor(ICursor pCursor)
+    {
+		setProperty("cursor", pCursor);
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isCursorSet()
+    {
+    	return getProperty("cursor", null) != null;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebFont getFont()
+    {
+    	return getProperty("font", null);
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setFont(IFont pFont)
+    {
+		setProperty("font", pFont);
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isFontSet()
+    {
+    	return getProperty("font", null) != null;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getToolTipText()
+    {
+    	return getProperty("toolTipText", null);
+    }
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setToolTipText(String pToolTipText)
+    {
+		setProperty("toolTipText", pToolTipText);
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isFocusable()
+    {
+		return getProperty("focusable", Boolean.FALSE).booleanValue();
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setFocusable(boolean pFocusable)
+    {
+		setProperty("focusable", Boolean.valueOf(pFocusable));
+    }
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public Integer getTabIndex()
+	{
+		return getProperty("tabIndex", null);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setTabIndex(Integer pTabIndex)
+	{
+		setProperty("tabIndex", pTabIndex);
+	}
+
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void requestFocus()
+    {
+		getFactory().requestFocus(this);
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IContainer getParent()
+    {
+		Object o = getProperty("parent", null);
+		
+		if (o instanceof IContainer)
+		{
+			return (IContainer)o;
+		}
+		else
+		{
+			if (o != null)
+			{
+				if (!isAdditional())
+				{
+					//if component is not marked as additional -> log access to parent
+					LoggerFactory.getInstance(WebComponent.class).error("Component '", getName(), "' (", getClass(), ") has a component (", o, " as parent!");
+				}
+				else
+				{
+					LoggerFactory.getInstance(WebComponent.class).debug("Component '", getName(), "' (", getClass(), ") has a component (", o, " as parent!");
+				}
+			}
+			
+			return null;
+		}
+    }
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setParent(IContainer pParent)
+	{
+		setParent(pParent, true);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isVisible()
+    {
+		return getProperty("visible", Boolean.TRUE).booleanValue();
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setVisible(boolean pVisible)
+    {
+		setProperty("visible", Boolean.valueOf(pVisible));
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isEnabled()
+    {
+		return getProperty("enabled", Boolean.TRUE).booleanValue();
+    }
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setEnabled(boolean pEnabled)
+    {
+		setProperty("enabled", Boolean.valueOf(pEnabled));
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebPoint getLocationRelativeTo(IComponent pComponent)
+    {
+    	return getLocation();
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setLocationRelativeTo(IComponent pComponent, IPoint pLocation)
+	{
+		setLocation(pLocation);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebPoint getLocation()
+    {
+		WebRectangle bounds = getBounds();
+    	return new WebPoint(bounds.getX(), bounds.getY());
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setLocation(IPoint pLocation)
+    {
+		WebRectangle bounds = getBounds();
+		bounds.setX(pLocation.getX());
+		bounds.setY(pLocation.getY());
+		setBounds(bounds);
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebDimension getSize()
+    {
+		WebRectangle bounds = getBounds();
+    	return new WebDimension(bounds.getWidth(), bounds.getHeight());
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setSize(IDimension pSize)
+    {
+	    if (pSize != null)
+	    {
+    		WebRectangle bounds = getBounds();
+    		bounds.setWidth(pSize.getWidth());
+    		bounds.setHeight(pSize.getHeight());
+    		
+    		setBounds(bounds);
+	    }
+	    else
+	    {
+	        setBounds(null);
+	    }
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public WebRectangle getBounds()
+    {
+		WebRectangle bounds = getProperty("bounds", new WebRectangle());
+    	return new WebRectangle(bounds.getX(), bounds.getY(), bounds.getWidth(), bounds.getHeight());
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setBounds(IRectangle pBounds)
+    {
+	    if (pBounds != null)
+	    {
+    		WebRectangle bounds = getBounds();
+    		bounds.setX(pBounds.getX());
+    		bounds.setY(pBounds.getY());
+    		bounds.setWidth(pBounds.getWidth());
+    		bounds.setHeight(pBounds.getHeight());
+    		setProperty("bounds", bounds);
+	    }
+	    else
+	    {
+	        setProperty("bounds", null);
+	    }
+	    
+    	if (eventComponentResized != null)
+    	{
+    		getFactory().synchronizedDispatchEvent(eventComponentResized, 
+    				                               new UIComponentEvent(eventSource, 
+    															        UIComponentEvent.COMPONENT_RESIZED, 
+    															        System.currentTimeMillis(),
+    															        0));
+    	}
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IComponent getEventSource()
+	{
+		return eventSource;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setEventSource(IComponent pEventSource)
+	{
+		eventSource = pEventSource;
+	}
+
+    /**
+     * {@inheritDoc}
+     */
+    public void setStyle(Style pStyle)
+    {
+        if (pStyle != null && pStyle.getStyleNames().length > 0)
+        {
+            setProperty("style", pStyle.clone());
+        }
+        else
+        {
+            setProperty("style", null);
+        }
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public Style getStyle()
+    {
+        Style style = (Style)getProperty("style", null);
+
+        if (style == null)
+        {
+            return new Style();
+        }
+        
+        return style.clone();
+    }	
+	
+    /**
+     * {@inheritDoc}
+     */
+    public IImage capture(int iWidth, int iHeight)
+    {
+        return null; // optional Feature...
+    }
+
+    /**
+	 * {@inheritDoc}
+	 */
+	public MouseHandler<IMousePressedListener> eventMousePressed()
+	{
+		if (eventMousePressed == null)
+		{
+			eventMousePressed = new MouseHandler<IMousePressedListener>(IMousePressedListener.class);
+			
+			setProperty("mousePressed", eventMousePressed);
+		}
+		return eventMousePressed;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public MouseHandler<IMouseReleasedListener> eventMouseReleased()
+	{
+		if (eventMouseReleased == null)
+		{
+			eventMouseReleased = new MouseHandler<IMouseReleasedListener>(IMouseReleasedListener.class);
+			
+			setProperty("mouseReleased", eventMouseReleased);
+		}
+		return eventMouseReleased;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public MouseHandler<IMouseClickedListener> eventMouseClicked()
+	{
+		if (eventMouseClicked == null)
+		{
+			eventMouseClicked = new MouseHandler<IMouseClickedListener>(IMouseClickedListener.class);
+			
+			setProperty("mouseClicked", eventMouseClicked);
+		}
+		return eventMouseClicked;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public MouseHandler<IMouseEnteredListener> eventMouseEntered()
+	{
+		if (eventMouseEntered == null)
+		{
+			eventMouseEntered = new MouseHandler<IMouseEnteredListener>(IMouseEnteredListener.class);
+			
+			setProperty("mouseEntered", eventMouseEntered);
+		}
+		return eventMouseEntered;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public MouseHandler<IMouseExitedListener> eventMouseExited()
+	{
+		if (eventMouseExited == null)
+		{
+			eventMouseExited = new MouseHandler<IMouseExitedListener>(IMouseExitedListener.class);
+			
+			setProperty("mouseExited", eventMouseExited);
+		}
+		return eventMouseExited;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public KeyHandler<IKeyPressedListener> eventKeyPressed()
+	{
+		if (eventKeyPressed == null)
+		{
+			eventKeyPressed = new KeyHandler<IKeyPressedListener>(IKeyPressedListener.class);
+			
+			setProperty("keyPressed", eventKeyPressed);
+		}
+		return eventKeyPressed;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public KeyHandler<IKeyReleasedListener> eventKeyReleased()
+	{
+		if (eventKeyReleased == null)
+		{
+			eventKeyReleased = new KeyHandler<IKeyReleasedListener>(IKeyReleasedListener.class);
+			
+			setProperty("keyReleased", eventKeyReleased);
+		}
+		return eventKeyReleased;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public KeyHandler<IKeyTypedListener> eventKeyTyped()
+	{
+		if (eventKeyTyped == null)
+		{
+			eventKeyTyped = new KeyHandler<IKeyTypedListener>(IKeyTypedListener.class);
+			
+			setProperty("keyTyped", eventKeyTyped);
+		}
+		return eventKeyTyped;
+	}
+	
+    /**
+	 * {@inheritDoc}
+	 */
+    public ComponentHandler<IComponentMovedListener> eventComponentMoved()
+    {
+		if (eventComponentMoved == null)
+		{
+			eventComponentMoved = new ComponentHandler<IComponentMovedListener>(IComponentMovedListener.class);
+			
+			setProperty("componentMoved", eventComponentMoved);
+		}
+		return eventComponentMoved;
+    }
+	
+    /**
+	 * {@inheritDoc}
+	 */
+    public ComponentHandler<IComponentResizedListener> eventComponentResized()
+    {
+		if (eventComponentResized == null)
+		{
+			eventComponentResized = new ComponentHandler<IComponentResizedListener>(IComponentResizedListener.class);
+			
+			setProperty("componentResized", eventComponentResized);
+		}
+		return eventComponentResized;
+    }	
+	
+    /**
+	 * {@inheritDoc}
+	 */
+    public FocusHandler<IFocusGainedListener> eventFocusGained()
+    {
+		if (eventFocusGained == null)
+		{
+			eventFocusGained = new FocusHandler<IFocusGainedListener>(IFocusGainedListener.class);
+			
+			setProperty("focusGained", eventFocusGained);
+		}
+		return eventFocusGained;
+    }
+	
+    /**
+	 * {@inheritDoc}
+	 */
+    public FocusHandler<IFocusLostListener> eventFocusLost()
+    {
+		if (eventFocusLost == null)
+		{
+			eventFocusLost = new FocusHandler<IFocusLostListener>(IFocusLostListener.class);
+			
+			setProperty("focusLost", eventFocusLost);
+		}
+		return eventFocusLost;
+    }	
+    
+    /**
+	 * {@inheritDoc}
+	 */
+	public <T> T getProperty(String pPropertyName, T pDefaultValue)
+	{
+		if (properties == null)
+		{
+			return pDefaultValue;
+		}
+		else
+		{
+			Object result = properties.get(pPropertyName);
+			if (result == null)
+			{
+				return pDefaultValue;
+			}
+			else
+			{
+				return (T)result;
+			}
+		}
+	}
+	
+    /**
+	 * {@inheritDoc}
+	 */
+	public void setProperty(String pPropertyName, Object pValue)
+	{
+		setProperty(pPropertyName, pValue, false);
+	}
+	
+    /**
+	 * {@inheritDoc}
+	 */
+	public void setProperty(String pPropertyName, Object pValue, boolean pOverride)
+	{
+		if (properties == null)
+		{
+			properties = new ChangedHashtable<String, Object>();
+		}
+		
+		properties.put(pPropertyName, pValue, true, pOverride);
+	}
+
+    /**
+	 * {@inheritDoc}
+	 */
+	public boolean isChanged(String pPropertyName)
+	{
+		return properties != null && properties.isChanged(pPropertyName);
+	}    
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // User-defined methods
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Gets the parent component of given component.
+	 * 
+	 * @param pComponent the component to use
+	 * @return the parent component
+	 */
+	public static IComponent getParent(IComponent pComponent)
+	{
+		if (pComponent instanceof WebComponent)
+		{
+			return ((WebComponent)pComponent).getParentIntern();
+		}
+		else
+		{
+			return pComponent.getParent();
+		}
+	}
+	
+	/**
+	 * Sets a command property. A command property is a special property. It will be removed from the
+	 * property list after first change access.
+	 * 
+	 * @param pPropertyName the command property name
+	 * @param pValue the value
+	 */
+	protected void setCommandProperty(String pPropertyName, Object pValue)
+	{
+		if (properties == null)
+		{
+			properties = new ChangedHashtable<String, Object>();
+		}
+		
+		properties.put(pPropertyName, pValue, true, true);
+		
+		if (liCommandProperties == null)
+		{
+			liCommandProperties = new ArrayList<String>();
+		}
+
+		if (!liCommandProperties.contains(pPropertyName))
+		{
+			liCommandProperties.add(pPropertyName);
+		}
+	}
+	
+	/**
+	 * Removes a command property.
+	 * 
+	 * @param pPropertyName the command property name
+	 * @see #setCommandProperty(String, Object)
+	 */
+	protected void removeCommandProperty(String pPropertyName)
+	{
+		if (properties != null)
+		{
+			properties.remove(pPropertyName, false);
+			properties.clearChanges(pPropertyName);
+			
+			liCommandProperties.remove(pPropertyName);
+		}
+	}
+	
+	/**
+	 * Marks all properties changed.
+	 */
+	public void markAllPropertiesChanged()
+	{
+		if (properties != null)
+		{
+			lastSendConstraint = null;
+			
+			String[] keys;
+			
+			synchronized (properties)
+			{
+				keys = properties.keySet().toArray(new String[properties.size()]);
+			}
+
+			for (String key : keys)
+			{
+				properties.put(key, properties.get(key), true, true);
+			}
+		}
+	}
+	
+    /**
+     * Sets the parent with optional check if component is already added.
+     * 
+     * @param pParent the new parent
+     * @param pCheckAdded <code>true</code> to check if component is already added, <code>false</code> to set parent 
+     *                    without check if component is already added
+     */
+    protected void setParent(IContainer pParent, boolean pCheckAdded)
+    {
+    	if (pCheckAdded)
+    	{
+			if (pParent == null)
+			{
+				IContainer parent = getProperty("parent", null);
+				
+				if (parent != null && parent.indexOf(this) >= 0)
+				{
+					throw new IllegalArgumentException("Can't unset parent, because this component is still added!");
+				}
+			}
+			else
+			{
+				if (pParent.indexOf(this) < 0)
+				{
+					throw new IllegalArgumentException("Can't set parent, because this component is not added!");
+				}
+			}
+    	}
+  
+    	setParentIntern(pParent);
+    }
+    
+    /**
+     * Sets the parent without any checks and also allow components as parent.
+     * 
+     * @param pParent the parent
+     */
+    protected void setParentIntern(IComponent pParent)
+    {
+		setProperty("parent", pParent);
+    }
+    
+    /**
+     * Gets the parent without container check.
+     * 
+     * @return the parent
+     */
+    public IComponent getParentIntern()
+    {
+    	return getProperty("parent", null);
+    }
+    
+    /**
+     * Gets the name as property. The difference to {@link #getName()} is that the name property
+     * is {@link #asId(String)}.
+     * 
+     * @return the name as property
+     */
+    public String propertyName()
+    {
+    	return getProperty("name", null);
+    }
+    
+	/**
+	 * Gets the id of this component.
+	 * 
+	 * @return the id.
+	 */
+	public String getComponentId()
+	{
+		if (componentId == null)
+		{
+			int id;
+			
+			synchronized (this)
+			{
+				id = counter++;
+			}
+			
+			componentId = getComponentName() + id;
+		}
+		
+		return componentId;
+	}
+	
+	/**
+	 * Sets the id of this component. Be careful with this method because a change of
+	 * the id may cause problems!
+	 * 
+	 * @param pComponentId the id
+	 */
+	public void setComponentId(String pComponentId)
+	{
+		componentId = pComponentId;
+	}
+	
+	/**
+	 * Gets the id of this component.
+	 * 
+	 * @return the id.
+	 */
+	protected String getComponentName()
+	{
+		return StringUtil.getText(WebFactory.getClassName(this), TextType.UpperCase); 
+	}
+	
+	/**
+	 * Clones a IDimension.
+	 *  
+	 * @param pDimension the IDimension.
+	 * @return the clones IDimension.
+	 */
+	private WebDimension cloneDimension(IDimension pDimension)
+	{
+		if (pDimension == null)
+		{
+			return null;
+		}
+		else
+		{
+			return new WebDimension(pDimension.getWidth(), pDimension.getHeight());
+		}
+	}
+	
+	/**
+	 * Gets the changed properties.
+	 * 
+	 * @return the changed properties.
+	 */
+	public List<Map.Entry<String, Object>> getChangedProperties()
+	{
+		if (properties == null)
+		{
+			return null;
+		}
+		else
+		{
+			Object constraints = properties.get("constraints");
+			Object sendConstraint;
+			
+			if (constraints instanceof WebResource)
+			{
+				sendConstraint = ((WebResource)constraints).getAsString();
+			}
+			else
+			{
+				sendConstraint = constraints;
+			}
+			
+			if ((sendConstraint != null || lastSendConstraint != null) 
+				&& (sendConstraint == null || !sendConstraint.equals(lastSendConstraint)))
+			{
+				lastSendConstraint = sendConstraint;
+				
+				setProperty("constraints", constraints, true);
+			}
+			
+			try
+			{
+				return properties.getLastChanges();
+			}
+			finally
+			{
+				//clear command properties
+				if (liCommandProperties != null)
+				{
+					String sPropName;
+
+					for (int i = 0, cnt = liCommandProperties.size(); i < cnt; i++)
+					{
+						sPropName = liCommandProperties.get(i);
+						
+						properties.remove(sPropName, false);
+						properties.clearChanges(sPropName);
+					}
+				}
+				
+			}
+		}
+	}
+	
+	/**
+	 * Clears the changes of given property name.
+	 * 
+	 * @param pProperty the property name
+	 */
+	protected void clearChangedProperty(String pProperty)
+	{
+		if (properties != null)
+		{
+			properties.clearChanges(pProperty);
+		}
+	}
+	
+	/**
+	 * Gets the constraints of this component.
+	 * 
+	 * @return the constraints of this component.
+	 */
+	public Object getConstraints()
+    {
+    	return getProperty("constraints", null);
+    }
+
+	/**
+	 * Sets the constraints of this component.
+	 * 
+	 * @param pConstraints the constraints of this component.
+	 */
+	public void setConstraints(Object pConstraints)
+    {
+		setProperty("constraints", pConstraints);
+    }
+	
+	/**
+	 * Puts an object into the internal cache. If the given value is <code>null</code>,
+	 * the object with given name will be removed from the internal cache.
+	 * 
+	 * @param pName the object name 
+	 * @param pValue the value
+	 */
+	public void putObject(String pName, Object pValue)
+	{
+		if (hmpObjects == null)
+		{
+			hmpObjects = new HashMap<String, Object>();
+		}
+		
+		if (pValue == null)
+		{
+			hmpObjects.remove(pName);
+		}
+		else
+		{
+			hmpObjects.put(pName, pValue);
+		}
+	}
+	
+	/**
+	 * Gets an object from the internal cache.
+	 * 
+	 * @param pName the object name
+	 * @return the object
+	 * @param <T> the expected return type
+	 */
+	public <T> T getObject(String pName)
+	{
+		return (T)getObject(pName, null);
+	}
+	
+	/**
+	 * Gets an object from the internal cache and returns a default value
+	 * if the object was not found.
+	 *  
+	 * @param pName the object name
+	 * @param pDefault the default value if there is no object with given name in the cache
+	 * @return the object or default value
+	 * @param <T> the expected return type
+	 */
+	public <T> T getObject(String pName, T pDefault)
+	{
+		if (hmpObjects == null)
+		{
+			return pDefault;
+		}
+		
+		T obj = (T)hmpObjects.get(pName);
+		
+		if (obj == null)
+		{
+			return pDefault;
+		}
+		else
+		{
+			return obj;
+		}
+	}
+	
+	/**
+	 * Adds the specified additional <code>IComponent</code> to this container at the end. 
+	 *
+	 * @param pComponent the <code>IComponent</code> to be added
+	 * @throws IllegalArgumentException if the component can not be added
+	 * @see IComponent
+	 */
+	public void addAdditional(IComponent pComponent)
+    {
+		addAdditional(pComponent, -1);
+    }
+	
+	/**
+	 * Adds the specified additional <code>IComponent</code> to this container with the specified index. 
+	 *
+	 * @param pComponent the <code>IComponent</code> to be added
+	 * @param pIndex the position in the container's list at which to insert
+	 *        the <code>IComponent</code>; <code>-1</code> means insert at the end
+	 * @throws IllegalArgumentException if the component can not be added
+	 * @see IComponent
+	 */
+	public void addAdditional(IComponent pComponent, int pIndex)
+    {
+		IComponent parent;
+
+		if (pComponent instanceof WebComponent)
+		{
+			parent = ((WebComponent)pComponent).getParentIntern(); 
+		}
+		else
+		{
+			parent = pComponent.getParent();
+		}
+
+		// Remove from "old" parent
+		if (parent instanceof WebComponent)
+		{
+			((WebComponent)parent).removeAdditional(pComponent);
+		}
+		
+		if (pIndex < 0)
+		{
+			componentsAdditional.add((WebComponent)pComponent);
+		}
+		else
+		{
+			componentsAdditional.add(pIndex, (WebComponent)pComponent);
+		}
+		
+		if (pComponent instanceof WebComponent)
+		{
+			((WebComponent)pComponent).setParentIntern(this);
+		}
+    }
+
+	/** 
+	 * Removes the specified additional component from this container.
+	 *
+	 * @param pComponent the <code>IComponent</code> to be removed
+	 * @see #addAdditional(IComponent)
+	 */	
+	public void removeAdditional(IComponent pComponent)
+	{
+		componentsAdditional.remove(pComponent);
+		
+		if (pComponent instanceof WebComponent)
+		{
+			((WebComponent)pComponent).setParentIntern(null);
+		}
+	}
+	
+	/**
+	 * Gets all base components.
+	 * 
+	 * @return the base components
+	 */
+	public List<WebComponent> getAdditionalComponents()
+	{
+		return (List<WebComponent>)componentsAdditional.clone();
+	}
+	
+	/**
+	 * Gets whether this component is an additional component of its parent.
+	 * 
+	 * @return <code>true</code> if this component is an additional component of the parent
+	 */
+	private boolean isAdditional()
+	{
+		IComponent comp = getParentIntern();
+		
+		if (comp instanceof WebComponent)
+		{
+			return ((WebComponent)comp).componentsAdditional.contains(this);
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Gets the aria label.
+	 * 
+	 * @param pPossibleLabels all possible labels
+	 * @return the first label from the possible labels which is not empty
+	 */
+	protected static final String getAriaLabel(String... pPossibleLabels)
+	{
+		if (pPossibleLabels != null && pPossibleLabels.length > 0)
+		{
+			for (String possibleLabel : pPossibleLabels)
+			{
+				if (!StringUtil.isEmpty(possibleLabel))
+				{
+					return possibleLabel;
+				}
+			}
+		}
+		
+		return null;
+	}
+
+    /**
+     * Dispatches the mouse clicked event if component is enabled.
+     * 
+     * @param pX the x position
+     * @param pY the y position
+     * @param pButton the mouse button
+     * @param pClickCount the click count
+     */
+	public void mouseClicked(int pButton, int pX, int pY, int pClickCount)
+	{
+			if (eventMouseClicked != null && eventMouseClicked.isDispatchable())
+			{
+				getFactory().synchronizedDispatchEvent(eventMouseClicked, new UIMouseEvent(getEventSource(), 
+						 							   UIMouseEvent.MOUSE_CLICKED, 
+						 							   System.currentTimeMillis(), 0,
+						 							   pX, pY, pClickCount <= 0 ? 1 : pClickCount, false));
+			}
+	}
+	
+    /**
+     * Dispatches the mouse pressed event if component is enabled.
+     * 
+     * @param pX the x position
+     * @param pY the y position
+     * @param pButton the mouse button
+     * @param pClickCount the click count
+     */
+	public void mousePressed(int pButton, int pX, int pY, int pClickCount)
+	{
+		if (eventMousePressed != null && eventMousePressed.isDispatchable())
+		{
+			getFactory().synchronizedDispatchEvent(eventMousePressed, new UIMouseEvent(getEventSource(), 
+					 							   UIMouseEvent.MOUSE_PRESSED, 
+					 							   System.currentTimeMillis(), 0,
+					 							   pX, pY, pClickCount <= 0 ? 1 : pClickCount, pButton == UIMouseEvent.BUTTON2_MASK));
+		}
+	}
+	
+    /**
+     * Dispatches the mouse released event if component is enabled.
+     * 
+     * @param pX the x position
+     * @param pY the y position
+     * @param pButton the mouse button
+     * @param pClickCount the click count
+     */
+	public void mouseReleased(int pButton, int pX, int pY, int pClickCount)
+	{
+		if (eventMouseReleased != null && eventMouseReleased.isDispatchable())
+		{
+			getFactory().synchronizedDispatchEvent(eventMouseReleased, new UIMouseEvent(getEventSource(), 
+					 							   UIMouseEvent.MOUSE_RELEASED, 
+					 							   System.currentTimeMillis(), 0,
+					 							   pX, pY, pClickCount <= 0 ? 1 : pClickCount, pButton == UIMouseEvent.BUTTON2_MASK));
+		}
+	}
+	
+    /**
+     * Dispatches the focus gained event if component is enabled.
+     */
+	public void focusGained()
+	{
+		if (isEnabled())
+		{
+			if (eventFocusGained != null && eventFocusGained.isDispatchable())
+			{
+				getFactory().synchronizedDispatchEvent(eventFocusGained, new UIFocusEvent(getEventSource(), UIFocusEvent.FOCUS_GAINED, System.currentTimeMillis(), 0));
+			}
+		}
+	}
+
+    /**
+     * Dispatches the focus lost event if component is enabled.
+     */
+	public void focusLost()
+	{
+		if (isEnabled())
+		{
+			if (eventFocusLost != null && eventFocusLost.isDispatchable())
+			{
+				getFactory().synchronizedDispatchEvent(eventFocusLost, new UIFocusEvent(getEventSource(), UIFocusEvent.FOCUS_LOST, System.currentTimeMillis(), 0));
+			}
+		}
+	}
+	
+	/**
+	 * Logs debug information.
+	 * 
+	 * @param pInfo the debug information
+	 */
+	public void debug(Object... pInfo)
+	{
+		if (logger == null)
+		{
+			logger = LoggerFactory.getInstance(getClass());
+		}
+		
+		logger.debug(pInfo);
+	}
+
+	/**
+	 * Logs information.
+	 * 
+	 * @param pInfo the information
+	 */
+	public void info(Object... pInfo)
+	{
+		if (logger == null)
+		{
+			logger = LoggerFactory.getInstance(getClass());
+		}
+		
+		logger.info(pInfo);
+	}
+
+	
+	/**
+	 * Logs error information.
+	 * 
+	 * @param pInfo the error information
+	 */
+	public void error(Object... pInfo)
+	{
+		if (logger == null)
+		{
+			logger = LoggerFactory.getInstance(getClass());
+		}
+
+		logger.error(pInfo);
+	}
+	
+	/**
+	 * Gets an id for a name.
+	 * 
+	 * @param pName the name
+	 * @return the id
+	 */
+	private String asId(String pName)
+	{
+		if (StringUtil.isEmpty(pName))
+		{
+			return null;
+		}
+		
+		StringBuilder sanitizedId = new StringBuilder();
+		
+		char currentChar;
+		
+		boolean startsWithLetter = false;
+		
+		for (int i = 0, cnt = pName.length(); i < cnt; i++)
+		{
+			currentChar = pName.charAt(i);
+		
+			// RegEx representation: [a-zA-Z0-9-_]
+			if ((currentChar >= 'A' && currentChar <= 'Z')
+				|| (currentChar >= 'a' && currentChar <= 'z')
+				|| ((Character.isDigit(currentChar)
+					 || currentChar == '-'
+					 || currentChar == '_') 
+					&& startsWithLetter))
+			{
+				startsWithLetter = true;
+				
+				sanitizedId.append(currentChar);
+			}
+		}
+		
+		return sanitizedId.toString();
+	}
+	
+}	// WebComponent

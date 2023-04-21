@@ -1,0 +1,263 @@
+/*
+ * Copyright 2013 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 26.03.2013 - [JR] - creation
+ * 13.08.2013 - [JR] - #756: changed add order
+ */
+package com.sibvisions.rad.ui.vaadin.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.rad.ui.IComponent;
+import javax.rad.ui.IContainer;
+import javax.rad.ui.ILayout;
+
+import com.sibvisions.rad.ui.vaadin.impl.layout.AbstractVaadinLayout;
+import com.sibvisions.rad.ui.vaadin.impl.layout.VaadinAbsoluteLayout;
+import com.vaadin.ui.Component;
+
+/**
+ * The <code>ContainerObject</code> acts like an {@link javax.rad.ui.IContainer} but doesn't implement {@link javax.rad.ui.IContainer}.
+ * This class should be used for {@link javax.rad.ui.IContainer} that are not inherited from {@link VaadinContainerBase}. 
+ * 
+ * @author René Jahn
+ */
+public class ContainerObject
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/** the connected container. */
+	private IVaadinContainer vacont;
+	
+	/** List of subcomponents. */
+	protected List<IComponent> components = new ArrayList<IComponent>(4);
+	
+	/** the container layout. */
+	protected ILayout<?> layout;
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+    /**
+     * Creates a new instance of <code>ContainerObject</code>.
+     *
+     * @param pContainer the connected container 
+     */
+	public ContainerObject(IVaadinContainer pContainer)
+	{
+		vacont = pContainer;
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // User-defined methods
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Gets the layout.
+	 * 
+	 * @return the layout
+	 */
+	public ILayout<?> getLayout()
+    {
+    	return layout;
+    }
+
+	/**
+	 * Sets the layout.
+	 * 
+	 * @param pLayout the layout
+	 */
+	public void setLayout(ILayout<?> pLayout)
+    {
+		if (pLayout == null)
+		{	
+			pLayout = new VaadinAbsoluteLayout();	
+		}
+		
+		// Before the components can be added to a new layout they have to be removed from vaadin
+		// It is only possible to add a component ones to a vaadin layout
+		for (IComponent component : components)
+		{
+			vacont.removeFromVaadin(component);
+		}
+		
+		if (layout instanceof AbstractVaadinLayout<?, ?>)
+		{
+		    ((AbstractVaadinLayout)layout).setParentContainer(null);
+		}
+		
+    	layout = pLayout;
+    	
+        if (layout instanceof AbstractVaadinLayout<?, ?>)
+        {
+            ((AbstractVaadinLayout)layout).setParentContainer(vacont);
+        }
+    	
+    	for (IComponent component : components)
+    	{
+    		if (((VaadinComponentBase<?, ?>)component).getSize() != null) 
+    		{
+	    		((Component)((VaadinComponentBase<?, ?>)component).getResource()).setWidth("" + ((VaadinComponentBase<?, ?>)component).getSize().getWidth());
+	    		((Component)((VaadinComponentBase<?, ?>)component).getResource()).setHeight("" + ((VaadinComponentBase<?, ?>)component).getSize().getHeight());   		
+    		}
+    		else
+    		{
+	    		((Component)((VaadinComponentBase<?, ?>)component).getResource()).setSizeUndefined();
+    		}
+    	
+			vacont.addToVaadin(component, ((VaadinComponentBase<?, ?>)component).getConstraints(), -1);
+    	}
+    }
+
+	/**
+	 * Adds a component to the layout, with the given constraints at the given index.
+	 * 
+	 * @param pComponent the component
+	 * @param pConstraints the constraints
+	 * @param pIndex the index
+	 */
+	public void add(IComponent pComponent, Object pConstraints, int pIndex)
+    {
+		// Remove from Container
+		if (pComponent.getParent() != null)
+		{
+			pComponent.getParent().remove(pComponent);
+		}
+
+		//add component to internal list before add to technology, because event handling for events from the underlying technology
+		//should work with our component tree as well (#756)
+		if (pIndex < 0)
+		{
+			components.add(pComponent);
+		}
+		else
+		{
+			components.add(pIndex, pComponent);
+		}
+
+		IContainer conOldParent = pComponent.getParent();
+		
+		pComponent.setParent(vacont);
+
+		try
+		{
+			vacont.addToVaadin(pComponent, pConstraints, pIndex);
+		}
+		catch (RuntimeException re)
+		{
+			components.remove(pComponent);
+			
+			pComponent.setParent(conOldParent);
+			
+			throw re;
+		}
+		catch (Error e)
+		{
+			components.remove(pComponent);
+
+			pComponent.setParent(conOldParent);
+			
+			throw e;
+		}
+    }
+
+	/**
+	 * Removes the component to the layout, at the given index.
+	 *  
+	 * @param pIndex the index
+	 */
+	public void remove(int pIndex)
+    {
+		vacont.removeFromVaadin(components.get(pIndex));
+		
+		IComponent component = components.remove(pIndex);
+		
+		component.setParent(null);
+    }
+
+	/**
+	 * Removes the given component from the layout.
+	 * 
+	 * @param pComponent the component
+	 */
+	public void remove(IComponent pComponent)
+	{
+		if (pComponent.getParent() == vacont)
+		{
+			vacont.remove(components.indexOf(pComponent));
+		}
+	}
+
+	/**
+	 * Removes all components from the layout.
+	 */
+	public void removeAll()
+	{
+		while (components.size() > 0)
+		{
+			vacont.remove(components.size() - 1);
+		}
+	}
+
+	/**
+	 * Gets the current component count.
+	 * 
+	 * @return the number of already added components
+	 */
+	public int getComponentCount()
+	{
+		return components.size();
+	}
+
+	/**
+	 * Gets the component at the given index.
+	 * 
+	 * @param pIndex the index
+	 * @return the component
+	 */
+	public IComponent getComponent(int pIndex)
+	{
+		return components.get(pIndex);
+	}
+	
+	/**
+	 * Gets the layout index of the given component.
+	 * 
+	 * @param pComponent the component
+	 * @return the index
+	 */
+	public int indexOf(IComponent pComponent)
+	{
+		return components.indexOf(pComponent);
+	}
+
+	/**
+	 * Gets the internal components list. Don't modify the list!
+	 * 
+	 * @return the internal component list
+	 */
+	public List<IComponent> getComponents()
+	{
+		return components;
+	}
+	
+}	// ContainerObject

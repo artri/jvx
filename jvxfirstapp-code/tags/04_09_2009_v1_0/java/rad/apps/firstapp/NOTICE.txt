@@ -1,0 +1,6 @@
+SIB Visions JVx First application
+Copyright 2009 SIB Visions GmbH
+
+This product includes software developed by
+SIB Visions GmbH (http://www.sibvisions.com/).
+  

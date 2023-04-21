@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<server>
+ 
+  <proxy secure="true" secureExists="false">
+    <username></username>
+    <password></password>
+  </proxy>
+  
+</server>

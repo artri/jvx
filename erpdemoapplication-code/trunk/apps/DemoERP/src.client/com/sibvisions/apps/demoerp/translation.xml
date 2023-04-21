@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+<entry key="PostgreSQL-23505: *&quot;*&quot;*">Uniqueness violation (*1)! Duplicate key can not be inserted.</entry>
+<entry key="PostgreSQL-23503: *&quot;*&quot;*&quot;*&quot;*&quot;*&quot;*(*)=(*)*&quot;*&quot;*">Delete not possible!  One or more rows still exists in a detail table *1.*5 (*3).</entry>
+<entry key="User '*' is expired for application '*'">User '*0' is no longer valid!</entry>
+<entry key="Unknown method '*'">Method '*' was not found!</entry>
+<entry key="*&quot;*.*.*&quot;*SQLCODE=-532*">Delete not possible!  One or more rows still exists in a detail table *1.*2 (*3).</entry>
+<entry key="MSSQL-2627: *'*'*'*.*'*">Uniqueness violation (*2)! Duplicate key can not be inserted into table *3.*4 .</entry>
+<entry key="PostgreSQL-23505: *»*«*">Uniqueness violation (*1)! Duplicate key can not be inserted.</entry>
+<entry key="PostgreSQL-23505: *&quot;*&quot;">Uniqueness violation (*1)! Duplicate key can not be inserted.</entry>
+<entry key="ORA-02292: *(*.*)*">Delete not possible! One or more rows still exists in a detail table (*2).</entry>
+<entry key="Error opening work-screen '">The screen '*' was not found!</entry>
+<entry key="Invalid request parameters!">The server request contains invalid parameters!</entry>
+<entry key="ORA-00904: &quot;*&quot;.&quot;*&quot;: *">Field *1.*2 was not found!</entry>
+<entry key="Authentication for user '*' and application '*' is not possible">The security system can not perform the authentication</entry>
+<entry key="Parameter 'driver' is missing for application '*'">Configuration error: Drivername is missing!</entry>
+<entry key="*SQLCODE=-407*">Please enter a value in all mandatory fields!</entry>
+<entry key="Invalid stream identifier '*'">Invalid request identifier!</entry>
+<entry key="Missing instance name">Missing object name!</entry>
+<entry key="MSSQL-515: *'*'*'*.*.*'*">Please enter a value in field '*1' (*4.*5)!</entry>
+<entry key="The passwords are different!">The new passwords do not match!</entry>
+<entry key="Error during instantiation of security manager">The security manager cannot be used!</entry>
+<entry key="Invalid password for '*' and application '*'">Invalid password for user '*0'</entry>
+<entry key="MySQL-1048: *'*'*">Please enter a value in field '*1'!</entry>
+<entry key="Session is already open!">Session is already open!</entry>
+<entry key="Parameter 'url' is missing for application '*'">Configuration error: Connection descriptor is missing!</entry>
+<entry key="MySQL-1364: *'*'*">Please enter a value in field '*1'!</entry>
+<entry key="ORA-01407: *(&quot;*&quot;.*.&quot;*&quot;)*">Please enter a value in field '*3' (*1.*2)!</entry>
+<entry key="ORA-00001: *(*.*)*">Uniqueness violation (*2)! Duplicate key can not be inserted.</entry>
+<entry key="Object '*' was not initialized!">Object '*' was not initialized!</entry>
+<entry key="ORA-01722: *">Only numbers are allowed!</entry>
+<entry key="Call back is not allowed!">Callback denied!</entry>
+<entry key="MSSQL-547: *'*'*'*'*'*.*'*'*'*">Delete not possible!  One or more rows still exists in a detail table *5.*6 (*1).</entry>
+<entry key="ORA-01013: *">The operation lasts too long, maybe the record is being edited by another user!</entry>
+<entry key="MySQL-1451: *(`*`.`*`*`*`*(`*`)*`*`*(`*`))">Delete not possible!  One or more rows still exists in a detail table *1.*2 (*4).</entry>
+<entry key="ORA-2*: *ORA-*">*1</entry>
+<entry key="Read timed out">Connection to the server is broken!</entry>
+<entry key="PostgreSQL-23502: *&quot;*&quot;*">Please enter a value in field '*1'!</entry>
+<entry key="No session for call '*'">Session not found!</entry>
+<entry key="PostgreSQL-23503: *»*«*»*«*»*«*(*)=(*)*»*«*">Delete not possible!  One or more rows still exists in a detail table *1.*5 (*3).</entry>
+<entry key="*&quot;*&quot;*&quot;*.*&quot;*SQLCODE=-803*">Uniqueness violation (*3)! Duplicate key not be inserted into table *3.*4 .</entry>
+<entry key="User '*' is inactive for application '*'">User '*0' is deactivated!</entry>
+<entry key="JDBC driver '*' for application '*' was not found!">Configuration error: Databasedriver not found!</entry>
+<entry key="Parameter 'username' is missing for application '*'">Configuration error: Database credentials missing!</entry>
+<entry key="ORA-01400: *(&quot;*&quot;.*.&quot;*&quot;)*">Please enter a value in field '*3' (*1.*2)!</entry>
+<entry key="Invalid session id '*'">Invalid session identification! The session is no longer valid!</entry>
+<entry key="The old and new password are the same">The new password must differ from the old password!</entry>
+<entry key="Parameter 'password' is missing for application '*'">Configuration error: Database credentials missing!</entry>
+<entry key="Unknown object '*'">Object '*' was not found!</entry>
+<entry key="PostgreSQL-23502: *»*«*">Please enter a value in field '*1'!</entry>
+<entry key="Can not open database connection with '*' for application '*'">The database connection can not be established!</entry>
+<entry key="ORA-00054: *">The record is being edited by another user!</entry>
+<entry key="User '*' was not found for application '*'">User '*0' is unknown!</entry>
+<entry key="Session expired!">Your session has expired!</entry>
+<entry key="It is not allowed to open the work-screen '*'">Due to security reasons it's not allowed to open the screen!</entry>
+<entry key="The new password is empty">The new password can not be empty!</entry>
+<entry key="Invalid serializer '*'">The server request serializer is missing!</entry>
+<entry key="Error while changing password of '*' for application '*'">The security system can not change the password</entry>
+<entry key="PostgreSQL-23505: *»*«">Uniqueness violation (*1)! Duplicate key can not be inserted.</entry>
+<entry key="Please change your password">Please change your password!</entry>
+<entry key="MySQL-1062: *'*'*'*'">Uniqueness violation (*3)! Duplicate key '*1' can not be inserted.</entry>
+</properties>

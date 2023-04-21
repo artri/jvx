@@ -1,0 +1,410 @@
+<!-- 
+Copyright 2012 SIB Visions GmbH
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+ 
+http://www.apache.org/licenses/LICENSE-2.0
+ 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+
+<project name="JVx EE" default="start.complete"
+         xmlns:artifact="antlib:org.apache.maven.artifact.ant"
+         xmlns:staging="antlib:org.sonatype.nexus.ant.staging">
+
+  <!-- 
+    ***************************************************************** 
+  	* information   
+  	***************************************************************** 
+  	-->
+    
+  <description>JVx EE</description>
+ 
+  <!-- 
+  	***************************************************************** 
+  	* global properties   
+  	***************************************************************** 
+  	-->
+  
+  <property name="jar.name" value="jvxee.jar" />
+  
+  <property name="release.name" value="jvxee"/>
+  
+  <!-- 
+  	***************************************************************** 
+  	* general properties   
+  	***************************************************************** 
+  	-->
+  
+  <property name="build" location="${basedir}/../build"/>
+  <property name="buildnumber" location="${build}/buildnumber" />
+  <property name="temp" location="${build}/temp" />
+  <property name="licence" location="${basedir}" />
+  <property name="quality" location="${build}/quality" />
+  <property name="classes" location="${temp}/classes" />
+  <property name="example" location="${basedir}/../example/JVx EE Example" />
+  
+  <property name="src" location="${basedir}/src"/>
+  <property name="src.test" location="${basedir}/test" />
+  <property name="libs" location="${basedir}/lib" />
+
+  <property name="install" location="${build}/install" />
+  <property name="release" location="${build}/release" />
+  <property name="javadoc" location="${install}/doc" />
+  <property name="maven"       location="${basedir}/maven" />
+  <property name="checkstyle" location="${install}/checkstyle" />
+  
+  <!-- Maven snapshots and staging repository id and url -->
+  <property name="mvn.snapshotsrep.id"  value="sonatype-nexus-snapshots" />
+  <property name="mvn.snapshotsrep.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
+  <property name="mvn.stagingrep.id"    value="sonatype-nexus-staging" />
+  <property name="mvn.stagingrep.url"   value="https://oss.sonatype.org/service/local/staging/deploy/maven2" />
+  
+  <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant" classpath="${build}/maven/maven-ant-tasks-2.1.3.jar" />
+  	
+  <!-- 
+  	***************************************************************** 
+  	* external taskdefinitions   
+  	***************************************************************** 
+  	-->
+	
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${build}/ant-contrib.jar" />
+
+  <taskdef resource="checkstyletask.properties" classpath="${build}/checkstyle-all-5.1.jar" />
+	
+  <!-- 
+  	***************************************************************** 
+  	* logging   
+  	***************************************************************** 
+  	-->
+
+  <record name="${build}/build.log" />
+  
+  <!-- 
+  	***************************************************************** 
+  	* INTERNAL TASKS   
+  	***************************************************************** 
+  	-->
+  
+  <!--
+    * setup tasks
+    -->
+  
+  <target name="proxy.check">
+    <stopwatch name="timer_proxy"/>
+    
+    <typedef name="canreach" classname="com.sibvisions.addons.ant.CanReach" classpath="${buildnumber}/addons.jar" />
+
+    <if>
+      <istrue value="true" />
+      <then>
+	    <condition property="proxy.enabled">
+	      <and>
+	        <canreach host="10.0.0.1" port="3128"/>
+	      </and>
+	    </condition>
+      </then>
+    </if>
+    
+    <stopwatch name="timer_proxy" action="total"/>
+  </target>
+  
+  <target name="proxy" depends="proxy.check" if="proxy.enabled">
+    <stopwatch name="timer1"/>
+    
+    <property name="proxy.host" value="10.0.0.1"/>
+    <property name="proxy.port" value="3128"/>
+    <property name="proxy.user" value=""/>
+    <property name="proxy.pass" value=""/>
+      
+    <setproxy proxyhost="${proxy.host}" proxyport="${proxy.port}" proxyuser="${proxy.user}" proxypassword="${proxy.password}"/>
+    
+    <stopwatch name="timer1" action="total"/>
+  </target>
+  
+  <!-- 
+	* cleanup tasks 
+	-->
+
+  <target name="clean.start">
+    <stopwatch name="timer1"/>
+    
+    <delete dir="${temp}" />
+    <delete dir="${install}" />
+    <delete dir="${release}" />
+    <delete dir="${quality}" />
+    
+    <stopwatch name="timer1" action="total"/>
+  </target>
+
+  <target name="clean.stop">
+    <stopwatch name="timer2"/>
+    
+    <delete dir="${temp}" />
+    
+    <stopwatch name="timer2" action="total"/>
+  </target>
+
+  <!-- 
+	* compile, build tasks 
+	-->
+
+  <target name="compile">
+  	
+    <stopwatch name="timer3"/>
+      
+  	<mkdir dir="${classes}"/>
+  	
+    <!-- Compile the java code from ${src} into ${build} -->
+    <javac srcdir="${src}" destdir="${classes}" >
+	  <classpath>
+	    <fileset dir="${libs}">
+	      <include name="**/*.jar" />
+	    </fileset>
+	  </classpath>
+  	</javac>
+  	
+    <stopwatch name="timer3" action="total"/>
+  	
+  </target>
+
+  <target name="jar" depends="compile">
+      
+    <stopwatch name="timer4"/>
+      
+    <mkdir dir="${install}"/>
+
+	<!-- buildnumber -->
+    <taskdef name="buildnr" classname="com.sibvisions.addons.ant.AntBuildNumber" classpath="${buildnumber}/addons.jar;${classes}" />
+    <buildnr buildfile="${buildnumber}/buildnr.properties" class="com.sibvisions.rad.persist.jpa.IPackageSetup" versionfield="VERSION" namefield="NAME"/> 
+    
+    <jar jarfile="${install}/${jar.name}" basedir="${classes}">
+	  <manifest>
+   	    <attribute name="Specification-Title" value="${build.versionstring}"/>
+        <attribute name="Specification-Version" value="b${build.number}"/>
+        <attribute name="Specification-Vendor" value="SIB Visions GmbH"/>
+        <attribute name="Implementation-Title" value="${build.versionstring}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+    </jar>
+    
+    <stopwatch name="timer4" action="total"/>
+    
+  </target>
+  
+  <target name="opensource" depends="jar, javadoc">
+
+    <zip destfile="${release}/${release.name}-${build.version}.zip">
+      <zipfileset dir="${install}">
+        <include name="${jar.name}" />
+      </zipfileset>
+      <zipfileset dir="${licence}">
+        <include name="LICENSE.txt" />
+        <include name="NOTICE.txt" />
+      </zipfileset>
+    </zip>
+
+    <zip destfile="${release}/${release.name}-${build.version}_src.zip">
+      <zipfileset dir="${src}" prefix="src" />
+      <zipfileset dir="${licence}">
+        <include name="LICENSE.txt" />
+        <include name="NOTICE.txt" />
+        </zipfileset>
+    </zip>    
+    
+    <zip destfile="${release}/${release.name}-${build.version}_javadoc.zip">
+      <zipfileset dir="${javadoc}" prefix="api" />
+      <zipfileset dir="${licence}">
+        <include name="LICENSE.txt" />
+      </zipfileset>
+    </zip>    
+
+    <zip destfile="${release}/${release.name}-${build.version}_eclipse_example.zip">
+      <zipfileset dir="${example}">
+        <exclude name="**/classes/**"/>
+        <exclude name="**/jvxeeexample.log"/>
+        <exclude name="**/jvxeeexample.lck"/>
+        <exclude name="**/jvxeeexample.tmp/**"/>
+        <exclude name="**/eclipselink-src-2.3.2.v20111125-r10461.zip"/>
+      </zipfileset>
+    </zip>    
+    
+  </target>  
+	
+  <target name="maven.snapshot" depends="proxy">
+    <property name="debug" value="on" />
+    <property name="debuglevel" value="lines,vars,source" />
+
+    <property name="maven.version.postfix" value="-SNAPSHOT" />
+
+    <property name="mvn.id" value="${mvn.snapshotsrep.id}" />
+    <property name="mvn.url" value="${mvn.snapshotsrep.url}" />
+    
+  </target>
+  
+  <target name="maven" depends="proxy">
+      
+	<property name="maven.version.postfix" value="" />
+	<property name="mvn.groupId" value="com.sibvisions" />
+		
+	<condition property="gpgexecutable" value="C:\Program Files (x86)\GNU\GnuPG\pub\gpg.exe" else="gpg">
+	  <and>
+		<os family="Windows" />
+	  </and>
+    </condition>
+		
+	<!-- define late because of the classpath -->
+	<taskdef name="buildnr" classname="com.sibvisions.addons.ant.AntBuildNumber" classpath="${buildnumber}/addons.jar;${classes}" />
+	<buildnr buildfile="${buildnumber}/buildnr.properties" loadOnly="true"/>
+		
+	<propertyregex property="versionnumber" input="${build.version}" regexp=" " replace="_" global="true" defaultValue="${build.version}" />
+		
+	<property name="mvn.jvxee.jar" value="${release}/maven/${release.name}-${versionnumber}${maven.version.postfix}.jar" />
+	<property name="mvn.jvxee.sources.jar" value="${release}/maven/${release.name}-${versionnumber}${maven.version.postfix}-sources.jar" />
+	<property name="mvn.jvxee.javadoc.jar" value="${release}/maven/${release.name}-${versionnumber}${maven.version.postfix}-javadoc.jar" />
+		
+	<property name="mvn.id" value="${mvn.stagingrep.id}" />
+	<property name="mvn.url" value="${mvn.stagingrep.url}" />
+		
+	<mkdir dir="${release}/maven" />
+		
+	<zip destfile="${mvn.jvxee.jar}">
+	  <zipfileset src="${install}/${jar.name}"/>
+	</zip>
+		
+	<zip destfile="${mvn.jvxee.sources.jar}">
+	  <zipfileset dir="${src}/" includes="**" excludes="**/package.html" prefix=""/>
+	</zip>
+		
+	<unzip src="${release}/${release.name}-${build.version}_javadoc.zip" dest="${release}/maven/javadoc"/>
+		
+	<zip destfile="${mvn.jvxee.javadoc.jar}">
+	  <zipfileset dir="${release}/maven/javadoc/api" />
+	</zip>
+		
+	<property name="maven.tmp" location="${temp}/maven" />
+		
+	<delete dir="${release}/maven/javadoc" />
+	<delete dir="${maven.tmp}" />
+		
+	<copy todir="${maven.tmp}">
+	  <fileset dir="${maven}"/>
+	</copy>
+		
+	<replace dir="${maven.tmp}" token="&lt;version&gt;1.1&lt;/version&gt;" value="&lt;version&gt;${versionnumber}${maven.version.postfix}&lt;/version&gt;">
+	  <include name="**/pom.xml" />
+	</replace>
+		
+	<artifact:mvn>
+	  <arg value="org.apache.maven.plugins:maven-gpg-plugin:1.4:sign-and-deploy-file" />
+	  <arg value="-Durl=${mvn.url}" />
+	  <arg value="-DrepositoryId=${mvn.id}" />
+	  <arg value="-DpomFile=${maven.tmp}/jvxee/pom.xml" />
+	  <arg value="-Dfile=${mvn.jvxee.jar}" />
+	  <arg value="-Dfiles=${mvn.jvxee.sources.jar},${mvn.jvxee.javadoc.jar}" />
+	  <arg value="-Dclassifiers=sources,javadoc" />
+	  <arg value="-Dtypes=jar,jar" />
+	  <arg value="-Pgpg" />
+	  <arg value="-Dgpg.executable=${gpgexecutable}" />
+	</artifact:mvn>
+  </target>
+	
+  <!-- 
+	* quality tasks 
+	-->
+	
+  <target name="checkstyle">
+    <stopwatch name="timer5"/>
+    
+    <property name="checkstyle" location="${quality}/checkstyle" />
+
+    <!-- important because it is used in checkstyle.xml -->
+  	<property name="project_loc" location="${basedir}" />
+
+    <delete dir="${checkstyle}" />
+    <mkdir dir="${checkstyle}" />
+
+    <checkstyle configurl="http://jvx.svn.sourceforge.net/viewvc/jvx/trunk/java/library/checkstyle_opensource.xml">
+      <classpath path="${libs}/jvx.jar"/>
+      <fileset dir="${src}" includes="**/*.java" />
+      <fileset dir="${src.test}" includes="**/*.java" />
+      <formatter type="plain" />
+      <formatter type="xml" toFile="${checkstyle}/checkstyle_errors.xml" />
+    </checkstyle>
+
+    <xslt in="${checkstyle}/checkstyle_errors.xml" out="${checkstyle}/dummy.html" style="${build}/checkstyle-frames-errors.xsl" />
+    <xslt in="${checkstyle}/checkstyle_errors.xml" out="${checkstyle}/index_simple.html" style="${build}/checkstyle-simple.xsl" />
+
+    <!-- cleanup -->
+    <delete file="${checkstyle}/dummy.html" />
+    <delete>
+      <fileset dir="${checkstyle}">
+        <include name="*.xml" />
+      </fileset>
+    </delete>
+
+    <stopwatch name="timer5" action="total"/>
+  </target>	
+	
+ <target name="javadoc" depends="proxy">
+     
+    <stopwatch name="timer6"/>
+    
+    <delete dir="${javadoc}" />
+ 	<mkdir dir="${javadoc}" />
+ 	
+    <javadoc packagenames="*" 
+      		 defaultexcludes="yes" 
+             destdir="${javadoc}" 
+             author="false" 
+             version="false" 
+             use="true" 
+             windowtitle="JVx EE"
+             source="1.5" 
+             encoding="ISO-8859-1">
+      <arg value="-J-Dhttp.proxyHost=${proxy.host}"/>
+      <arg value="-J-Dhttp.proxyPort=${proxy.port}"/>
+      <arg value="-J-Dhttp.proxyUser=${proxy.user}"/>
+      <arg value="-J-Dhttp.proxyPassword=${proxy.password}"/>
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="**/*.jar" />
+        </fileset>
+      </classpath>
+      <sourcepath>
+        <pathelement location="${src}" />
+      </sourcepath>
+      <doctitle>
+        <![CDATA[<h1>JVx EE</h1>]]>
+      </doctitle>
+      <bottom><![CDATA[<i>Copyright &#169; 2012 SIB Visions GmbH. All Rights Reserved.</i>]]></bottom>
+	  <link href="http://docs.oracle.com/javase/6/docs/api/"/>
+	  <link href="http://docs.oracle.com/javaee/5/api/"/>
+	  <link href="http://www.sibvisions.com/files/jvx/2.3/api/"/>
+    </javadoc>
+
+    <stopwatch name="timer6" action="total"/>
+    
+  </target>	
+	
+  <!-- 
+  	***************************************************************** 
+  	* PUBLIC START TASKS   
+  	***************************************************************** 
+  	-->
+ 
+  <target name="start.quality" depends="clean.start, checkstyle, javadoc, clean.stop" />
+  
+  <target name="start.complete" depends="clean.start, opensource, clean.stop"/> 
+  
+  <target name="start.maven" depends="clean.start, opensource, maven" description="Publishing a maven release"/>
+  <target name="start.maven.snapshot" depends="clean.start, maven.snapshot, opensource, maven" description="Publishing a maven snapshot"/>
+ 
+</project>

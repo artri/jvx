@@ -1,0 +1,8 @@
+#valid for 20 years
+set OPENSSL_CONF=C:\Programme\Gemeinsame Dateien\SSL\openssl.cnf
+
+C:\Programme\OpenSSL-Win32\bin\openssl req -new -x509 -days 7300 -nodes -text -out server.crt -keyout server.key -subj "/CN=vmpgsqlwinxp.sibvisions.net"
+C:\Programme\OpenSSL-Win32\bin\openssl req -new -nodes -text -out root.csr -keyout root.key -subj "/CN=root.sibvisions.net"
+C:\Programme\OpenSSL-Win32\bin\openssl x509 -req -in root.csr -text -days 7300 -extfile "C:\Programme\Gemeinsame Dateien\SSL\openssl.cnf" -extensions v3_ca -signkey root.key -out root.crt
+C:\Programme\OpenSSL-Win32\bin\openssl req -new -nodes -text -out server.csr -keyout server.key -subj "/CN=vmpgsqlwinxp.sibvisions.net"
+C:\Programme\OpenSSL-Win32\bin\openssl x509 -req -in server.csr -text -days 7300 -CA root.crt -CAkey root.key -CAcreateserial -out server.crt

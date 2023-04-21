@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<server>
+  <startport>2001</startport>
+ 
+  <audio>off</audio>
+  <serial>COM1</serial>
+  <buttondelay>1000</buttondelay>
+
+  <media directory="C:\Temp\smedia"/>
+
+  <tcp bindaddress="0.0.0.0">
+  
+  <db name="SERVER_1" path="C:\Temp">
+  
+</server>

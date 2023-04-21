@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+
+  <!--
+   **************************************************************************
+    Context configuration 
+   **************************************************************************
+   -->
+
+  <display-name>JVx</display-name>
+
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+  <!--
+   **************************************************************************
+    JVx configuration
+   **************************************************************************
+   -->
+
+  <!-- Servlet for accessing the JVx server through http(s) streaming protocol. -->
+  <servlet>
+    <servlet-name>ServletServer</servlet-name>
+    <servlet-class>com.sibvisions.rad.server.http.ServletServer</servlet-class>
+  </servlet>
+      
+  <servlet-mapping>
+    <servlet-name>ServletServer</servlet-name>
+    <url-pattern>/services/Server</url-pattern>
+  </servlet-mapping>
+
+  <!-- Servlet for downloading content (reports, csv export, any binary data). -->
+  <servlet>
+    <servlet-name>DownloadServlet</servlet-name>
+    <servlet-class>com.sibvisions.rad.server.http.DownloadServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>DownloadServlet</servlet-name>
+    <url-pattern>/services/Download</url-pattern>
+  </servlet-mapping>
+
+  <!-- Servlet for uploading content (images, import files, any binary data). -->
+  <servlet>
+    <servlet-name>UploadServlet</servlet-name>
+    <servlet-class>com.sibvisions.rad.server.http.UploadServlet</servlet-class>
+  </servlet>
+      
+  <servlet-mapping>
+    <servlet-name>UploadServlet</servlet-name>
+    <url-pattern>/services/Upload</url-pattern>
+  </servlet-mapping>
+
+  <!-- Servlet for testing ISerializer implementations. -->
+  <servlet>
+    <servlet-name>SerializerServlet</servlet-name>
+    <servlet-class>http.SerializerServlet</servlet-class>
+  </servlet>
+      
+  <servlet-mapping>
+    <servlet-name>SerializerServlet</servlet-name>
+    <url-pattern>/services/Serializer</url-pattern>
+  </servlet-mapping>
+  
+  <!--
+   ************************************************************************** 
+    Database configuration 
+   **************************************************************************
+   -->
+
+  <!-- DB Server start/stop listener -->
+  <listener>
+    <listener-class>http.RadContextListener</listener-class>
+  </listener>
+
+  <!-- REST listener -->
+  <listener>
+    <listener-class>http.RestContextListener</listener-class>
+  </listener>
+  
+  <!-- custom REST services -->
+  <listener>
+    <listener-class>com.sibvisions.jvx.CustomRESTServices</listener-class>
+  </listener>
+
+  <!--
+   ************************************************************************** 
+    REST support 
+   **************************************************************************
+   -->
+
+  <!-- Restlet adapter -->  
+  <servlet>  
+    <servlet-name>RestletServlet</servlet-name>  
+    <servlet-class>com.sibvisions.rad.server.http.rest.RESTServlet</servlet-class>
+    
+    <init-param>
+      <!-- Application class name -->
+      <param-name>org.restlet.application</param-name>
+      <param-value>com.sibvisions.rad.server.http.rest.RESTAdapter</param-value>
+    </init-param>
+    
+    <init-param>
+      <param-name>cors.origin</param-name>
+      <param-value>*</param-value>
+    </init-param>
+    
+    <init-param>
+      <param-name>adminservices.enabled</param-name>
+      <param-value>true</param-value>
+    </init-param>
+
+    <init-param>
+      <param-name>adminservice.testAuthentication.enabled</param-name>
+      <param-value>true</param-value>
+    </init-param>
+
+  </servlet>  
+  
+  <servlet-mapping>  
+    <servlet-name>RestletServlet</servlet-name>  
+    <url-pattern>/services/rest/*</url-pattern>  
+  </servlet-mapping> 
+
+  <!--
+   ************************************************************************** 
+    Special mime-type mappings 
+   **************************************************************************
+   -->
+   
+  <!-- Mime type for csv export. -->  
+  <mime-mapping> 
+    <extension>csv</extension> 
+    <mime-type>application/vnd.ms-excel</mime-type> 
+  </mime-mapping>
+  
+</web-app>

@@ -1,0 +1,284 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 01.10.2008 - [RH] - creation
+ * 02.11.2008 - [RH] - test cases adjusted. -> convertObjetcToStorage removed
+ * 07.04.2009 - [RH] - interface review - Test cases adapted
+ * 25.06.2009 - [JR] - testGetValueByIndex implemented [BUGFIX-TEST]
+ * 03.04.2014 - [RZ] - does no longer extend EventProcotol
+ * 03.04.2014 - [RZ] - #2 - added testTicket2
+ */
+package com.sibvisions.rad.model.mem;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+import javax.rad.model.ColumnDefinition;
+import javax.rad.model.IDataRow;
+import javax.rad.model.ModelException;
+import javax.rad.model.RowDefinition;
+import javax.rad.model.SortDefinition;
+import javax.rad.model.datatype.BigDecimalDataType;
+import javax.rad.model.event.DataRowEvent;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.sibvisions.rad.model.EventProtocol;
+
+
+/**
+ * Tests all Functions of {@link DataRow} .<br>
+ * 
+ * @see com.sibvisions.rad.model.mem.DataRow
+ * @author Roland Hörmann
+ */
+public class TestDataRow
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/** The DataRow test instance. */
+	private DataRow	drDataRow;
+	
+	/** The RowDefinition for the test DataRow. */
+	private RowDefinition rdRowDefinition;	
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Init RowDefinition and construct a DataRow. 
+	 * 
+	 * @throws Exception
+	 *             if the DataRow couldn't instantiate
+	 */
+	@Before
+	public void init() throws Exception
+	{
+		// init the RowDefinition
+		rdRowDefinition = new RowDefinition();
+		
+		ColumnDefinition cdId   = new ColumnDefinition("id", new BigDecimalDataType());
+		ColumnDefinition cdName = new ColumnDefinition("name");
+		
+		rdRowDefinition.addColumnDefinition(cdId);		
+		rdRowDefinition.addColumnDefinition(cdName);
+		
+		// construct DataRow
+		drDataRow = new DataRow(rdRowDefinition);
+	}
+		
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Test methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Test some base functions in the DataRow.
+	 * 
+	 * @throws Exception
+	 *             if not all DataRow methods work correctly
+	 */	
+	@Test
+	public void testBaseFunctions() throws Exception
+	{
+		Assert.assertEquals(rdRowDefinition, drDataRow.getRowDefinition());
+		
+		// test getter/setter
+		drDataRow.setValue("id", new BigDecimal(1));
+		drDataRow.setValue("name", "The name");
+		Assert.assertEquals("The name", drDataRow.getValue("name"));
+		Assert.assertEquals(new BigDecimal(1), drDataRow.getValue("id"));
+		
+		// test getData() - id is first in RowDefinition
+		Assert.assertEquals(drDataRow.getValue("id"), new BigDecimal(1)); 		
+		System.out.println(drDataRow);
+		
+		// test clone
+		IDataRow drClone = drDataRow.createDataRow(null);
+		drClone.setValue("id", new BigDecimal(2));
+		Assert.assertEquals("The name", drClone.getValue("name"));
+		Assert.assertEquals(new BigDecimal(2), drClone.getValue("id"));
+		Assert.assertEquals(1, drClone.compareTo(drDataRow));
+		
+		// test clone(new String[] {}
+		drClone = drDataRow.createDataRow(new String[] {"id"});
+		drClone.setValue("id", new BigDecimal(2));
+		Assert.assertEquals(new BigDecimal(2), drClone.getValue("id"));
+		Assert.assertTrue(drClone.compareTo(drDataRow, new SortDefinition(new String[] {"id"})) == 1);
+		Assert.assertTrue(drClone.compareTo(drDataRow) == 1);
+		
+		// test rowFactory(new String[] {})
+		IDataRow drEmpty = drDataRow.createEmptyDataRow(new String[] {"name"});
+		Assert.assertEquals(null, drEmpty.getValue("name"));
+		Assert.assertTrue(drEmpty.getRowDefinition().getColumnDefinition("name") != null);
+		Assert.assertEquals(1, drEmpty.getRowDefinition().getColumnCount());
+		System.out.println(drClone);
+	}
+	
+	/**
+	 * Test the Listeners of the DataRow.
+	 * 
+	 * @throws Exception
+	 *             if not all Listener methods work correctly
+	 */
+	@Test
+	public void testListener() throws Exception
+	{
+		EventProtocol eventProtocol = new EventProtocol();
+		
+		// register listeners
+		drDataRow.eventValuesChanged().addListener(eventProtocol);
+		drDataRow.addControl(eventProtocol);
+		
+		// Change Data in the DataRow
+		drDataRow.setValue("id", new BigDecimal(1));
+		drDataRow.setValue("name", "The name");
+
+		IDataRow drClone = drDataRow.createEmptyDataRow(null);
+		drClone.setValue("id", new BigDecimal(2));
+		String[] pColumnNames = drDataRow.getRowDefinition().getColumnNames();
+		drDataRow.setValues(pColumnNames, drDataRow.getValues(pColumnNames));	
+		System.out.println(drClone);
+		
+		System.out.println(eventProtocol.getEventsAsString());
+		
+		List<EventProtocol.EventEntry> events = eventProtocol.getEvents();
+		
+		Assert.assertEquals(EventProtocol.EventEntry.EventType.VALUES_CHANGED, events.get(0).getEventType());
+		Assert.assertEquals(EventProtocol.EventEntry.EventType.NOTIFY_REPAINT, events.get(1).getEventType());
+		Assert.assertEquals(EventProtocol.EventEntry.EventType.VALUES_CHANGED, events.get(2).getEventType());
+		Assert.assertEquals(EventProtocol.EventEntry.EventType.NOTIFY_REPAINT, events.get(3).getEventType());
+		Assert.assertEquals(EventProtocol.EventEntry.EventType.VALUES_CHANGED, events.get(4).getEventType());
+		Assert.assertEquals(EventProtocol.EventEntry.EventType.NOTIFY_REPAINT, events.get(5).getEventType());
+		
+		// remove listeners
+		drDataRow.removeControl(eventProtocol);
+		drDataRow.eventValuesChanged().removeListener(eventProtocol);
+	}
+	
+	/**
+	 * Test {@link DataRow#getValue(int)}.
+	 * 
+	 * @throws Exception if the test fails
+	 */
+	@Test
+	public void testGetValueByIndex() throws Exception
+	{
+		RowDefinition rowdef = new RowDefinition();
+		
+		rowdef.addColumnDefinition(new ColumnDefinition("NAME"));
+		rowdef.addColumnDefinition(new ColumnDefinition("BEMERKUNG"));
+
+		DataRow row = new DataRow(rowdef);
+		
+		IDataRow rowClone = row.createEmptyDataRow(new String[] {"NAME"});
+		rowClone.getRowDefinition().addColumnDefinition(new ColumnDefinition("NAME_CLONE"));
+		rowClone.getRowDefinition().addColumnDefinition(new ColumnDefinition("BEMERKUNG_CLONE"));
+	
+		//the internal array has size = 1, but the rowdefinition size = 3
+		Assert.assertNull("Internal array has an invalid size", rowClone.getValue(2));
+	}
+	
+	/**
+	 * Test for ticket #2.
+	 * A listener that does only subscribes to certain column names should only get
+	 * events for these columns.
+	 * 
+	 * @throws ModelException if the test fails
+	 */
+	@Test
+	public void testTicket2() throws ModelException
+	{
+		EventProtocol epAll = new EventProtocol();
+		EventProtocol epName = new EventProtocol();
+		
+		drDataRow.eventValuesChanged().addListener(epAll);
+		drDataRow.eventValuesChanged("name").addListener(epName);
+		
+		drDataRow.setValue("id", new BigDecimal(4));
+		drDataRow.setValue("name", "Another name");
+	
+		Assert.assertEquals(2,  epAll.getEvents().size());
+		Assert.assertEquals(1,  epName.getEvents().size());
+		
+		assertEventValuesChanged(epAll.getEvents().get(0), new String[] {"id"});
+		assertEventValuesChanged(epAll.getEvents().get(1), new String[] {"name"});
+		assertEventValuesChanged(epName.getEvents().get(0), new String[] {"name"});
+	
+		drDataRow.setValues(new String[] {"id"}, new Object[] { new BigDecimal(5)});
+		drDataRow.setValues(new String[] {"id",  "name"}, new Object[] { new BigDecimal(6), "Second Name"});
+		
+		Assert.assertEquals(4,  epAll.getEvents().size());
+		Assert.assertEquals(2,  epName.getEvents().size());
+		
+		assertEventValuesChanged(epAll.getEvents().get(2), new String[] {"id"});
+		assertEventValuesChanged(epAll.getEvents().get(3), new String[] {"id", "name"});
+		assertEventValuesChanged(epName.getEvents().get(1), new String[] {"id",  "name"});
+		
+		drDataRow.eventValuesChanged().removeListener(epAll);
+		
+		drDataRow.setValue("id", new BigDecimal(7));
+		drDataRow.setValue("name", "Yet another name");
+		
+		Assert.assertEquals(4,  epAll.getEvents().size());
+		Assert.assertEquals(3,  epName.getEvents().size());
+		
+		assertEventValuesChanged(epName.getEvents().get(2), new String[] {"name"});
+		
+		drDataRow.eventValuesChanged().removeListener(epName);
+	}
+	
+	/**
+	 * Asserts that the given event is of the type <code>VALUES_CHANGED</code> and
+	 * that the changed columns matches the given column names.
+	 * 
+	 * @param pEventEntry the event to check
+	 * @param pColumnNames the column names
+	 */
+	private void assertEventValuesChanged(EventProtocol.EventEntry pEventEntry, String[] pColumnNames)
+	{
+		Assert.assertEquals(EventProtocol.EventEntry.EventType.VALUES_CHANGED, pEventEntry.getEventType());
+		
+		DataRowEvent event = (DataRowEvent) pEventEntry.getOriginalEvent();
+		
+		Assert.assertArrayEquals(pColumnNames, event.getChangedColumnNames());
+	}
+
+	   /**
+     * Test equals should not throw an exception.
+     * 
+     * @throws ModelException if the test fails
+     */
+    @Test
+    public void testEquals() throws ModelException
+    {
+        DataRow dr1 = new DataRow();
+        dr1.getRowDefinition().addColumnDefinition(new ColumnDefinition("SEARCH"));
+        DataRow dr2 = new DataRow();
+        dr2.getRowDefinition().addColumnDefinition(new ColumnDefinition("SEARCH"));
+        dr2.getRowDefinition().addColumnDefinition(new ColumnDefinition("DISPLAY"));
+        
+        Assert.assertEquals(-1, dr1.compareTo(dr2));
+        Assert.assertEquals(1, dr2.compareTo(dr1));
+    }
+
+} 	// TestDataRow

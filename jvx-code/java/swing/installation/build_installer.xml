@@ -1,0 +1,200 @@
+<!-- 
+Copyright 2021 SIB Visions GmbH
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+ 
+http://www.apache.org/licenses/LICENSE-2.0
+ 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+
+<project name="Application Installer" default="start.complete">
+
+	<!-- 
+    ***************************************************************** 
+  	* information   
+  	***************************************************************** 
+  	-->
+
+	<description>Creates the application installer file</description>
+
+    <!-- 
+    ***************************************************************** 
+  	* global properties
+  	***************************************************************** 
+  	-->
+	
+	<property name="app.name" value="Application"/>
+	
+	<property name="installer.type.win"   value="msi" />
+	<property name="installer.type.mac"   value="dmg" />
+	<property name="installer.type.linux" value="rpm" />
+	
+	<property name="installer.favicon.win"   location="${basedir}/WebContent/favicon.ico" />
+	<property name="installer.favicon.mac"   location="${basedir}/WebContent/favicon.icns" />
+	<property name="installer.favicon.linux" location="${basedir}/WebContent/favicon.ico" />
+	
+	<property name="installer.vendor" value="SIB Visions GmbH" />
+
+	<!-- 
+  	***************************************************************** 
+  	* general properties   
+  	***************************************************************** 
+  	-->
+
+	<property name="build" location="${basedir}/build" />
+	<property name="temp"  location="${build}/temp" />
+
+	<property name="install"    location="${build}/install" />
+	
+	<property name="installer.jre"    location="${basedir}/ant/installer/jre" />
+	<property name="installer.input"  location="${temp}/installer_input" />
+	<property name="installer.output" location="${install}/installer" />
+
+	<property name="jpackage" location="${java.home}/bin/jpackage" />
+
+	<property name="jar.name.jvxclient" value="jvxclient.jar" />
+	
+    <!-- 
+  	***************************************************************** 
+  	* external taskdefinitions   
+  	***************************************************************** 
+  	-->
+	
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${basedir}/ant/ant-contrib.jar" />
+	
+	<!-- 
+  	***************************************************************** 
+  	* INTERNAL TASKS   
+  	***************************************************************** 
+  	-->
+
+  	<!-- 
+	* cleanup tasks 
+	-->
+	
+	<!-- JVM 15 check -->
+	<target name="jvm15">
+		<fail message="Unsupported Java version: ${java.version}. Make sure that the Java version is >= 15.">
+		    <condition>
+	          <bool>
+	            <islessthan arg1="${java.version}" arg2="15"/>
+	          </bool>
+		    </condition>
+		</fail>
+	</target>
+
+	<target name="clean.start">
+		
+		<delete dir="${temp}" />
+		<delete dir="${install}" />
+		
+	</target>
+	
+	<target name="prepare.input" >
+		
+		<copy todir="${installer.input}">
+			<fileset dir="${basedir}/ant/installer">
+				<include name="application.jnlp" />
+				<include name="${jar.name.jvxclient}" />
+			</fileset>
+		</copy>	
+		
+	</target>
+	
+	<!-- Creates the installer file via jpackage -->
+	<target name="create.installer" depends="jvm15, prepare.input">
+		
+		<delete dir="${installer.output}"/>
+		<mkdir dir="${installer.output}"/>
+		
+		<exec executable="${jpackage}" failonerror="true" dir="${installer.output}" osfamily="windows">
+			<arg value="-i" />
+			<arg value="${installer.input}" />
+			<arg value="--main-class" />
+			<arg value="com.sibvisions.rad.ui.swing.impl.SwingStarter" />
+			<arg value="--main-jar" />
+			<arg value="${jar.name.jvxclient}" />
+			<arg value="--win-dir-chooser" />
+			<arg value="--type" />
+			<arg value="${installer.type.win}" />
+			<arg value="--name" />
+			<arg value="${app.name}" />
+			<arg value="--vendor" />
+			<arg value="${installer.vendor}" />
+			<arg value="--description" />
+			<arg value="Starts a swing application from values specified in an .jnlp file." />
+			<arg value="--icon" />
+            <arg value="${installer.favicon.win}" />
+			<arg value="--runtime-image" />
+			<arg value="${installer.jre}" />
+		</exec>
+		
+		<exec executable="${jpackage}" failonerror="true" dir="${installer.output}" osfamily="mac">
+			<arg value="-i" />
+			<arg value="${installer.input}" />
+			<arg value="--main-class" />
+			<arg value="com.sibvisions.rad.ui.swing.impl.SwingStarter" />
+			<arg value="--main-jar" />
+			<arg value="${jar.name.jvxclient}" />
+			<arg value="--type" />
+			<arg value="${installer.type.mac}" />
+			<arg value="--name" />
+			<arg value="${app.name}" />
+			<arg value="--vendor" />
+			<arg value="${installer.vendor}" />
+			<arg value="--description" />
+			<arg value="Starts a swing application from values specified in an .jnlp file." />
+			<arg value="--icon" />
+            <arg value="${installer.favicon.mac}" />
+			<arg value="--runtime-image" />
+			<arg value="${installer.jre}" />
+		</exec>
+		
+		<exec executable="${jpackage}" failonerror="true" dir="${installer.output}" osfamily="unix">
+			<arg value="-i" />
+			<arg value="${installer.input}" />
+			<arg value="--main-class" />
+			<arg value="com.sibvisions.rad.ui.swing.impl.SwingStarter" />
+			<arg value="--main-jar" />
+			<arg value="${jar.name.jvxclient}" />
+			<arg value="--type" />
+			<arg value="${installer.type.linux}" />
+			<arg value="--name" />
+			<arg value="${app.name}" />
+			<arg value="--vendor" />
+			<arg value="${installer.vendor}" />
+			<arg value="--description" />
+			<arg value="Starts a swing application from values specified in an .jnlp file." />
+			<arg value="--icon" />
+            <arg value="${installer.favicon.linux}" />
+			<arg value="--runtime-image" />
+			<arg value="${installer.jre}" />
+		</exec>
+		
+	</target>
+
+	<!-- 
+  	***************************************************************** 
+  	* PUBLIC START TASKS   
+  	***************************************************************** 
+  	-->
+
+	<!-- 
+	  This task builds an installer for the swing starter application. Following steps have to be taken for this to work:
+	  
+		 1. Install OpenJDK 16
+		 2. Enable .NET 3.5 Features (Control Panel\All Control Panel Items\Programs and Features\Turn Windows Features On/Off)
+		 3. Install WIX Toolset -> add to PATH
+		 
+		 The application.jnlp of this application has to be copied to the same folder as this file.
+	-->
+	<target name="start.complete" depends="jvm15, clean.start, create.installer" description="Creates the application installer" />
+
+</project>

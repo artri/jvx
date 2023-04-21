@@ -1,0 +1,89 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+	<title>[TITLE]</title> 
+    <link rel="stylesheet" href="Upload?APPLICATION=[APPLICATION]&CONNECTION_ID=[CONNECTION_ID]&RESOURCE=upload.css" type="text/css"/>
+    <script language="javascript" type="text/javascript">
+    var width  = 380;
+    var height = 220;
+    var x;
+    var y;
+    function configure()
+    {
+      if (window)
+      {
+        if (document.all)
+        {
+          //IE as browser
+          //height = 200;
+        }
+
+        x = (window.screen.width - width) / 2;
+        y = (window.screen.height - height) / 2;
+        
+        window.resizeTo(width, height);
+        window.moveTo(x, y);
+        window.focus();
+      }
+    }
+    function upload()
+    {
+      if (!document.getElementById('SUBMIT').disabled)
+      {
+  	    document.FORM.submit();
+  	    document.getElementById('FILE').disabled = true;
+  	    document.getElementById('SUBMIT').disabled = true;
+  	    document.getElementById('CANCEL').disabled = true;
+      }
+    }
+    function cancel()
+    {
+      if (!document.getElementById('SUBMIT').disabled)
+      {
+  	    document.FORM.reset();
+  	    document.FORM.submit();
+  	    document.getElementById('FILE').disabled = true;
+  	    document.getElementById('SUBMIT').disabled = true;
+  	    document.getElementById('CANCEL').disabled = true;
+      }
+    }
+    function close()
+    {
+	  //don't use XMLHttpRequest -> causes problems when closing with firefox and is not fast enough!
+	  //maybe the request will be canceled from the browser?
+	  
+	  //don't use:
+      //var img = new Image();
+   	  //img.src = 'Upload?APPLICATION=[APPLICATION]&KEY=[KEY]&WAIT=false&CLOSE';
+   	  //
+   	  //because firefox closes the window too fast and interrupts the request!
+
+      if (!document.getElementById('SUBMIT').disabled)
+      {
+          //that's the only way to be sure that the upload will be canceled
+	   	  opener.open('Upload?APPLICATION=[APPLICATION]&KEY=[KEY]&CONNECTION_ID=[CONNECTION_ID]&WAIT=false&CLOSE=true', '', 'width='+width+',height=80,left='+x+',top='+y+',status=no,location=no,status=no,menubar=notoolbar=no,menubar=no,dependent=yes,resizable=yes');
+      } 
+    }
+    </script>
+  </head>
+  <body onLoad="javascript:configure();" onUnload="javascript:close();">
+    <form name="FORM" method="POST" enctype="multipart/form-data" action="Upload?APPLICATION=[APPLICATION]&CONNECTION_ID=[CONNECTION_ID]&KEY=[KEY]">
+      <table height="100%" width="100%" cellspacing="0" cellpadding="0" border="0">
+	    <tr>
+	      <td align="center" valign="middle">
+		    <table cellspacing="0" cellpadding="0" border="0">	    	  
+              <tr><td colspan="2" align="left" valign="middle"><span class="infotext">[INFOTEXT]</span></td></tr>
+			  <tr><td colspan="2" class="spacer15"><img src="Upload?APPLICATION=[APPLICATION]&CONNECTION_ID=[CONNECTION_ID]&RESOURCE=images/1x1.gif" class="spacer15"></td></tr>
+			  <tr><td colspan="2"><input type="file" name="FILE" id="FILE" onChange="javascript:upload();"/></td></tr>
+			  <tr><td colspan="2" class="spacer20"><img src="Upload?APPLICATION=[APPLICATION]&CONNECTION_ID=[CONNECTION_ID]&RESOURCE=images/1x1.gif" class="spacer20"></td></tr>
+			  <tr>
+			    <td align="left"><input type="submit" id="SUBMIT" value="[UPLOADBUTTON]" onClick="javascript:upload();"/></td>
+			    <td align="right"><input type="submit" id="CANCEL" value="[CANCELBUTTON]" onClick="javascript:cancel();"/></td>
+			  </tr>
+		    </table>
+          </td>
+        </tr>
+      </table>
+    </form>
+  </body>
+</html>

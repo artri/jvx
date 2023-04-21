@@ -1,0 +1,135 @@
+/*
+ * Copyright 2020 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 28.08.2020 - [JR] - creation
+ */
+package javax.rad.genui.component;
+
+import java.math.BigDecimal;
+
+import javax.rad.application.DesktopApplication;
+import javax.rad.application.genui.UILauncher;
+import javax.rad.model.ColumnDefinition;
+import javax.rad.model.datatype.BigDecimalDataType;
+import javax.rad.model.datatype.StringDataType;
+import javax.rad.model.event.DataRowEvent;
+import javax.rad.model.event.IDataRowListener;
+import javax.rad.ui.IComponent;
+import javax.rad.ui.component.IMap;
+
+import com.sibvisions.rad.model.mem.MemDataBook;
+import com.sibvisions.rad.ui.swing.impl.SwingApplication;
+import com.sibvisions.rad.ui.swing.impl.component.map.SwingMap;
+import com.sibvisions.util.type.StringUtil;
+
+/**
+ * A simple test application for {@link SwingMap}.
+ * 
+ * @author René Jahn
+ */
+public class MapTestApplication extends DesktopApplication 
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Startup
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Starts the application.
+	 * 
+	 * @param pArgs arguments
+	 */
+	public static void main(String[] pArgs)
+	{
+		SwingApplication sapp = new SwingApplication();
+		sapp.startup(MapTestApplication.class.getName(), null, null);
+	}
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Creates a new instance of <code>MapTestApplication</code>.
+	 * 
+	 * @param pLauncher the UI launcher
+	 */	
+	public MapTestApplication(UILauncher pLauncher) 
+	{
+		super(pLauncher);
+	}
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Overwritten methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	@Override
+	public IComponent getDefaultComponent() throws Exception 
+	{
+        MemDataBook groupsDataBook = new MemDataBook();
+        groupsDataBook.setName("groups");
+        groupsDataBook.getRowDefinition().addColumnDefinition(new ColumnDefinition(IMap.COLUMNNAME_GROUP, new StringDataType()));
+        groupsDataBook.getRowDefinition().addColumnDefinition(new ColumnDefinition(IMap.COLUMNNAME_LATITUDE, new BigDecimalDataType(20, 17)));
+        groupsDataBook.getRowDefinition().addColumnDefinition(new ColumnDefinition(IMap.COLUMNNAME_LONGITUDE, new BigDecimalDataType(20, 17)));
+        groupsDataBook.open();
+        
+        groupsDataBook.insert(false);
+        groupsDataBook.setValues(new String[] {IMap.COLUMNNAME_GROUP, IMap.COLUMNNAME_LATITUDE, IMap.COLUMNNAME_LONGITUDE}, 
+        		                 new Object[] {"TEST", BigDecimal.valueOf(48.2d), BigDecimal.valueOf(17.4d)});
+        groupsDataBook.insert(false);
+        groupsDataBook.setValues(new String[] {IMap.COLUMNNAME_GROUP, IMap.COLUMNNAME_LATITUDE, IMap.COLUMNNAME_LONGITUDE}, 
+        		                 new Object[] {"TEST", BigDecimal.valueOf(48.2d), BigDecimal.valueOf(17.0d)});
+        groupsDataBook.insert(false);
+        groupsDataBook.setValues(new String[] {IMap.COLUMNNAME_GROUP, IMap.COLUMNNAME_LATITUDE, IMap.COLUMNNAME_LONGITUDE}, 
+        		                 new Object[] {"TEST", BigDecimal.valueOf(49d), BigDecimal.valueOf(16.4d)});
+        groupsDataBook.saveAllRows();
+
+        MemDataBook pointsDataBook = new MemDataBook();
+        pointsDataBook.setName("points");
+        pointsDataBook.getRowDefinition().addColumnDefinition(new ColumnDefinition(IMap.COLUMNNAME_LATITUDE, new BigDecimalDataType(20, 17)));
+        pointsDataBook.getRowDefinition().addColumnDefinition(new ColumnDefinition(IMap.COLUMNNAME_LONGITUDE, new BigDecimalDataType(20, 17)));
+        pointsDataBook.getRowDefinition().addColumnDefinition(new ColumnDefinition(IMap.COLUMNNAME_MARKERIMAGE, new StringDataType()));
+        pointsDataBook.open();
+        
+        pointsDataBook.insert(false);
+        pointsDataBook.setValues(new String[] {IMap.COLUMNNAME_LATITUDE, IMap.COLUMNNAME_LONGITUDE, IMap.COLUMNNAME_MARKERIMAGE}, 
+                                 new Object[] {BigDecimal.valueOf(48.2d), BigDecimal.valueOf(17.4d), "/javax/rad/genui/images/16x16/add.png"});
+        pointsDataBook.insert(false);
+        pointsDataBook.setValues(new String[] {IMap.COLUMNNAME_LATITUDE, IMap.COLUMNNAME_LONGITUDE}, 
+                                 new Object[] {BigDecimal.valueOf(48.3d), BigDecimal.valueOf(17.5d)});
+        pointsDataBook.saveAllRows();
+        
+        pointsDataBook.eventValuesChanged().addListener(new IDataRowListener() 
+        {
+			@Override
+			public void valuesChanged(DataRowEvent pDataRowEvent) throws Throwable 
+			{
+				System.out.println("Changed: " + StringUtil.toString(pDataRowEvent.getChangedDataRow().getValuesAsString(null)));
+				
+			}
+		});
+        
+        UIMap map = new UIMap();
+        map.setGroupsDataBook(groupsDataBook);
+        map.setPointsDataBook(pointsDataBook);
+        map.setPointSelectionEnabled(true);
+        map.setPointSelectionLockedOnCenter(true);
+                
+	    return map;
+	}
+
+}	// MapTestApplication

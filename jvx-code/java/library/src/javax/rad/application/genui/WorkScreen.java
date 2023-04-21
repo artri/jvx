@@ -1,0 +1,501 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ * 
+ * 21.11.2008 - [JR] - creation
+ * 15.04.2009 - [JR] - log methods implemented
+ * 22.04.2009 - [JR] - removed log methods
+ * 29.08.2009 - [JR] - added simple showMessage calls  
+ * 12.06.2010 - [JR] - show... now returns IContent 
+ *                   - show... generic opener
+ * 20.09.2013 - [JR] - #798: notifyActivate implemented  
+ * 17.10.2013 - [JR] - #842
+ *                     * isParameterSet, removeParameter implemented
+ *                     * constructor with parameters (Map) added     
+ * 27.07.2017 - [JR] - #1811: setParameter with Parameter class                               
+ */
+package javax.rad.application.genui;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.rad.application.IContent;
+import javax.rad.application.IWorkScreen;
+import javax.rad.application.IWorkScreenApplication;
+import javax.rad.application.genui.event.WorkScreenHandler;
+import javax.rad.application.genui.event.type.screen.IParameterChangedListener;
+import javax.rad.util.Parameter;
+
+import com.sibvisions.util.type.StringUtil;
+
+/**
+ * The <code>WorkScreen</code> is a default implementation of {@link IWorkScreen}.
+ * 
+ * @author René Jahn
+ */
+public class WorkScreen extends ControllerContent 
+                        implements IWorkScreen
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /** The map which maps parameter names to {@link WorkScreenHandler}s. */
+    private transient Map<String, WorkScreenHandler> hmpParameterChangedHandler;
+    
+	/** the parent application. */
+	protected transient IWorkScreenApplication application;
+
+	/** the parameter mapping. */
+	private transient Map<String, Object> mapParameter;
+	
+	/** true, if this workscreen shoul be modal. */
+	private transient boolean modal = false;
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Creates a new instance of <code>WorkScreen</code>.
+	 */
+	public WorkScreen()
+	{
+	}
+
+	/**
+	 * Creates a new instance of <code>WorkScreen</code> for a parent
+	 * application.
+	 * 
+	 * @param pApplication the parent application
+	 */
+	public WorkScreen(IWorkScreenApplication pApplication)
+	{
+		this(pApplication, null);
+	}
+	
+	/**
+	 * Creates a new instance of <code>WorkScreen</code> for a parent
+	 * application and specific parameters.
+	 * 
+	 * @param pApplication the parent application
+	 * @param pParameter additional screen parameters
+	 */
+	public WorkScreen(IWorkScreenApplication pApplication, Map<String, Object> pParameter)
+	{
+		application = pApplication;
+		
+		if (pParameter != null && pParameter.size() > 0)
+		{
+			for (Entry<String, Object> entry : pParameter.entrySet())
+			{
+				setParameter(entry.getKey(), entry.getValue());
+			}
+		}
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Interface implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void notifyActivate()
+	{
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IWorkScreenApplication getApplication()
+	{
+		return application;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void save() throws Throwable
+	{
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void reload() throws Throwable
+	{
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isModal()
+	{
+		return modal;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setModal(boolean pModal)
+	{
+		modal = pModal;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object setParameter(String pName, Object pValue)
+	{
+		if (mapParameter == null)
+		{
+			mapParameter = new HashMap<String, Object>();
+		}
+		
+		Object old = mapParameter.put(pName, pValue);
+		
+		fireParameterChanged(pName, old, pValue);
+		
+		return old;
+	}
+	
+	/**
+	 * Gets the value of an additional parameter from the work-screen. If parameter is not set in
+	 * the work-screen, the application parameter will be returned.
+	 * 
+	 * @param pName the parameter name
+	 * @return the parameter
+	 * @see Application#getParameter(String)
+	 */
+	public Object getParameter(String pName)
+	{
+		if (mapParameter != null && mapParameter.containsKey(pName))
+		{
+			return mapParameter.get(pName);
+		}
+		else
+		{
+			return application.getParameter(pName);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isParameterSet(String pName)
+	{
+		if (mapParameter == null)
+		{
+			return false;
+		}
+		
+		return mapParameter.containsKey(pName);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object removeParameter(String pName)
+	{
+		if (mapParameter == null)
+		{
+			return null;
+		}
+		
+        Object old = mapParameter.remove(pName);
+
+        fireParameterChanged(pName, old, null);
+		
+		return old;
+	}
+	
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Overwritten methods
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    protected String createComponentName()
+    {
+		return createName(getClass().getSimpleName());
+    }	
+    
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// User-defined methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Sets the given parameter.
+	 * 
+	 * @param pParameter the parameter
+	 */
+	@Deprecated
+	public void setParameter(Parameter pParameter)
+	{
+	    addParameter(pParameter);
+	}
+	
+    /**
+     * Adds the given parameter.
+     * 
+     * @param pParameter the parameter
+     */
+    public void addParameter(Parameter... pParameter)
+    {
+        if (pParameter != null)
+        {
+            for (Parameter param : pParameter)
+            {
+                setParameter(param.getName(), param.getValue());
+            }
+        }
+    }
+    
+	/**
+	 * Removes the given parameter.
+	 * 
+	 * @param pParameter the parameter
+	 */
+	public void removeParameter(Parameter... pParameter)
+	{
+		if (pParameter != null)
+		{
+            for (Parameter param : pParameter)
+            {
+                removeParameter(param.getName());
+            }
+		}
+	}
+	
+	/**
+	 * Gets whether the parameter is set.
+	 * 
+	 * @param pParameter the parameter
+	 * @return <code>true</code> if parameter is set, <code>false</code> otherwise
+	 */
+	public boolean isParameterSet(Parameter pParameter)
+	{
+		if (pParameter != null)
+		{
+			return isParameterSet(pParameter.getName());
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Creates a name from the given simple class name.
+	 * 
+	 * The created name is in the form that a following "WorkScreen" is removed,
+	 * the first three letters of all words are combined with a two digit
+	 * checksum (A-Z0-9) at the end.
+	 * 
+	 * Examples:
+	 * <pre>
+	 * NewTestingWorkScreen		NewTes-XX
+	 * CreateInputWorkScreen	CreInp-XX
+	 * </pre>
+	 * 
+	 * @param pSimpleClassName the simple class name.
+	 * @return the name.
+	 */
+	protected static String createName(String pSimpleClassName)
+	{
+		String sName = pSimpleClassName;
+		
+		int hashCode = sName.hashCode();
+		if (hashCode == Integer.MIN_VALUE)
+		{
+			// Math.abs(INTEGER.MIN_VALUE) yields Integer.MIN_VALUE).
+			// Let us just add 1 and be done with it.
+			hashCode = hashCode + 1;
+		}
+		
+		int checkDigit = Math.abs(hashCode) % 1296;
+		String checkDigitString = Integer.toString(checkDigit, 36);
+		
+		if (checkDigitString.length() < 2)
+		{
+			checkDigitString += "0" + checkDigitString;
+		}
+		
+		if (sName.endsWith("WorkScreen"))
+		{
+			sName = sName.substring(0, sName.length() - 10);
+		}
+		
+		return StringUtil.getShortenedWords(sName, 3) + "-" + checkDigitString.toUpperCase();
+	}
+	
+	/**
+	 * Shows a message with the {@link javax.rad.application.IMessageConstants#MESSAGE_ICON_INFO} icon and the
+	 * {@link javax.rad.application.IMessageConstants#MESSAGE_BUTTON_OK} button.
+	 * 
+	 * @param <OP> the opener type
+	 * @param pOpener the opener of the information
+	 * @param pMessage the message/information to show
+	 * @return the message content or <code>null</code> if the message has no content
+	 * @throws Throwable if the message could not be initialized 
+	 */
+	public <OP> IContent showInformation(OP pOpener, String pMessage) throws Throwable
+	{
+		return getApplication().showMessage(pOpener, MESSAGE_ICON_INFO, MESSAGE_BUTTON_OK, pMessage, null, null);
+	}
+
+	/**
+	 * Shows a message with the {@link javax.rad.application.IMessageConstants#MESSAGE_ICON_INFO} icon and the
+	 * {@link javax.rad.application.IMessageConstants#MESSAGE_BUTTON_OK} button.
+	 * 
+	 * @param <OP> the opener type
+	 * @param pOpener the opener of the information
+	 * @param pMessage the message/information to show
+	 * @param pOkAction the action to call when OK was pressed
+	 * @return the message content or <code>null</code> if the message has no content
+	 * @throws Throwable if the message could not be initialized 
+	 */
+	public <OP> IContent showInformation(OP pOpener, String pMessage, String pOkAction) throws Throwable
+	{
+		return getApplication().showMessage(pOpener, MESSAGE_ICON_INFO, MESSAGE_BUTTON_OK, pMessage, pOkAction, null);
+	}
+
+	/**
+	 * Shows a message with the {@link javax.rad.application.IMessageConstants#MESSAGE_ICON_ERROR} icon and the
+	 * {@link javax.rad.application.IMessageConstants#MESSAGE_BUTTON_OK} button.
+	 * 
+	 * @param <OP> the opener type
+	 * @param pOpener the opener of the information
+	 * @param pMessage the message/error to show
+	 * @return the message content or <code>null</code> if the message has no content
+	 * @throws Throwable if the message could not be initialized 
+	 */
+	public <OP> IContent showError(OP pOpener, String pMessage) throws Throwable
+	{
+		return getApplication().showMessage(pOpener, MESSAGE_ICON_ERROR, MESSAGE_BUTTON_OK, pMessage, null, null);
+	}
+	
+	/**
+	 * Shows a message with the {@link javax.rad.application.IMessageConstants#MESSAGE_ICON_ERROR} icon and the
+	 * {@link javax.rad.application.IMessageConstants#MESSAGE_BUTTON_OK} button.
+	 * 
+	 * @param <OP> the opener type
+	 * @param pOpener the opener of the information
+	 * @param pMessage the message/error to show
+	 * @param pOkAction the action to call when OK was pressed
+	 * @return the message content or <code>null</code> if the message has no content
+	 * @throws Throwable if the message could not be initialized 
+	 */
+	public <OP> IContent showError(OP pOpener, String pMessage, String pOkAction) throws Throwable
+	{
+		return getApplication().showMessage(pOpener, MESSAGE_ICON_ERROR, MESSAGE_BUTTON_OK, pMessage, pOkAction, null);
+	}
+
+	/**
+	 * Shows a message with the {@link javax.rad.application.IMessageConstants#MESSAGE_ICON_QUESTION} icon and the
+	 * {@link javax.rad.application.IMessageConstants#MESSAGE_BUTTON_YES_NO} buttons.
+	 * 
+	 * @param <OP> the opener type
+	 * @param pOpener the opener of the information
+	 * @param pMessage the message/question to show
+	 * @param pOkAction the action to call when yex was pressed
+	 * @return the message content or <code>null</code> if the message has no content
+	 * @throws Throwable if the message could not be initialized 
+	 */
+	public <OP> IContent showQuestion(OP pOpener, String pMessage, String pOkAction) throws Throwable
+	{
+		return getApplication().showMessage(pOpener, MESSAGE_ICON_QUESTION, MESSAGE_BUTTON_YES_NO, pMessage, pOkAction, null);
+	}
+
+	/**
+	 * Shows a message with the {@link javax.rad.application.IMessageConstants#MESSAGE_ICON_QUESTION} icon and the
+	 * {@link javax.rad.application.IMessageConstants#MESSAGE_BUTTON_YES_NO} buttons.
+	 * 
+	 * @param <OP> the opener type
+	 * @param pOpener the opener of the information
+	 * @param pMessage the message/question to show
+	 * @param pOkAction the action to call when yex was pressed
+	 * @param pCancelAction the action to call when no/x was pressed
+	 * @return the message content or <code>null</code> if the message has no content
+	 * @throws Throwable if the message could not be initialized 
+	 */
+	public <OP> IContent showQuestion(OP pOpener, String pMessage, String pOkAction, String pCancelAction) throws Throwable
+	{
+		return getApplication().showMessage(pOpener, MESSAGE_ICON_QUESTION, MESSAGE_BUTTON_YES_NO, pMessage, pOkAction, pCancelAction);
+	}
+	
+    /**
+     * Gets the event handler for the parameter changed event.
+     * 
+     * @return the event handler
+     */
+    public WorkScreenHandler<IParameterChangedListener> eventParameterChanged()
+    {
+        return eventParameterChanged(null);
+    }
+    
+    /**
+     * Gets the event handler for the changed event of a specific parameter.
+     * 
+     * @param pName the connected parameter name
+     * @return the event handler
+     */
+    public WorkScreenHandler<IParameterChangedListener> eventParameterChanged(String pName)
+    {
+        if (hmpParameterChangedHandler == null)
+        {
+            hmpParameterChangedHandler = new HashMap<String, WorkScreenHandler>();
+        }
+        
+        WorkScreenHandler handler = hmpParameterChangedHandler.get(pName);
+        
+        if (handler == null)
+        {
+            handler = new WorkScreenHandler<IParameterChangedListener>(IParameterChangedListener.class);
+            
+            hmpParameterChangedHandler.put(pName, handler);
+        }
+        
+        return handler;        
+    }
+    
+    /**
+     * Notifies all parameter changed listeners about a change.
+     * 
+     * @param pName the parameter name
+     * @param pOld the old value
+     * @param pNew the new value
+     */
+    protected void fireParameterChanged(String pName, Object pOld, Object pNew)
+    {
+        if (hmpParameterChangedHandler != null)
+        {
+            if (hmpParameterChangedHandler.containsKey(null))
+            {
+                hmpParameterChangedHandler.get(null).dispatchEvent(this, pName, pOld, pNew);
+            }
+            
+            if (hmpParameterChangedHandler.containsKey(pName))
+            {
+                hmpParameterChangedHandler.get(pName).dispatchEvent(this, pName, pOld, pNew);
+            }
+        }
+    }
+	
+}	// WorkScreen

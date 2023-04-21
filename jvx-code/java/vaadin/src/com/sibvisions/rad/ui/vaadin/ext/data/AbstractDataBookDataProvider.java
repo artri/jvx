@@ -1,0 +1,444 @@
+/*
+ * Copyright 2017 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 06.10.2017 - [RZ] - Craetion
+ */
+package com.sibvisions.rad.ui.vaadin.ext.data;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import javax.rad.model.IDataBook;
+import javax.rad.model.ModelException;
+import javax.rad.model.SortDefinition;
+import javax.rad.model.condition.CompareCondition;
+import javax.rad.model.condition.ICondition;
+import javax.rad.model.condition.Not;
+import javax.rad.model.condition.OperatorCondition;
+
+import com.sibvisions.util.type.CommonUtil;
+import com.vaadin.data.provider.AbstractBackEndDataProvider;
+import com.vaadin.data.provider.Query;
+import com.vaadin.data.provider.QuerySortOrder;
+import com.vaadin.shared.data.sort.SortDirection;
+
+/**
+ * The {@link AbstractDataBookDataProvider} is an
+ * {@link AbstractBackEndDataProvider} which provides the base for reading from
+ * an {@link IDataBook}.
+ * 
+ * @param <T> the type of the returned items.
+ * @author Robert Zenz
+ */
+public abstract class AbstractDataBookDataProvider<T> extends AbstractBackEndDataProvider<T, Object>
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/** The backing {@link IDataBook}. */
+	protected IDataBook dataBook = null;
+	
+	/** If this provider is enabled. */
+	protected boolean enabled = true;
+	
+    /** force set filter. */
+    private boolean force = false;
+    
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Creates a new instance of {@link AbstractDataBookDataProvider}.
+	 *
+	 * @param pDataBook the {@link IDataBook}.
+	 */
+	protected AbstractDataBookDataProvider(IDataBook pDataBook)
+	{
+		super();
+		
+		dataBook = pDataBook;
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Abstract methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Gets all the items between the given indexes.
+	 * <p>
+	 * Implementing classes can safely assume that the {@link IDataBook} is in
+	 * the correct state regarding the sort order. If this provider is disabled,
+	 * this method will not be called.
+	 * 
+	 * @param pQuery the query.
+	 * @param pStartRowIndex the row index at which to start, inclusive.
+	 * @param pEndRowIndex the row index at which to stop, exclusive.
+	 * @return the {@link Stream} of items.
+	 * @throws ModelException if accessing the {@link IDataBook} failed.
+	 */
+	protected abstract Stream<T> getItems(Query<T, Object> pQuery, int pStartRowIndex, int pEndRowIndex) throws ModelException;
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Abstract methods implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected Stream<T> fetchFromBackEnd(Query<T, Object> pQuery)
+	{
+		if (!enabled)
+		{
+			return Stream.empty();
+		}
+		
+		try
+		{
+			prepareDataBook(pQuery);
+			
+			int start = pQuery.getOffset();
+			int end = start + pQuery.getLimit();
+			
+			Stream<T> items = getItems(pQuery, start, end);
+			
+			restoreDataBook();
+			
+			return items;
+		}
+		catch (ModelException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected int sizeInBackEnd(Query<T, Object> pQuery)
+	{
+		if (!enabled)
+		{
+			return 0;
+		}
+		
+		try
+		{
+			prepareDataBook(pQuery);
+			
+			int count = Math.min(pQuery.getLimit(), getItemsCount(pQuery));
+			
+			restoreDataBook();
+			
+			return count;
+		}
+		catch (ModelException e)
+		{
+			throw new RuntimeException(e);
+		}
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// User-defined methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Gets if this provider is enabled.
+	 * <p>
+	 * If the provider is enabled, it delivers data. If it is disabled, an item
+	 * count of zero is returned and an empty {@link Stream} instead of items.
+	 * 
+	 * @return {@code true} if this provider is enabled.
+	 * @see #setEnabled(boolean)
+	 */
+	public boolean isEnabled()
+	{
+		return enabled;
+	}
+	
+	/**
+	 * Sets if this provider is enabled.
+	 * <p>
+	 * If the provider is enabled, it delivers data. If it is disabled, an item
+	 * count of zero is returned and an empty {@link Stream} instead of items.
+	 * 
+	 * @param pEnabled {@code true} if this provider should be enabled.
+	 * @see #isEnabled()
+	 */
+	public void setEnabled(boolean pEnabled)
+	{
+		enabled = pEnabled;
+	}
+	
+	/**
+	 * Checks if the two given {@link ICondition}s are different, returning
+	 * {@code true} in that case.
+	 * <p>
+	 * This function is used to determine whether the filter on the
+	 * {@link #dataBook} has changed or not. If this function returns
+	 * {@code true}, the new filter will be set on the {@link #dataBook}.
+	 * 
+	 * @param pFirstCondition the first {@link ICondition} for the test, can be
+	 *            {@code null}.
+	 * @param pSecondCondition the second {@link ICondition} for the test, can
+	 *            be {@code null}.
+	 * @return {@code true} if the two given {@link ICondition}s are not equal.
+	 */
+	protected boolean isDifferentFilter(ICondition pFirstCondition, ICondition pSecondCondition)
+	{
+		if (pFirstCondition == pSecondCondition)
+		{
+			return false;
+		}
+		
+		if (pFirstCondition == null || pSecondCondition == null)
+		{
+			return true;
+		}
+		
+		if (!pFirstCondition.getClass().equals(pSecondCondition.getClass()))
+		{
+			return true;
+		}
+		
+		if (pFirstCondition instanceof CompareCondition)
+		{
+			CompareCondition firstCondition = (CompareCondition)pFirstCondition;
+			CompareCondition secondCondition = (CompareCondition)pSecondCondition;
+			
+			return !(CommonUtil.equals(firstCondition.getColumnName(), secondCondition.getColumnName())
+					&& CommonUtil.equals(firstCondition.getValue(), secondCondition.getValue()));
+		}
+		else if (pFirstCondition instanceof OperatorCondition)
+		{
+			ICondition[] firstConditions = ((OperatorCondition)pFirstCondition).getConditions();
+			ICondition[] secondConditions = ((OperatorCondition)pSecondCondition).getConditions();
+			
+			if (firstConditions.length != secondConditions.length)
+			{
+				return true;
+			}
+			
+			for (int index = 0; index < firstConditions.length; index++)
+			{
+				if (isDifferentFilter(firstConditions[index], secondConditions[index]))
+				{
+					return true;
+				}
+			}
+			
+			return false;
+		}
+		else if (pFirstCondition instanceof Not)
+		{
+			return isDifferentFilter(
+					((Not)pFirstCondition).getCondition(),
+					((Not)pSecondCondition).getCondition());
+		}
+		else
+		{
+			return !pFirstCondition.equals(pSecondCondition);
+		}
+	}
+	
+	/**
+	 * Creates an {@link ICondition} for the given value.
+	 * <p>
+	 * By default, this method returns the currently set filter of the
+	 * {@link #dataBook} to preserve it.
+	 * 
+	 * @param pValue the value to use as filter.
+	 * @return the created {@link ICondition}, can be {@code null}.
+	 * @throws ModelException because Martin said!
+	 */
+	protected ICondition createFilter(Object pValue) throws ModelException
+	{
+		return dataBook.getFilter();
+	}
+	
+	/**
+	 * Gets the item count from the {@link IDataBook} for the current query.
+	 * <p>
+	 * Extending classes can safely assume that {@link #prepareDataBook(Query)}
+	 * has been caled at this point. If this provider is disabled, this method
+	 * will not be called.
+	 * 
+	 * @param pQuery the {@link Query} for which to get the count.
+	 * @return the item count.
+	 * @throws ModelException when accessing/using the {@link IDataBook} failed.
+	 */
+	protected int getItemsCount(Query<T, Object> pQuery) throws ModelException
+	{
+		if (!dataBook.isAllFetched())
+		{
+			return dataBook.getRowCount() + 1;
+		}
+		else
+		{
+			return dataBook.getRowCount();
+		}
+	}
+	
+	/**
+	 * Gets if the given {@link SortDefinition} is {@code null} or empty.
+	 * <p>
+	 * A {@link SortDefinition} is considered empty if the list of columns is
+	 * either {@code null} or has no items.
+	 * 
+	 * @param pSort the {@link SortDefinition} to check.
+	 * @return {@code true} if the given {@link SortDefinition} can be
+	 *         considered {@code null} or empty.
+	 */
+	protected boolean isNullOrEmpty(SortDefinition pSort)
+	{
+		return pSort == null
+				|| pSort.getColumns() == null
+				|| pSort.getColumns().length == 0;
+	}
+	
+	/**
+	 * Prepares the {@link IDataBook} based on the given {@link Query}.
+	 * 
+	 * @param pQuery the {@link Query} to use.
+	 * @throws ModelException when preparing the {@link IDataBook} failed.
+	 */
+	protected void prepareDataBook(Query<T, Object> pQuery) throws ModelException
+	{
+		updateSort(pQuery.getSortOrders());
+		updateFilter(pQuery.getFilter());
+	}
+	
+	/**
+	 * Restores the {@link IDataBook}.
+	 * 
+	 * @throws ModelException if restoring the {@link IDataBook} failed.
+	 */
+	protected void restoreDataBook() throws ModelException
+	{
+	}
+	
+	/**
+	 * Converts the given sort to a {@link SortDefinition}.
+	 * 
+	 * @param pSort the sort to convert.
+	 * @return the created {@link SortDefinition}, {@code null} if there is
+	 *         nothing to convert.
+	 */
+	protected SortDefinition toSortDefinition(List<QuerySortOrder> pSort)
+	{
+		if (pSort == null || pSort.isEmpty())
+		{
+			return null;
+		}
+		
+		String[] columnNames = new String[pSort.size()];
+		boolean[] directions = new boolean[pSort.size()];
+		
+		for (int index = 0; index < pSort.size(); index++)
+		{
+			QuerySortOrder querySortOrder = pSort.get(index);
+			
+			columnNames[index] = querySortOrder.getSorted();
+			directions[index] = (querySortOrder.getDirection() == SortDirection.ASCENDING);
+		}
+		
+		return new SortDefinition(columnNames, directions);
+	}
+	
+	/**
+	 * Checks and updates the {@link ICondition} of the {@link IDataBook} if
+	 * necessary.
+	 * 
+	 * @param pFilter the filter to use.
+	 * @throws ModelException if accessing the old or setting the new
+	 *             {@link ICondition} failed.
+	 */
+	protected void updateFilter(Optional<Object> pFilter) throws ModelException
+	{
+		ICondition newFilter = null;
+		
+		if (pFilter.isPresent())
+		{
+			newFilter = createFilter(pFilter.get());
+		}
+		else
+		{
+			newFilter = createFilter(null);
+		}
+		
+		if (force || isDifferentFilter(newFilter, dataBook.getFilter()))
+		{
+		    force = false;
+			dataBook.setFilter(newFilter);
+		}
+	}
+	
+	/**
+	 * Forces the next time setting the filter.
+	 */
+	public void forceSetFilter()
+	{
+	    force = true;
+	}
+	
+	/**
+	 * Checks and updates the {@link SortDefinition} of the {@link IDataBook} if
+	 * necessary.
+	 * 
+	 * @param pSort the sort to use.
+	 * @throws ModelException if accessing the old or setting the new
+	 *             {@link SortDefinition} failed.
+	 */
+	protected void updateSort(List<QuerySortOrder> pSort) throws ModelException
+	{
+		SortDefinition currentSort = dataBook.getSort();
+		
+		if (pSort.isEmpty() && isNullOrEmpty(currentSort))
+		{
+			return;
+		}
+		
+		if (pSort.isEmpty() && !isNullOrEmpty(currentSort))
+		{
+			dataBook.setSort(null);
+			return;
+		}
+		
+		if (!isNullOrEmpty(currentSort) && pSort.size() == currentSort.getColumns().length)
+		{
+			for (int index = 0; index < pSort.size(); index++)
+			{
+				if (!pSort.get(index).getSorted().equals(currentSort.getColumns()[index])
+						|| (pSort.get(index).getDirection() == SortDirection.ASCENDING) != currentSort.isAscending()[index])
+				{
+					dataBook.setSort(toSortDefinition(pSort));
+					return;
+				}
+			}
+		}
+		else
+		{
+			dataBook.setSort(toSortDefinition(pSort));
+		}
+	}
+	
+}	// AbstractDataBookDataProvider

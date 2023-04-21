@@ -1,0 +1,1167 @@
+/*
+ * Copyright 2013 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 22.01.2013 - [SW] - creation
+ * 28.01.2015 - [JR] - #1244: notifyRepaint instead of cancelEditing
+ */
+package com.sibvisions.rad.ui.vaadin.impl.control;
+
+import javax.rad.model.ColumnDefinition;
+import javax.rad.model.IDataBook;
+import javax.rad.model.IDataRow;
+import javax.rad.model.ModelException;
+import javax.rad.model.datatype.IDataType;
+import javax.rad.model.ui.ICellEditor;
+import javax.rad.model.ui.ICellEditorHandler;
+import javax.rad.model.ui.ICellEditorListener;
+import javax.rad.model.ui.IControl;
+import javax.rad.ui.IColor;
+import javax.rad.ui.IComponent;
+import javax.rad.ui.IContainer;
+import javax.rad.ui.IDimension;
+import javax.rad.ui.IFont;
+import javax.rad.ui.IRectangle;
+import javax.rad.ui.Style;
+import javax.rad.ui.component.IPlaceholder;
+import javax.rad.ui.control.ICellFormatter;
+import javax.rad.ui.control.IEditor;
+import javax.rad.util.ExceptionHandler;
+import javax.rad.util.TranslationMap;
+
+import com.sibvisions.rad.ui.vaadin.ext.VaadinUtil;
+import com.sibvisions.rad.ui.vaadin.ext.events.RegistrationContainer;
+import com.sibvisions.rad.ui.vaadin.ext.ui.AccessibilityUtil;
+import com.sibvisions.rad.ui.vaadin.ext.ui.client.CssExtensionAttribute;
+import com.sibvisions.rad.ui.vaadin.ext.ui.extension.AttributesExtension;
+import com.sibvisions.rad.ui.vaadin.ext.ui.extension.CssExtension;
+import com.sibvisions.rad.ui.vaadin.impl.IVaadinContainer;
+import com.sibvisions.rad.ui.vaadin.impl.VaadinColor;
+import com.sibvisions.rad.ui.vaadin.impl.VaadinFeaturedComponent;
+import com.sibvisions.rad.ui.vaadin.impl.celleditor.IVaadinCellEditorHandler;
+import com.sibvisions.rad.ui.vaadin.impl.celleditor.VaadinLinkedCellEditor;
+import com.sibvisions.rad.ui.vaadin.impl.feature.IAutoCompleteFeature;
+import com.sibvisions.util.log.ILogger;
+import com.sibvisions.util.log.LoggerFactory;
+import com.sibvisions.util.type.StringUtil;
+import com.vaadin.server.ClientConnector.AttachEvent;
+import com.vaadin.server.ClientConnector.AttachListener;
+import com.vaadin.server.Sizeable.Unit;
+import com.vaadin.ui.AbstractComponent;
+import com.vaadin.ui.AbstractField;
+import com.vaadin.ui.Component;
+import com.vaadin.ui.TextField;
+
+/**
+ * The <code>VaadinEditor</code> class is the vaadin implementation of {@link IEditor}.
+ * 
+ * @author Stefan Wurm
+ */
+public class VaadinEditor extends VaadinFeaturedComponent<Component> 
+                          implements ICellFormatterEditorListener,
+									 IEditor,
+									 IPlaceholder,
+									 Runnable,
+									 IAutoCompleteFeature
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/** the component logger. */
+	private static ILogger logger = null;
+
+	/** The DataRow to be edited. */
+	private IDataRow dataRow = null;
+	
+	/** The column to be edited. */
+	private String columnName = null;
+	
+	/** The CellEditor. */
+	private ICellEditor cellEditor = null;
+	
+	/** The cellFormatListener. */
+	private ICellFormatter cellFormatter = null;
+	
+	/** The used CellEditor. */
+	private ICellEditorHandler<AbstractComponent> cellEditorHandler = null;
+	
+	/** The translation mapping. */
+	private TranslationMap translation = null;
+
+	/** Cell Editor started editing. */
+	private TextField dummyEditor;
+	
+	/** For the css style of the dummy editor. **/
+	private CssExtension cssExtensionDummyEditor = new CssExtension();
+	
+	/** the cached size (set later). */
+	private IDimension dimCachedSize = null;
+	
+	/** The {@link RegistrationContainer} that holds all registrations. */
+	private RegistrationContainer registrations = new RegistrationContainer();	
+	
+	/** Tells, if the CellEditor should save immediate. */
+	private boolean savingImmediate = false;
+	
+	/** Tells, if notifyRepaint is called the first time. */
+	private boolean bFirstNotifyRepaintCall = true;
+	
+	/** Ignore Cancel call. */
+	private boolean isCancelling = false;
+
+	/** Cell Editor started editing. */
+	private boolean bEditingStarted = false;
+	
+	/** If the Editor is enabled. **/
+	private boolean bEnabled = true;
+	
+	/** If editor is attached. **/
+	private boolean isAttached = false;
+	
+	/** the borders visibility. */
+	private boolean borderVisible = true;
+	
+	/** the placeholder. */
+	private String placeholder = null;
+	
+    /** whether the translation is enabled. */
+    private boolean bTranslationEnabled = true;
+    
+    /** whether the size is set. */
+    private boolean bSizeSet = false;
+    
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+    /**
+     * Creates a new instance of <code>VaadinEditor</code>.
+     *
+     * @see javax.rad.ui.control.IEditor
+     */
+	public VaadinEditor()
+	{
+		super(new TextField());
+				
+		dummyEditor = (TextField)resource;
+		
+		cssExtensionDummyEditor.extend(dummyEditor);
+
+		dummyEditor.setEnabled(false);
+		dummyEditor.setStyleName("jvxeditor");
+
+		verticalAlignment = ALIGN_DEFAULT;
+		horizontalAlignment = ALIGN_DEFAULT;
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Interface implementation
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    //RUNNABLE
+    
+	/**
+	 * The run method is invoked.
+	 * It enables events from the model again. 
+	 * Due to performance reasons the events are disabled from the first call of
+	 * notifyRepaint until the EventQueue calls the run method. 
+	 * This minimizes the repaints of the control. 
+	 */
+	public void run()
+	{
+		try
+		{
+            if (!isCancelling)
+			{
+				isCancelling = true;
+
+				if (isAttached)
+				{
+				    cancelEditing();
+				}
+			}
+		}
+		finally
+		{
+			isCancelling = false;
+			bFirstNotifyRepaintCall = true;
+		}		
+	}
+	
+	//ICONTROL
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void notifyRepaint()
+	{
+		if (bFirstNotifyRepaintCall && !bEditingStarted && isAttached)
+		{
+			bFirstNotifyRepaintCall = false;
+			
+			getFactory().invokeLater(this);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void cancelEditing()
+	{
+		bEditingStarted = false;
+
+		try
+		{
+        	if (cellEditorHandler != null)
+        	{
+        		cellEditorHandler.cancelEditing();
+        		
+        		setFocusableIntern();
+        	}
+		}
+		catch (ModelException ex)
+		{
+			if (logger == null)
+			{
+				logger = LoggerFactory.getInstance(getClass());
+			}
+
+			logger.debug(ex);
+		}		
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void saveEditing() throws ModelException
+	{
+		if (bEditingStarted)
+		{
+			// Set immediate to false to avoid recursion, if DataRowListener stores again.
+			bEditingStarted = false;
+
+			if (cellEditorHandler != null)
+			{
+				try
+				{
+					cellEditorHandler.saveEditing();
+				}
+				catch (ModelException e)
+				{
+					cellEditorHandler.cancelEditing();
+					
+					ExceptionHandler.raise(e);
+				}
+			}
+
+            // In case of saving immediate, it not necessarily causes an event, to avoid a values changed on last key pressed.
+            // so call notifyRepaint, it will not cause an additional cancelEditing, if saveEditing already caused one.
+            // The event is needed, so that the cellEditorHandler can reset firstEditing flag in cancelEditing!
+			notifyRepaint();
+		}
+	}
+
+	/**
+     * Gets the CellFormatter.
+     *
+     * @return the CellFormatter.
+     * @see #setCellFormatter
+     */
+    public ICellFormatter getCellFormatter()
+    {
+    	return cellFormatter;
+    }
+
+    /**
+     * Sets the CellFormatter.
+     * 
+	 * @param pCellFormatter the CellFormatter
+     * @see #getCellFormatter
+     */
+    public void setCellFormatter(ICellFormatter pCellFormatter)
+    {
+    	cellFormatter = pCellFormatter;
+    }
+	
+    /**
+     * Sets the translation mapping for this table.
+     * 
+     * @param pTranslation the translation mapping
+     */
+    public void setTranslation(TranslationMap pTranslation)
+    {
+    	if (translation != pTranslation)
+    	{
+        	translation = pTranslation;
+        	
+        	try 
+        	{
+    			saveEditing();
+    		} 
+        	catch (ModelException e) 
+        	{
+    			cancelEditing();
+    		}
+
+        	notifyRepaint();
+    	}
+    }
+    
+    /**
+     * Gets the translation mapping for this table.
+     * 
+     * @return the current translation mapping or <code>null</code> if there is no
+     *         translation mapping
+     */
+    public TranslationMap getTranslation()
+    {
+    	return translation;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public void setTranslationEnabled(boolean pEnabled)
+    {
+        bTranslationEnabled = pEnabled;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    public boolean isTranslationEnabled()
+    {
+        return bTranslationEnabled;
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+	public String translate(String pText)
+	{
+		if (bTranslationEnabled && translation != null)
+		{
+			return translation.translate(pText);
+		}
+		else
+		{
+			return pText;
+		}
+	}
+
+	//ICellEditorListener
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void editingStarted() 
+	{
+		try
+		{
+			bEditingStarted = true; // first set bEditingStarted true, to prevent events on update.
+
+			if (dataRow instanceof IDataBook)
+			{
+				IDataRow oldDataRow = dataRow.createDataRow(null);
+				
+				((IDataBook)dataRow).update();
+				
+				if (!oldDataRow.equals(dataRow, new String[] {columnName})) // Only if value is changed, cancel editing.
+				{
+					bEditingStarted = false;
+					notifyRepaint();
+				}
+			}
+		}
+		catch (ModelException pModelException)
+		{
+			bEditingStarted = false;
+			notifyRepaint();
+			
+			ExceptionHandler.raise(pModelException);
+		}
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void editingComplete(String pCompleteType) 
+	{
+		if (pCompleteType == ICellEditorListener.ESCAPE_KEY)
+		{
+			cancelEditing();
+		}
+		else
+		{
+			try
+			{
+				saveEditing();
+			}
+			catch (ModelException ex)
+			{
+				cancelEditing();
+				
+				ExceptionHandler.raise(ex);
+			}
+
+			if (pCompleteType == ICellEditorListener.ENTER_KEY || pCompleteType == ICellEditorListener.TAB_KEY)
+			{
+				focusNextChild(getParent(), this);
+			}
+			else if (pCompleteType == ICellEditorListener.SHIFT_ENTER_KEY || pCompleteType == ICellEditorListener.SHIFT_TAB_KEY)
+			{
+				focusPreviousChild(getParent(), this);
+			}
+		}
+	}
+			
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isSavingImmediate() 
+	{
+		return savingImmediate;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */	
+	public IControl getControl()
+	{
+		return this;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IDataRow getDataRow()
+	{
+		return dataRow;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setDataRow(IDataRow pDataRow) throws ModelException
+	{
+		uninstallEditor();
+		
+		dataRow = pDataRow;
+		
+		installEditor();
+		updateAccessibility();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getColumnName()
+	{
+		return columnName;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setColumnName(String pColumnName) throws ModelException
+	{
+		uninstallEditor();
+		
+		columnName = pColumnName;
+		
+		installEditor();
+		updateAccessibility();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setSavingImmediate(boolean pSavingImmediate)
+	{
+		savingImmediate = pSavingImmediate;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public ICellEditor getCellEditor()
+	{
+		return cellEditor;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setCellEditor(ICellEditor pCellEditor) throws ModelException
+	{
+	    saveEditing();
+	    
+		uninstallEditor();
+		
+		cellEditor = pCellEditor;
+		
+		installEditor();
+		updateAccessibility();
+	}	
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Overwritten methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setBorderVisible(boolean pVisible)
+	{
+		borderVisible = pVisible;
+
+        notifyRepaint();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isBorderVisible()
+	{
+		return borderVisible;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public String getPlaceholder()
+    {
+    	return placeholder;
+    }
+    
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    public void setPlaceholder(String pPlaceholder)
+    {
+    	placeholder = pPlaceholder;
+    	
+    	notifyRepaint();
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setSize(IDimension pSize)
+	{
+	    bSizeSet = pSize != null;
+
+	    if (cellEditorHandler != null)
+	    {
+	        setSizeIntern(pSize);
+	    }
+	    else
+	    {
+	        dimCachedSize = pSize;
+	    }
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isSizeSet()
+	{
+	    return super.isSizeSet() || bSizeSet;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public boolean isEnabled()
+	{
+		return bEnabled;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setEnabled(boolean pEnabled)
+	{
+		bEnabled = pEnabled;
+		
+		notifyRepaint();
+	}
+
+    /**
+     * {@inheritDoc}
+     */
+	@Override
+	protected boolean isFocusableIntern()
+	{
+	    boolean focusable = super.isFocusableIntern();
+	    
+	    if (focusable && resource instanceof AbstractField)
+	    {
+	        focusable = !((AbstractField)resource).isReadOnly();
+	    }
+
+	    return focusable;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setBackground(IColor pBackground)
+	{
+		background = pBackground;
+
+		notifyRepaint();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setForeground(IColor pForeground)
+	{
+		foreground = pForeground;
+
+		notifyRepaint();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setFont(IFont pFont)
+	{		
+		font = pFont;	
+		
+		notifyRepaint();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setBounds(IRectangle pBounds)
+	{
+		bounds = pBounds;
+		
+		setSize(pBounds);
+		
+		super.setBounds(pBounds);
+	}	
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setHorizontalAlignment(int pHorizontalAlignment)
+	{		
+		horizontalAlignment = pHorizontalAlignment;				
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setVerticalAlignment(int pVerticalAlignment)
+	{
+		verticalAlignment = pVerticalAlignment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setWidthFull()
+	{
+		setWidth(100f, Unit.PERCENTAGE);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setHeightFull()
+	{
+		setHeight(100f, Unit.PERCENTAGE);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setWidthUndefined()
+	{
+		setWidth(VaadinUtil.SIZE_UNDEFINED, Unit.PIXELS);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setHeightUndefined()
+	{
+		setHeight(VaadinUtil.SIZE_UNDEFINED, Unit.PIXELS);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void setToolTipText(String pToolTipText)
+	{
+		super.setToolTipText(pToolTipText);
+		
+		updateAccessibility();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void configureAttributesExtension(AttributesExtension pExtension)
+	{
+		super.configureAttributesExtension(pExtension);
+		
+		pExtension.setPropagateToInput(true);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override	
+	protected void updateFeatures()
+	{
+		//delegate to cell editor
+		notifyRepaint();
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // User-defined methods
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Sets the size.
+	 * 
+	 * @param pSize the size
+	 */
+	private void setSizeIntern(IDimension pSize)
+	{
+        dimCachedSize = null;
+        
+        if (pSize != null) 
+        {
+            setWidth(pSize.getWidth(), Unit.PIXELS);
+            setHeight(pSize.getHeight(), Unit.PIXELS);
+        }
+        else
+        {
+            setWidth(VaadinUtil.SIZE_UNDEFINED, Unit.PIXELS);
+            setHeight(VaadinUtil.SIZE_UNDEFINED, Unit.PIXELS);
+        }
+	}
+	
+	/**
+	 * Uninstalls the CellEditor and its CellEditorComponent.
+	 */
+	private void uninstallEditor()
+	{
+		registrations.removeAll();
+		
+		if (cellEditorHandler != null)
+		{
+            // TODO It is unclear, if uninstalling an Editor should call cancel or save.
+            // Till it is not clear and no problems occur, nothing is done, what is nearby a cancel.
+            // cellEditorHandler.cancelEditing() or cellEditorHandler.saveEditing();
+            cellEditorHandler.uninstallEditor();
+
+			dataRow.removeControl(this);
+			
+			setResource(dummyEditor);
+
+			cellEditorHandler = null;
+			
+            bEditingStarted = false; // Without having any solution, if the editor should be saved or cancelled, after uninstalling, it should be not in editingStarted mode.
+		}
+		else
+		{
+			setResource(dummyEditor);
+		}
+		
+		isAttached = false;
+	}
+
+	/**
+	 * Installs the CellEditor and its CellEditorComponent.
+	 */
+	private void installEditor()
+	{
+		cssExtensionDummyEditor.removeAttribute("background-color");
+		
+		dummyEditor.setEnabled(true);
+
+		if (dataRow != null && columnName != null)
+		{
+			try
+			{
+				IDataType dataType = dataRow.getRowDefinition().getColumnDefinition(columnName).getDataType();
+				ICellEditor editor;
+				
+				if (cellEditor == null)
+				{
+					editor = dataType.getCellEditor();
+				}
+				else
+				{
+					editor = cellEditor;
+				}
+				
+		    	if (editor == null)
+		    	{
+		    		editor = VaadinUtil.getDefaultCellEditor(dataType.getTypeClass());
+		    	}
+		    	
+		    	cellEditorHandler = editor.createCellEditorHandler(this, dataRow, columnName);
+		    	
+		    	if (dimCachedSize != null)
+		    	{
+		    	    setSize(dimCachedSize);
+		    	}
+		    	
+				if (cellEditorHandler != null)
+				{
+				    AbstractComponent comp = cellEditorHandler.getCellEditorComponent();
+
+				    //don't use a detachlistener because we temporarily remove components in our layouts.
+				    //this would trigger too many repaints
+                    registrations.add(comp.addAttachListener(new AttachListener() 
+                    {
+                        @Override
+                        public void attach(AttachEvent event)
+                        {
+                            if (!isAttached)
+                            {
+                                isAttached = true;
+                                
+                                if (cellEditorHandler != null)
+                                {
+                                	notifyRepaint();
+                                }
+                            }
+                        }
+                    }));
+                    
+                    setResource(comp);
+                    
+                    if (isContextClickListenerAttached())
+                    {
+                    	attachContextClickListenerToResource();
+                    }
+                    
+					//addStyleName instead of setStyleName because we won't reset previously added styles
+					addInternStyleName("jvxeditor");
+					
+					setHorizontalAlignment(horizontalAlignment);
+					setVerticalAlignment(verticalAlignment);
+				}
+				
+				dataRow.addControl(this);
+
+				if (isAttached)
+				{
+					cancelEditing();
+				}
+			}
+			catch (ModelException ex)
+			{
+				cssExtensionDummyEditor.addAttribute(new CssExtensionAttribute("background",
+																	  		   ((VaadinColor)getFactory()
+																	  				   		  .getSystemColor(IColor.INVALID_EDITOR_BACKGROUND))
+																	  				   		  .getStyleValueRGB(),
+																	  		   true));
+				dummyEditor.setReadOnly(true);
+				
+	            if (logger == null)
+	            {
+	                logger = LoggerFactory.getInstance(getClass());
+	            }
+
+	            logger.debug(ex);
+			}
+		}
+		
+		if (cellEditorHandler == null)
+		{
+			setResource(dummyEditor);
+		}
+	}	
+
+	/** 
+	 * The current used <code>CellEditor</code> for editing.
+	 *  
+	 * @return The current used CellEditor for editing.
+	 */
+	public ICellEditorHandler<AbstractComponent> getCellEditorHandler()
+	{
+		return cellEditorHandler;
+	}
+	
+	/**
+	 * Sets the width for the the editor.
+	 * An editor consists of Panel, Panel, Component like TextField, DateField, ....
+	 * 
+	 * @param pWidth the width
+	 * @param pUnit the unit: PIXELS, PERCENTAGE
+	 */
+	private void setWidth(float pWidth, Unit pUnit)
+	{
+		if (cellEditorHandler instanceof IVaadinCellEditorHandler)
+		{
+			((IVaadinCellEditorHandler)cellEditorHandler).setWidth(pWidth, pUnit);
+		}
+		else
+		{
+			VaadinUtil.setComponentWidth((AbstractComponent)resource, pWidth, pUnit);
+		}
+	}
+	
+	/**
+	 * Sets the height for the the editor.
+	 * An editor consists of Panel, Panel, Component like TextField, DateField, ....
+	 * 
+	 * @param pHeight the height
+	 * @param pUnit the unit: PIXELS, PERCENTAGE
+	 */
+	private void setHeight(float pHeight, Unit pUnit)
+	{
+	    if (cellEditorHandler instanceof IVaadinCellEditorHandler)
+	    {
+    		if (pHeight >= 0 && pUnit == Unit.PIXELS)
+    		{
+    			// Height is not possible for Vaadin ComboBox.
+    			if (!(cellEditorHandler.getCellEditor() instanceof VaadinLinkedCellEditor))
+    			{
+    				((IVaadinCellEditorHandler)cellEditorHandler).setHeight(pHeight, Unit.PIXELS);	
+    			}
+    		}
+    		else 
+    		{
+				((IVaadinCellEditorHandler)cellEditorHandler).setHeight(pHeight, pUnit);
+    		}
+	    }
+		else
+		{
+			VaadinUtil.setComponentHeight((AbstractComponent)resource, pHeight, pUnit);
+		}
+	}
+	
+	/**
+	 * Sets the focus on the next focusable component.
+	 * 
+	 * @param pParent the parent container
+	 * @param pComponent the start component.
+	 * @return true if it was possible to focus the next child
+	 */
+	private boolean focusNextChild(IContainer pParent, IComponent pComponent)
+	{
+		if (pParent instanceof IVaadinContainer)
+		{
+			int index;
+			if (pComponent == null)
+			{
+				index = 0;
+			}
+			else
+			{
+				index = pParent.indexOf(pComponent) + 1; 
+			}
+		
+			for (int i = index, cnt = pParent.getComponentCount(); i < cnt; i++)
+			{
+				IComponent component = pParent.getComponent(i);
+				
+				if (component.isVisible())
+				{
+					if (component instanceof IContainer)
+					{
+						if (focusNextChild((IContainer)component, null))
+						{
+							return true;
+						}
+					}
+					else if (component.isFocusable() && component.isEnabled())
+					{
+						component.requestFocus();
+						
+						return true;
+					}
+				}
+			}
+			
+			return focusNextChild(pParent.getParent(), pParent);
+		}	
+		
+		return false;
+	}
+	
+	/**
+	 * Sets the focus on the previous focusable component.
+	 * 
+	 * @param pParent the parent container
+	 * @param pComponent the start component.
+	 * @return true if it was possible to focus the previous child
+	 */
+	private boolean focusPreviousChild(IContainer pParent, IComponent pComponent)
+	{
+		if (pParent != null && pParent instanceof IVaadinContainer)
+		{
+			int index;
+			if (pComponent == null)
+			{
+				index = pParent.getComponentCount() - 1;
+			}
+			else
+			{
+				index = pParent.indexOf(pComponent) - 1; 
+			}
+
+			for (int i = index; i >= 0; i--)
+			{
+				IComponent component = pParent.getComponent(i);
+				
+				if (component.isVisible())
+				{
+					if (component instanceof IContainer)
+					{
+						if (focusPreviousChild((IContainer) component, null))
+						{
+							return true;
+						}
+					} 
+					else if (component.isFocusable() && component.isEnabled())
+					{
+						component.requestFocus();
+						
+						return true;
+					}
+				}
+			}
+			
+			return focusPreviousChild(pParent.getParent(), pParent);
+		}		
+		
+		return false;
+	}
+	
+	/**
+	 * Sets the new resource object.
+	 * 
+	 * @param pComponent the new resource.
+	 */
+	private void setResource(Component pComponent)
+	{
+	    Style oldStyle = getStyle();
+	    
+	    IVaadinContainer container = (IVaadinContainer)getParent();
+		
+		if (container != null)
+		{
+			int index = container.indexOf(this);
+			container.removeFromVaadin(this);
+			resource = pComponent;
+			container.addToVaadin(this, getConstraints(), index);
+		}
+		else
+		{
+			resource = pComponent;
+		}	
+		
+		// Reinitialize the properties when component changed.
+		setVisible(isVisible());
+		setEnabled(isEnabled());
+		setFocusable(isFocusable());
+		setStyle(oldStyle);
+		
+		if (getId() != null)
+		{
+			setId(getId());
+		}
+		
+		if (getToolTipText() != null)
+		{
+			setToolTipText(getToolTipText());
+		}
+		
+		if (getName() != null)
+		{
+			setName(getName());
+		}
+		
+		if (isCursorSet())
+		{
+			setCursor(getCursor());
+		}
+		
+		if (resource != dummyEditor)
+		{
+			if (eventFocusGained != null)
+			{
+				addFocusListener();
+			}
+			
+			if (eventFocusLost != null)
+			{
+				addBlurListener();
+			}
+		}
+	}
+	
+	/**
+	 * Updates the accessibility attributes of this editor.
+	 */
+	private void updateAccessibility()
+	{
+		if (dataRow != null
+			&& !StringUtil.isEmpty(columnName))
+		{
+			try
+			{
+				ColumnDefinition columnDefinition = dataRow.getRowDefinition().getColumnDefinition(columnName);
+				
+				AccessibilityUtil.setLabel(getAttributesExtension(),
+										   getToolTipText(),
+										   columnDefinition.getComment(),
+										   columnDefinition.getLabel(),
+										   columnDefinition.getName());
+			}
+			catch (ModelException e)
+			{
+				logger.error(e);
+			}
+		}
+	}
+	
+} 	// VaadinEditor
+

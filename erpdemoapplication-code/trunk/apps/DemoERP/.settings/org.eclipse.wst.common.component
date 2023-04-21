@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+  <wb-module deploy-name="Demoerp">
+    <wb-resource deploy-path="/" source-path="/WebContent"/>
+    <wb-resource deploy-path="/WEB-INF/rad/apps/DemoERP/reports" source-path="/reports"/>
+    <wb-resource deploy-path="/WEB-INF/rad/apps/DemoERP/config.xml" source-path="/config.xml"/>
+    <wb-resource deploy-path="/WEB-INF/rad/apps/DemoERP/mobile.xml" source-path="/mobile.xml"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src.client"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src.server"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/test"/>
+    <property name="context-root" value="Demoerp"/>
+    <property name="java-output-path"/>
+  </wb-module>
+</project-modules>

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+  <securitymanager>
+    <class>com.sibvisions.rad.server.security.DBSecurityManager</class>
+  </securitymanager>
+  
+  <datasource>
+    <db name="default">
+      <driver>org.hsqldb.jdbcDriver</driver>
+      <url>jdbc:hsqldb:hsql://localhost/demodb;ifexists=true</url>
+      <username>sa</username>
+      <password></password>
+    </db>
+  </datasource>
+  
+</application>

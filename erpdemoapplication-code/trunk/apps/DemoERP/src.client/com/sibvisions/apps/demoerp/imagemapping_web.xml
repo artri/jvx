@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties>
+
+  <entry key="/com/sibvisions/apps/demoerp/images/add.png">/com/sibvisions/apps/demoerp/images/web/add.png</entry>
+  <entry key="/com/sibvisions/apps/demoerp/images/diskette.png">/com/sibvisions/apps/demoerp/images/web/diskette.png</entry>
+  <entry key="/com/sibvisions/apps/demoerp/images/export_database2.png">/com/sibvisions/apps/demoerp/images/web/export_database2.png</entry>
+  <entry key="/com/sibvisions/apps/demoerp/images/import_database2.png">/com/sibvisions/apps/demoerp/images/web/import_database2.png</entry>
+  <entry key="/com/sibvisions/apps/demoerp/images/invoice.png">/com/sibvisions/apps/demoerp/images/web/invoice.png</entry>
+  <entry key="/com/sibvisions/apps/demoerp/images/paypal.png">/com/sibvisions/apps/demoerp/images/web/paypal.png</entry>
+  <entry key="/com/sibvisions/apps/demoerp/images/purchase.png">/com/sibvisions/apps/demoerp/images/web/purchase.png</entry>
+  <entry key="/com/sibvisions/apps/demoerp/images/salesman.png">/com/sibvisions/apps/demoerp/images/web/salesman.png</entry>
+  <entry key="/com/sibvisions/apps/demoerp/images/stats_area_chart.png">/com/sibvisions/apps/demoerp/images/web/stats_area_chart.png</entry>
+  
+</properties>

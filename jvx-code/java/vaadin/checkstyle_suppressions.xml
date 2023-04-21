@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+
+<suppressions>
+    
+    <suppress checks="VisibilityModifier"
+              files="java[\\/]vaadin[\\/]src[\\/]com[\\/]sibvisions[\\/]rad[\\/]ui[\\/]vaadin[\\/]ext[\\/]ui[\\/]client[\\/].*"/>
+    
+    <suppress checks="JavadocPackage"
+              files="java[\\/]vaadin[\\/]test[\\/].*"/>
+    <suppress checks="JavadocPackage"
+              files="java[\\/]vaadin[\\/]rad[\\/]apps[\\/]simpleapp[\\/]src.server[\\/].*"/>
+    <suppress checks=".+"
+              files="java[\\/]vaadin[\\/]research[\\/].*"/>
+    
+    <suppress checks=".+"
+              files="java[\\/]library[\\/].*"/>
+    <suppress checks=".+"
+              files="java[\\/]vaadin[\\/]src[\\/]com[\\/]handinteractive[\\/].*"/>
+    <suppress checks=".+"
+              files="java[\\/]vaadin[\\/]src[\\/]com[\\/]vaadin[\\/]icons[\\/].*"/>
+    <suppress checks=".+"
+              files="java[\\/]vaadin[\\/]src[\\/]com[\\/]vaadin[\\/]v7[\\/]client[\\/]ui[\\/].*"/>
+    <suppress checks=".+"
+              files="java[\\/]vaadin[\\/]src[\\/]com[\\/]vaadin[\\/]client[\\/]ui[\\/].*"/>
+    <suppress checks=".+"
+              files="java[\\/]vaadin[\\/]src[\\/]com[\\/]google[\\/]gwt[\\/]user[\\/]client[\\/]ui[\\/].*"/>
+              
+    
+</suppressions>

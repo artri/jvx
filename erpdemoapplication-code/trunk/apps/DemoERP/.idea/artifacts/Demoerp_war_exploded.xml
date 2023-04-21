@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<component name="ArtifactManager">
+  <artifact type="exploded-war" name="Demoerp:war exploded">
+    <output-path>$PROJECT_DIR$/WebContent</output-path>
+    <root id="root">
+      <element id="directory" name="WEB-INF">
+        <element id="directory" name="classes">
+          <element id="module-output" name="Demoerp"/>
+        </element>
+        <element id="directory" name="lib">
+          <element id="library" level="module" name="libs/server/appserver.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/com.fasterxml.jackson.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/commons-fileupload-1.2.2.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/commons-io-2.2.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/commons-logging-1.1.3.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/ContextMenu-4.5.0.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/db2jcc.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/db2jcc_license_cu.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/dom4j-1.6.1.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/flute-1.3.0.gg2.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/iText-4.2.0.mpl.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/iText-rtf-4.2.0.mpl.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/jtds-1.2.8.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/jvx.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/jvxhelp-server.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/jvxhelp-themes.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/jvxmobile-addons.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/jvxmobile.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/jvxvaadin-client.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/jvxvaadin-themes.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/jvxvaadincharts-server.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/jvxweb.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/mysql-connector-java-5.1.14-bin.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/oracle_12c.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/org.restlet.ext.fileupload.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/org.restlet.ext.jackson.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/org.restlet.ext.servlet.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/org.restlet.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/poi-3.9-20121203.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/poi-ooxml-3.9-20121203.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/poi-ooxml-schemas-3.9-20121203.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/postgresql-9.0-801.jdbc3.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/projxvaadin-server.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/sac-1.3.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/sqljdbc4.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/stax-api-1.0.1.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/vaadin-slf4j-jdk14-1.6.1.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/validation-api-1.0.0.GA.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/xmlbeans-2.3.0.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/zxing.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/client/appsclient.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/client/dndtabpane.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/client/jcommon-1.0.16.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/client/jfreechart-1.0.13.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/client/jvxfx.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/client/projx.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/javax.mail-1.5.4.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/atmosphere-runtime-2.2.9.vaadin2.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/fontbox-2.0.2.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/jsoup-1.8.3.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/lucene-analyzers-common-4.7.2.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/lucene-core-4.7.2.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/lucene-queryparser-4.7.2.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/pdfbox-2.0.2.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/vaadin-sass-compiler-0.9.13.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/vaadin-charts-3.2.0.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/vaadin-charts-model-3.2.0.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/vaadin-client-compiled-7.7.7.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/vaadin-push-7.7.7.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/vaadin-server-7.7.7.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/vaadin-shared-7.7.7.jar" module-name="Demoerp"/>
+          <element id="library" level="module" name="libs/server/vaadin-themes-7.7.7.jar" module-name="Demoerp"/>
+        </element>
+      </element>
+      <element id="javaee-facet-resources" facet="Demoerp/web/Web"/>
+    </root>
+  </artifact>
+</component>

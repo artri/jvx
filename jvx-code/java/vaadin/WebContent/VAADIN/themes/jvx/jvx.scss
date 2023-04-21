@@ -1,0 +1,1116 @@
+/* Import the reindeer theme. */
+@import "../reindeer/reindeer.scss";
+
+@import "../valo/fonts/vaadin-icons/vaadin-icons.scss";
+
+/* after all other styles. */
+@import "../jvxbase/jvxbase.scss";
+@import "application.scss";
+
+@mixin jvx 
+{
+    /* Include all the styles from the reindeer theme */
+    @include reindeer;
+    
+    @include jvxbase;
+    
+	/* WINDOW ********************************************************************/
+
+    .v-window.save
+    {
+    	min-width: 40px !important;
+    	min-height: 20px !important;
+	}
+
+	.v-window.save .v-verticallayout
+	{
+		text-align: center;
+	}
+    
+	.v-window.save .v-button.continue
+	{
+	    padding: 10px;
+	    font-size: 1.5em;
+	}
+
+	.v-window.save .v-button.cancel
+	{
+		margin-top: 15px;
+	    padding: 6px;
+	    font-size: 1.5em;
+	}
+
+    .v-window.upload
+	{
+    	min-width: 320px !important;
+    	min-height: 10px !important;
+	}	
+    
+	.v-window.upload .v-button
+	{
+		padding: 4px;
+	}	
+	
+	/* INPUT *********************************************************************/
+	
+    .v-scrollable.v-panel-content > .v-textarea.v-widget
+    {
+    	overflow: auto;
+    }
+	
+	/* LABEL *********************************************************************/
+	
+	.v-label 
+	{
+	    line-height: 23px;
+	}
+	
+	/* RADIOBUTTON ***************************************************************/
+	
+	.v-radiobutton input
+	{
+	    margin: 5px 4px 5px 0px;
+	}
+	.v-radiobutton, .v-radiobutton label, .v-radiobutton input, .v-radiobutton .v-icon {
+		vertical-align: middle;
+		white-space: nowrap;
+	}
+
+	/* SWITCH ***************************************************************/
+	
+	.v-switch {
+		position: relative;
+		line-height: 14px;
+		white-space: nowrap;
+	}
+
+	.v-switch.v-has-width label {
+		white-space: nowrap;
+	}
+	
+	:root & .v-switch label {
+		display: inline-block;
+	}
+	
+	:root & .v-switch > input {
+		position: absolute;
+		clip: rect(0, 0, 0, 0);
+		left: 0.2em;
+		top: 0.2em;
+		z-index: 0;
+		margin: 0;
+	}
+	
+	:root & .v-switch > input ~ label:before, :root & .v-switch > input ~ label:after {
+		content: "";
+		display: inline-block;
+		box-sizing: border-box;
+		width: 14px;
+		height: 14px;
+		position: absolute;
+		top: 4px;
+		left: 2px;
+		border-radius: 4px;
+		font-size: 11px;
+		text-align: center;
+	}
+	
+	:root & .v-switch > input ~ label:before {
+		padding: 0 7px;
+		color: #191919;
+		font-weight: 400;
+		border-radius: 7px;
+		border: 1px solid #767676;
+		padding: 0;
+		width: 28px;
+		height: 14px;
+	}
+	
+	:root & .v-switch > input ~ label:after {
+		content: "";
+		font-family: ThemeIcons;
+		color: transparent;
+		width: 8px;
+		height: 8px;
+		top: 7px;
+		left: 6px;
+		background: #9f9f9f;
+	}
+	
+	:root & .v-switch > input:active ~ label:after {
+		background-color: rgba(125, 125, 125, 0.2);
+	}
+	
+	:root & .v-switch > input:checked ~ label:after {
+		top: 7px;
+		left: 18px;
+		background: #767676;
+	}
+	
+	.v-switch > .v-icon, .v-switch > label .v-icon {
+		margin: 0 5px 0 2px;
+		min-width: 1em;
+		cursor: pointer;
+	}
+	
+	.v-switch.v-disabled  > label, .v-switch.v-disabled  > .v-icon {
+		cursor: default;
+		opacity: 0.5;
+		filter: alpha(opacity=50) ;
+	}
+	
+	.v-switch.v-disabled  > label > .v-icon {
+		cursor: default;
+	}
+	
+	:root & .v-switch.v-disabled > input:active ~ label:after {
+		background: transparent;
+	}
+	
+	.v-switch.v-readonly  > label, .v-switch.v-readonly  > .v-icon {
+		cursor: default;
+	}
+	
+	.v-switch.v-readonly  > label > .v-icon {
+		cursor: default;
+	}
+	
+	:root & .v-switch.v-readonly > input:active ~ label:after {
+		background: transparent;
+	}
+	
+	:root & .v-switch.v-readonly > input ~ label:after {
+		opacity: 0.5;
+		filter: alpha(opacity=50) ;
+	}
+	
+	.v-formlayout-contentcell .v-switch, .v-formlayout-contentcell .v-radiobutton {
+		font-weight: 400;
+	}
+	
+	:root & .v-switch {
+		padding-left: 34px;
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+
+
+	/* ICON **********************************************************************/
+
+	.jvxicon,
+	.jvxinnericon 
+	{
+		font-size: 0px;
+	}
+	
+	/* EDITOR ********************************************************************/
+	
+	.jvxeditor 
+	{
+	    line-height: 23px;
+	}
+	
+	.jvxeditor .v-choicefield .v-nativebutton-caption
+	{
+		outline: none;
+	}
+	
+	.jvxeditor.jvxeditor-choicefield
+	{
+		line-height: 18px;
+	}
+	
+	.jvxeditor.v-datefield-popup-jvxeditor 
+	{
+	    line-height: 15px;
+	}		
+	
+	/* CHOICE FIELD *****************************************************************/
+	
+	.jvxeditor button.v-choicefield
+	{
+	    text-align: left !important;
+	} 
+
+	/* TABSHEET ******************************************************************/
+	
+	.v-tabsheet-caption-close
+	{
+		padding-left: 0px;
+		margin-right: 1px;
+	}
+	
+	.v-tabsheet-tabitem .v-caption .v-icon
+	{
+		vertical-align: top;
+		margin-right: 2px;
+	}
+	
+	.v-tabsheet-tabitem-focus .v-caption.v-disabled .v-captiontext
+	{
+	    text-decoration: none;
+	}
+		
+	/* PANEL *********************************************************************/
+    
+    .v-simplepanel
+    {
+    	background-color: transparent;
+    }
+    
+    .v-caption-v-simplepanel
+    {
+    	border-bottom: 1px solid #e5e5e5;
+    	overflow: hidden;
+    	text-align: left;
+    	font-weight: bold;
+    	padding-bottom: 2px;
+    	margin-bottom: 3px;
+    	width: 100%;
+    	height: 19px;
+    }    
+    
+    .v-panel-content
+	{
+	    border-left-color: transparent;
+	    border-right-color: transparent;
+	    border-bottom-color: transparent;
+	    background: transparent;
+	}
+	
+	.v-panel-deco
+	{
+	    height: 0;
+	    border: none;
+	}
+	      
+	.v-panel-nocaption      
+	{
+	    border: none;
+	}
+	
+	.v-panel-caption span
+	{
+	    padding-left: 2px;
+	}
+	
+	.v-panel-caption
+	{
+		text-align: inherit;
+	}
+
+	/* TOOLBAR *******************************************************************/
+
+	.v-window-contents .jvxtoolbar
+	{
+	    border: 1px solid #C2C3C4;
+	}	
+	
+	.jvxtoolbar.orientation-west 
+	{
+	   border-right: 0px;
+	}
+
+	.jvxtoolbar.orientation-north 
+	{
+	   border-bottom: 0px;
+	}
+
+	.jvxtoolbar.orientation-east 
+	{
+	   border-left: 0px;
+	}
+
+	.jvxtoolbar.orientation-south 
+	{
+	   border-top: 0px;
+	}
+	
+	/* COMBOBOX ******************************************************************/
+	
+	.comboboxmulti
+	{
+		padding: 0px;
+	}
+	
+	.comboboxmulti .v-table-body table
+	{
+	   width: 100%;
+	}	
+	
+	.comboboxmulti table .v-table-row:hover,
+	.comboboxmulti table .v-table-row-odd:hover
+	{
+		background: #4d749f url(../reindeer/common/img/sel-bg.png) repeat-x;
+		color: #fff;
+		text-shadow: #3b5a7a 0 1px 0;	
+	}
+	
+    .v-filterselect
+    {
+       background-image: none;
+       padding-left: 0;
+    }
+
+	&.v-app .v-filterselect-input, 
+	&.v-app input.v-filterselect-input,
+	.v-window .v-filterselect-input,
+	.v-window input.v-filterselect-input,
+	.v-popupview-popup .v-filterselect-input, 
+	.v-popupview-popup input.v-filterselect-input 
+	{
+	    border: 1px solid #bcbdbe;
+	    border-top-color: #a2a3a4;
+	    border-bottom-color: #c0c1c2;
+	    background: #fff;
+	    background-repeat: repeat-x;
+	    background-image: url(../reindeer/textfield/img/bg.png);
+	    
+	    background-repeat: repeat-x;
+	    -moz-border-radius: 3px;
+	    -webkit-border-radius: 3px;
+	    border-radius: 3px;
+	    margin: 0;
+	    height: 23px;
+	    line-height: normal;
+	    
+	    border-right: none;
+	    border-top-right-radius: 0;
+	    border-bottom-right-radius: 0;
+	    border-right-width: 0;
+	    -moz-border-radius-topright: 0;
+	    -moz-border-radius-bottomright: 0;
+	    -webkit-border-top-right-radius: 0;
+	    -webkit-border-bottom-right-radius: 0;
+	    
+	    padding: 3px 3px 4px 3px;
+	}
+	
+	.v-filterselect-focus .v-filterselect-input,
+	.v-filterselect-focus input.v-filterselect-input
+	{
+	    border-color: #5b97d0;
+	    border-top-color: #4f83b4;
+	    border-bottom-color: #5ca0df;
+	    outline: none;
+	    background-color: #fff;
+    }	
+    
+	.v-filterselect.v-readonly .v-filterselect-button
+	{
+		display: inline-block;
+	}
+
+	.v-filterselect.v-readonly .v-filterselect-input-readonly
+	{
+		border: 1px solid #bcbdbe;
+		border-top-color: #a2a3a4;
+		border-bottom-color: #c0c1c2;
+	}
+	
+	.v-filterselect.v-readonly .v-filterselect-button
+	{
+		background-image: url(../reindeer/select/img/right.png);
+	}
+
+	.v-filterselect.v-readonly,
+	.v-filterselect.v-readonly .v-filterselect-input
+	{
+		background: transparent;
+	}
+	
+	/* MENU **********************************************************************/
+	
+	.v-menubar.jvxmenubar
+	{
+	   height: 25px;
+	}
+	
+	.v-menubar.jvxmenubar .v-menubar-menuitem 
+	{
+	   padding-top: 5px;
+	}
+	
+	.v-menubar.jvxmenubar .v-menubar-menuitem-caption .v-icon.FontAwesome,
+	.v-menubar-submenu.jvxmenubar .v-menubar-menuitem-caption .v-icon.FontAwesome
+	{
+	   width : 16px;
+	   text-align: center;
+	   vertical-align: inherit;
+	   margin-right: 5px;
+	}
+	
+	.v-menubar-submenu.jvxmenubar .v-menubar-menuitem 
+	{
+	    padding-top: 4px;
+	    padding-bottom: 4px;
+	}
+	
+	.v-menubar.jvxmenubar .v-icon, .v-menubar-submenu .v-icon 
+	{
+	    max-width: 16px;
+	    max-height: 16px;
+	}
+	
+	.v-menubar-popup .v-menubar.jvxmenubar .v-icon, 
+	.v-menubar-popup .v-menubar-submenu .v-icon
+	{ 
+	    padding-bottom: 3px;
+	}
+	
+	
+	.v-menubar-popup
+	{
+	    background: rgba(255, 255, 255, 0.92);
+	}
+	
+	.v-menubar-popup:not(.jvxmenubarpopup) .v-menubar-separator span
+	{
+	    border-top-color: rgba(0, 0, 0, 0.2);
+	}
+	
+	/* TABLE *********************************************************************/
+	
+	.v-table .v-selected td
+	{
+		background: #4d749f url(../reindeer/common/img/sel-bg.png) repeat-x;
+	}
+	
+	.v-table-cell-content
+	{
+	    border-bottom: 1px solid transparent;
+	}
+
+	/* TREE **********************************************************************/
+	
+	.jvxtree td img
+	{
+		vertical-align: middle;
+	}
+
+    .jvxtree .v-table-row-odd
+    {
+        background: transparent;
+    }	
+    
+    .jvxtree td img 
+    {
+        padding-left: 2px;
+        padding-right: 4px;
+    }
+    
+    .jvxtree .v-table-cell-content
+    {
+        padding-left: 0;
+    }
+	
+	/* CHECKBOX ******************************************************************/
+	
+	.v-checkbox input
+	{
+	    margin: 5px 4px 5px 0px;
+	}
+
+	.v-checkbox, .v-checkbox label, .v-checkbox input, .v-checkbox .v-icon {
+		vertical-align: middle;
+		white-space: nowrap;
+	}
+	
+	/* BUTTON ********************************************************************/
+	
+    .v-button
+    {
+    	height: auto;
+    
+        color: black;
+    	background-color: #fafafa;
+    	border-bottom-color: #bcbcbc;
+    	border-top-color: #c5c5c5;
+    	border: 1px solid #c5c5c5;
+    	border-radius: 4px;
+
+    	cursor: pointer;
+    	
+    	background-image: linear-gradient(to bottom,#fafafa 2%, #efefef 98%);
+    	background-image: -webkit-linear-gradient(top, #fafafa 2%, #efefef 98%);
+    	box-shadow: inset 0 1px 0 transparent, inset 0 -1px 0 transparent, 0 2px 3px transparent;    
+    }
+            
+	.v-disabled.v-button
+	{
+        height: auto;
+	}
+	
+	.v-disabled.v-button:not(.v-button-noborder)
+	{
+  		box-shadow: none;    
+  		
+        background-image: linear-gradient(to bottom, #fafafa 2%, #efefef 98%);
+        background-image: -webkit-linear-gradient(top, #fafafa 2%, #efefef 98%);  
+        box-shadow: inset 0 1px 0 transparent, inset 0 -1px 0 transparent, 0 2px 3px transparent;   
+
+		border-bottom-color: #bcbcbc;
+		border-top-color: #c5c5c5;
+		border: 1px solid #c5c5c5;
+		border-radius: 4px;
+	}
+	
+	.v-button.pressed
+	{
+	    border-top: 1px solid #858585;
+	    border-left: 1px solid #858585;
+		border-right: 1px solid #858585;
+		border-bottom: 1px solid #858585;	
+		
+		background-image: linear-gradient(to bottom,#cacaca 2%, #efefef 98%);
+    	background-image: -webkit-linear-gradient(top, #cacaca 2%, #efefef 98%);
+	}	
+	
+	.v-button.pressed:focus
+	{
+	    border-top: 1px solid #858585;
+	    border-left: 1px solid #858585;
+		border-right: 1px solid #858585;
+		border-bottom: 1px solid #858585;	
+		
+		background-image: linear-gradient(to bottom,#cacaca 2%, #efefef 98%);
+    	background-image: -webkit-linear-gradient(top, #cacaca 2%, #efefef 98%);
+	}
+	
+	.v-button.pressed.v-button-borderonmouse
+	{
+	   	background-image: none;
+	
+	    border-top: 1px solid #858585;
+	    border-left: 1px solid #858585;
+		border-right: 1px solid #858585;
+		border-bottom: 1px solid #858585;	
+	}	
+	
+    .v-button.no-caption 
+    {
+    	padding: 0px;
+    }
+	
+	.v-disabled.v-button
+	{
+		background-image: none;
+	}
+	
+    .v-disabled.v-button .v-button-wrap
+    {    
+    	display: inline-block;
+    	height: auto;
+    	background: none;
+    	padding: 0px;
+
+    	vertical-align: middle;
+    	text-align: center;
+    }		    
+    
+    .v-button-borderonmouse:hover 
+	{
+    	background-color: #fafafa;
+    	border-bottom-color: #bcbcbc;
+    	border-top-color: #c5c5c5;
+    	border: 1px solid #c5c5c5;
+    	border-radius: 4px;
+    	padding: 0px;
+    	height: auto;
+
+    	cursor: pointer;
+    	
+    	background-image: linear-gradient(to bottom,#fafafa 2%, #efefef 98%);
+    	background-image: -webkit-linear-gradient(top, #fafafa 2%, #efefef 98%);
+    	box-shadow: inset 0 1px 0 transparent, inset 0 -1px 0 transparent, 0 2px 3px transparent;   
+	}	  
+    
+    .v-button-wrap
+    {    
+    	display: inline-block;
+    	height: auto;
+    	background: none;
+    	padding: 0px;
+
+    	vertical-align: middle;
+    	text-align: center;
+    }    
+
+	.v-button .v-icon 
+	{
+	    margin-right: 0;
+	    padding-right: 0;
+	}			
+	
+	.v-button-caption 
+	{
+	    margin-left: 0px;
+	    color: inherit;
+	}
+	
+	.v-button.default-padding
+	{
+	    padding: 3px 6px 3px 6px;
+	}
+	
+    .v-button:focus .v-button-wrap
+    {    
+    	background: none;
+    }
+    
+	.v-button:not(.v-button-borderonmouse):not(.v-disabled):not(.pressed).v-notfocusable:focus,
+	.v-menubar:not(.v-button-borderonmouse):not(.v-disabled):not(.pressed).v-notfocusable:focus
+	{
+    	border-bottom-color: #bcbcbc;
+    	border-top-color: #c5c5c5;
+    	border: 1px solid #c5c5c5;
+    	border-radius: 4px;
+	}        
+	
+	.v-button-noborder 
+	{
+		background-color: transparent;
+
+    	border-bottom-color: transparent;
+    	border-top-color: transparent;
+    	border: 1px solid transparent;
+    	border-radius: 4px;
+    	
+    	background-image: none;
+    	box-shadow: none;
+	}
+	
+	.v-button-noborder:not(.v-button-borderonmouse):not(.v-disabled):not(.pressed):focus
+	{
+		border: 1px solid transparent;
+		background-color: transparent;
+
+    	border-bottom-color: transparent;
+    	border-top-color: transparent;
+    	border-radius: 4px;
+    	
+    	box-shadow: none;
+	}
+
+	.v-button:active
+	{
+		background-image: none;
+	}
+	
+	.v-button:focus
+	{
+		background-image: none;
+	}
+	
+	.v-button.v-pressed
+	{
+		background-image: none;
+	}	
+	
+	.v-button:not(.v-button-noborder):not(.v-disabled):hover,
+	.v-button:not(.v-button-noborder):not(.v-disabled):focus:hover,
+	.v-button.v-button-noborder.v-button-borderonmouse:not(.v-disabled):hover,
+	.v-button.v-button-noborder.v-button-borderonmouse:not(.v-disabled):focus:hover
+	{
+	  border-bottom-color: #8a8a8a;
+	  border-top-color: #8a8a8a;
+	  border: 1px solid #8a8a8a;
+	}	
+
+    .v-button.v-disabled:not(.v-button-borderonmouse):not(.v-button-noborder):hover,
+    .v-button.v-disabled:not(.v-button-noborder):hover,
+    .v-button.v-disabled:not(.v-button-borderonmouse):not(.v-button-noborder):focus:hover,
+    .v-button.v-disabled:not(.v-button-noborder):focus:hover
+    {
+	  border-bottom-color: #bcbcbc;
+	  border-top-color: #c5c5c5;
+	  border: 1px solid #c5c5c5;
+	}
+	
+	.v-button.jvxbutton.v-pressed:not(.v-button-noborder),
+	.v-button.jvxbutton.v-pressed.v-button-noborder.v-button-borderonmouse
+	{
+	  background-image: -webkit-linear-gradient(top, #f4f5f5, #dfdddd);
+	  background-image: -moz-linear-gradient(top, #f4f5f5, #dfdddd);
+	  background-image: -ms-linear-gradient(top, #f4f5f5, #dfdddd);
+	  background-image: -o-linear-gradient(top, #f4f5f5, #dfdddd);
+	  background-image: linear-gradient(to bottom, #f4f5f5, #dfdddd);
+	}
+	
+	.v-button.jvxbutton .v-button-wrap
+	{
+	   overflow: hidden;
+	}
+	
+	/* TEXTFIELD *****************************************************************/
+		
+	.v-textfield-readonly,
+	.v-numberfield-readonly,
+	.v-textarea-readonly,
+	.v-filterselect-input-readonly,
+	.v-choicefield.v-readonly,
+	.v-choicefield.v-readonly .v-button-wrap
+	{
+		cursor: default !important;
+	}
+	
+	.v-choicefield.v-readonly
+	{
+    	cursor: default;
+    	opacity: 0.3;
+	}
+	
+	input.v-textfield-readonly,
+	input.v-numberfield-readonly,
+	textarea.v-textarea-readonly,
+	.v-textfield-readonly.v-textfield-focus,
+	.v-numberfield-readonly.v-numberfield-focus,
+	.v-textarea-readonly.v-textarea-focus
+	{
+		resize: none;
+		border-color: #A2A3A4 #BCBDBE #D2D3D4;
+		border-style: solid;
+	    border-width: 1px;
+	    background: transparent;
+	}
+	
+	input.v-textfield-readonly:focus,
+	input.v-numberfield-readonly:focus,
+	textarea.v-textarea-readonly:focus
+	{
+		outline: none;
+	}
+	
+	/* DATEFIELD *****************************************************************/
+
+	.v-datefield-popupcalendar .v-datefield-button-readonly:active
+	{
+    	background-image: url("../reindeer/datefield/img/popup-btn.png");
+	}
+	
+	.v-datefield.v-readonly input.v-datefield-textfield
+	{
+    	border-right-width: 0px;
+    	border-top-right-radius: 0px;
+    	border-bottom-right-radius: 0px;
+	}
+	
+	/*
+	It's better UX to show the button (see jvxbase.scss)
+	
+	.v-datefield-popupcalendar.no-popup-button
+	{
+		padding-right: 0;	
+	}
+	
+	.v-datefield-popupcalendar.no-popup-button input.v-datefield-textfield 
+	{
+        border-right-width: 1px;
+        -moz-border-radius-topright: 3px;
+        -moz-border-radius-bottomright: 3px;
+        -webkit-border-top-right-radius: 3px;
+        -webkit-border-bottom-right-radius: 3px;
+	}
+
+	/* NUMBERFIELD ***************************************************************/
+	
+	&.v-app .v-numberfield-focus,
+	&.v-window .v-numberfield-focus
+	{
+		border-color: #5b97d0;
+		border-top-color: #4f83b4;
+		border-bottom-color: #5ca0df;
+		outline: none;
+	}
+
+	/* GRID **********************************************************************/
+
+	.v-grid-header > .v-grid.row > .v-grid-cell
+	{
+		height: 21px !important;
+	}
+	
+	.v-grid-cell > * > .v-grid-cell-content
+	{
+		padding: 0px !important;
+	}
+	
+	.v-grid-cell > * > .v-grid-cell-content > span
+	{
+		padding: 0px 4px;
+	}
+	
+	.v-grid-body > .v-grid-row > .v-grid-cell,
+	.v-grid-cell > * > .v-grid-cell-content,
+	.v-grid-cell > .v-clickablehtmlrenderer
+	 {
+		height: 31px !important;
+		line-height: 31px !important;
+	}
+	
+	.v-grid-editor-cells div.v-datefield,
+	.v-grid-editor-cells div.v-filterselect {
+		height: unset !important;
+		min-height: unset !important;
+		vertical-align: middle;
+	}
+	
+	.v-grid-editor-cells .v-filterselect-button {
+		margin-top: 0px !important;
+	}
+	
+	.v-grid-editor-cells > div > .v-customcomponent,
+	.v-grid-editor-cells span.v-checkbox,
+	.v-grid-editor-cells button.v-nativebutton {
+		line-height: 31px !important;
+	}
+	
+	.v-grid-editor-cells > div input[type="checkbox"]
+	{
+		margin: 0px !important;
+		padding: 0px !important;
+	}
+	
+	.v-grid-editor-cells > div input[type="text"],
+	.v-grid-editor-cells > div input[type="password"]
+	{
+		padding-left: 3px !important;
+	}
+	
+	/* TREE **********************************************************************/
+	
+	.v-treegrid {
+		border: #c2c3c4 1px solid;
+	}
+	
+	.v-treegrid:focus {
+		outline: none !important;
+	}
+	
+	.v-treegrid-row {
+		position: absolute;
+	}
+	
+	.v-treegrid-expander {
+		display: inline-block;
+		vertical-align: top;
+		
+		&::before {
+			content: "";
+			display: inline-block;
+			font-family: ThemeIcons;
+			text-align: center;
+			width: 1.5em;
+			
+			&.expanded {
+				content: "\f0d7";
+			}
+			
+			&.collapsed {
+				content: "\f0da";
+			}
+			
+			&.collapse-disabled {
+				opacity: 0.5;
+				cursor: default;
+			}
+		}
+	}
+	
+	.v-treegrid-tablewrapper > table {
+		border-collapse: collapse;
+	}
+	
+	.v-treegrid-row {
+		height: 22px !important;
+		outline: transparent 1px solid;
+	}
+	
+	.v-treegrid:focus .v-treegrid-row-focused {
+		outline: #5ca0df 1px solid;
+	}
+	
+	.v-treegrid-row-selected {
+		background-color: #5486A9;
+		color: #ffffff;
+		text-shadow: #3b5a7a 0 1px 0;
+	}
+	
+	.v-treegrid:focus .v-treegrid-row-focused::before {
+		display: block;
+	}
+	
+	.v-treegrid-cell {
+		height: 22px !important;
+		line-height: 22px !important;
+		padding-top: 0px;
+		padding-bottom: 0px;
+		position: relative;
+	}
+	
+	.v-treegrid-cell-content {
+		display: inline-block;
+		vertical-align: top;
+	}
+	
+	.v-treegrid-node {
+		height: 22px !important;
+		line-height: 22px !important;
+		
+		@for $i from 0 through 15 {
+			&.depth-#{$i} {
+				padding-left: 1em * $i;
+			}
+		}
+	}
+	
+	.v-treegrid-editor {
+		position: absolute;
+	}
+	
+	.v-treegrid-scroller {
+		border: none;
+		box-sizing: border-box;
+		outline: none;
+		position: absolute;
+		z-index: 1;
+	}
+	
+	.v-treegrid-scroller-horizontal {
+		bottom: 0;
+		left: 0;
+		right: 0;
+		overflow-y: hidden;
+		-ms-overflow-y: hidden;
+	}
+	
+	.v-treegrid-scroller-vertical {
+		bottom: 0;
+		overflow-x: hidden;
+		right: 0;
+		top: 0;
+		-ms-overflow-x: hidden;
+	}
+	
+	.v-treegrid-tablewrapper {
+		box-sizing: border-box;
+		overflow: hidden;
+		position: absolute;
+		z-index: 5;
+	}
+	
+	.v-treegrid-body {
+		left: 0;
+		position: absolute;
+		width: inherit;
+		z-index: 10;
+	}
+	
+	.v-treegrid-tablewrapper > table {
+		border-spacing: 0;
+		table-layout: fixed;
+		width: inherit;
+	}
+	
+	.v-treegrid-cell-content > .v-grid-cell-content {
+		height: 22px !important;
+		line-height: 22px !important;
+	}
+	
+	/* POPUP MENU BUTTON*************************************************************/
+	
+    .jvxpopupbutton:not(.v-menubar-submenu)
+    {
+	    display: flex;
+	    flex-grow: 1;
+    }	
+	
+	.jvxpopupbutton:not(.v-menubar-submenu) .v-menubar-item .v-icon.FontAwesome
+	{
+	    min-width: 16px;
+	    text-align: center;
+	}
+	
+	.v-menubar-submenu.jvxpopupbutton
+	{
+	   	background-color: #f8f8f9;
+	}
+	
+	.v-menubar.jvxpopupbutton
+	{
+	   	@extend .v-button;
+	   
+	   	text-shadow: none;
+	   	padding-left: 0;
+	   
+	   	text-align: right !important; 
+	}
+	
+	.v-menubar.jvxpopupbutton:hover
+	{
+	   	@extend .v-button:not(.v-button-noborder):not(.v-disabled):hover; 
+	}
+	
+	.v-menubar.jvxpopupbutton > .v-menubar-menuitem
+	{
+	   	cursor: pointer;
+	   	width: 100%;
+	   	padding-left: 0;
+	   	padding-right: 0;
+	}
+	
+	.v-menubar.jvxpopupbutton > .v-menubar-menuitem-selected
+	{
+	    background-image: none;
+	    background-color: rgb(192, 195, 197);
+	}
+	
+	.v-menubar.jvxpopupbutton > .v-menubar-menuitem:hover,
+	.v-menubar.jvxpopupbutton > .v-menubar-menuitem-selected
+	{
+	    color: initial;
+	    text-shadow: none;
+	}
+	
+	.v-menubar.jvxpopupbutton > .v-menubar-menuitem > .v-menubar-menuitem-caption
+	{
+	    @extend .v-button-caption;
+	}
+
+    .v-menubar.jvxpopupbutton > .v-menubar-menuitem:first-child
+    {
+        padding-left: 5px;
+        padding-right: 2px;
+    }
+    
+	.v-menubar.jvxpopupbutton:not(.v-no-defaultitem) > .v-menubar-menuitem:not(.v-menubar-menuitem-disabled):active:first-child
+	{
+		background-color: rgb(192, 195, 197);
+    }
+	
+	.v-menubar.jvxpopupbutton > .v-menubar-menuitem:last-child > .v-menubar-menuitem-caption:after
+	{
+	   	font-family: ThemeIcons;
+       	content: "\f078";
+       	font-size: 9px;
+       	vertical-align: 0.1em;
+       	margin: 0 -0.2em 0 0.5em;
+       	opacity: 0.5;
+       
+	   	padding-right: 8px;
+    }
+	
+	.v-menubar.jvxpopupbutton > .v-menubar-menuitem > .v-menubar-menuitem-caption,
+	.v-menubar.jvxpopupbutton > .v-menubar-menuitem:hover > .v-menubar-menuitem-caption,
+	.v-menubar.jvxpopupbutton > .v-menubar-menuitem-selected > .v-menubar-menuitem-caption
+	{
+	   	text-shadow: none;
+	}
+	
+	.v-menubar.jvxpopupbutton:not(.v-nocaption) > .v-menubar-menuitem > .v-menubar-menuitem-caption > .v-icon
+	{
+	   padding-right: 5px;
+	}
+	
+	@include application;
+}

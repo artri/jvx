@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+
+<properties>
+  <entry key="APPLICATION">DemoERP</entry>
+  <entry key="* help system">* help system</entry>
+  <entry key="You are in the help system of APPLICATION.">You are in the help system of the application.</entry>
+</properties>

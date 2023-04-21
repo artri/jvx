@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<info>
+  <!-- Test: TCP Angaben 
+       in der zweiten Zeile
+       und in der dritten Zeile
+  
+  nach einer Leerzeile
+  -->
+  <company>http://www.sibvisions.com</company>
+  <expiration>01.01.2008</expiration>
+  <max_viewer>5</max_viewer>
+  <max_admin>1</max_admin>
+  <features>ADMIN,DBA</features>
+  <gamelimit>0</gamelimit>
+</info>

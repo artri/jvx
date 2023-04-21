@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config>
+
+  <user>admin</user>
+  <password encrypted="true">1f8b0800000000000000b329482c2e2ecf2f4ab14b4cc9cdccb3d187f3019039fc641a000000</password> 
+
+  <authentication>
+    <param>text</param>
+    <param>
+      <element name="name">
+        text
+      </element>
+    </param>
+  </authentication>
+  
+</config>

@@ -1,0 +1,320 @@
+<!-- 
+Copyright 2021 SIB Visions GmbH
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+ 
+http://www.apache.org/licenses/LICENSE-2.0
+ 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+
+<project name="SwingStarter" default="start.create.installer">
+
+	<!-- 
+    ***************************************************************** 
+  	* information   
+  	***************************************************************** 
+  	-->
+
+	<description>Creates the application installer file which uses the Swing Starter</description>
+
+    <!-- 
+    ***************************************************************** 
+  	* global properties
+  	***************************************************************** 
+  	-->
+	
+	<property name="jar.name.demoapp"   value="demoapp.jar" />
+	<property name="jar.name.jvxclient" value="jvxclient.jar" />
+	
+	<property name="installer.type.win"   value="msi" />
+	<property name="installer.type.mac"   value="dmg" />
+	<property name="installer.type.linux" value="rpm" />
+	<property name="installer.vendor"     value="SIB Visions GmbH" />
+	
+	<!-- 
+  	***************************************************************** 
+  	* general properties   
+  	***************************************************************** 
+  	-->
+
+	<property name="swst.build" location="${basedir}/build" />
+	<property name="swst.temp"  location="${swst.build}/temp" />
+
+	<property name="swst.install" location="${swst.build}/install" />
+
+	<property name="swst.src"   location="${basedir}/src" />
+	<property name="swst.test"  location="${basedir}/test" />
+	<property name="swst.lib"   location="${basedir}/lib" />
+	
+	<property name="swst.classes" location="${swst.temp}/classes" />
+	
+	<property name="installer.jre"    location="${swst.temp}/jre" />
+	<property name="installer.input"  location="${swst.temp}/installer_input" />
+	<property name="installer.output" location="${swst.install}" />
+	<property name="installer.resources" location="${basedir}/installation" />
+	
+	<property name="jvx.test"             location="${basedir}/../library/test" />
+	<property name="jvx.install"          location="${basedir}/../build/install" />
+	<property name="jvxserver.webcontent" location="${basedir}/../server/tomcat/WebContent" />
+
+	<property name="demoapp"  location="${jvxserver.webcontent}/${jar.name.demoapp}" />
+
+	<property name="jpackage" location="${java.home}/bin/jpackage" />
+	<property name="jlink"    location="${java.home}/bin/jlink" />
+	
+	<path id="jvx.classpath">
+		<pathelement location="${jvx.install}/jvx.jar" />
+	</path>
+
+    <!-- 
+  	***************************************************************** 
+  	* external taskdefinitions   
+  	***************************************************************** 
+  	-->
+	
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${basedir}/../build/ant-contrib.jar" />
+
+	<!-- 
+  	***************************************************************** 
+  	* INTERNAL TASKS   
+  	***************************************************************** 
+  	-->
+
+	<!-- 
+	* cleanup tasks 
+	-->
+	
+	<!-- JVM >= 15 check -->
+	<target name="jvm15">
+		<fail message="Unsupported Java version: ${java.version}. Make sure that the Java version is >= 15.">
+		    <condition>
+	          <bool>
+	            <islessthan arg1="${java.version}" arg2="15"/>
+	          </bool>
+		    </condition>
+		</fail>
+
+		<!-- only if jvm 15 is required -->
+		<property name="target.source"  value="15" />
+		<property name="target.version" value="15" />
+		
+	</target>
+
+	<target name="clean.start">
+		
+		<delete dir="${swst.temp}" />
+		<delete dir="${swst.install}" />
+		
+	</target>
+	
+	<!-- 
+	* compile, build tasks 
+	-->
+	
+	<!-- Builds JVx because we need jvxclient.jar -->
+	<target name="build.jvx">
+		
+		<delete dir="${installer.input}" />
+		<mkdir dir="${installer.input}" />
+		
+		<ant dir="${basedir}/../library" antfile="build.xml" target="start.release.nojavadoc" />
+		
+		<copy todir="${installer.input}">
+			<fileset dir="${jvx.install}">
+				<include name="${jar.name.jvxclient}" />
+			</fileset>
+		</copy>
+		
+	</target>
+	
+	<target name="compile" depends="build.jvx">
+		
+		<delete dir="${swst.classes}" />
+		<mkdir dir="${swst.classes}" />
+		
+		<javac srcdir="${swst.test}" destdir="${swst.classes}" encoding="ISO-8859-1">
+			<compilerarg value="-implicit:none"/>
+			<classpath refid="jvx.classpath" />
+
+			<include name="**/DialogTestApplication.java" />
+			<include name="**/DesktopApplication.java" />
+			
+			<src path="${swst.test}" />
+			<src path="${jvx.test}" />
+		</javac>
+	</target>
+
+	<target name="jar" depends="compile">
+		
+		<jar destfile="${demoapp}" basedir="${swst.classes}">
+			<manifest>
+				<attribute name="Main-Class" value="javax.rad.application.DialogTestApplication" />
+			</manifest>
+			<zipgroupfileset dir="${jvx.install}" includes="jvx.jar" />
+		</jar>
+		
+	</target>
+
+	<!-- Creates the minimal jre for the swing starter via jlink -->
+	<target name="create.jre" depends="jvm15">
+		
+		<mkdir dir="${swst.temp}" />
+		
+		<exec executable="${jlink}" failonerror="true" dir="${swst.temp}">
+			<arg value="--output" />
+			<arg value="${installer.jre}/" />
+			<arg value="--add-modules" />
+			<arg value="java.base,java.compiler,java.datatransfer,java.desktop,java.instrument,java.logging,java.management,java.management.rmi,java.naming,java.net.http,java.prefs,java.rmi,java.scripting,java.se,java.security.jgss,java.security.sasl,java.sql,java.sql.rowset,java.transaction.xa,java.xml,java.xml.crypto" />
+		</exec>
+		
+	</target>
+
+	<!-- Copies the jnlp file to be packaged into the msi -->
+	<target name="prepare.jnlp">
+		
+		<copy todir="${installer.input}">
+			<fileset dir="${installer.resources}">
+				<include name="application.jnlp" />
+			</fileset>
+		</copy>
+		
+	</target>
+	
+	<!-- Creates the installer file via jpackage -->
+	<target name="create.installer" depends="build.jvx, create.jre, prepare.jnlp">
+		
+		<mkdir dir="${swst.install}"/>
+		
+		<exec executable="${jpackage}" failonerror="true" dir="${swst.install}" osfamily="windows">
+			<arg value="-i" />
+			<arg value="${installer.input}" />
+			<arg value="--main-class" />
+			<arg value="com.sibvisions.rad.ui.swing.impl.SwingStarter" />
+			<arg value="--main-jar" />
+			<arg value="${jar.name.jvxclient}" />
+			<arg value="--win-dir-chooser" />
+			<arg value="--type" />
+			<arg value="${installer.type.win}" />
+			<arg value="--name" />
+			<arg value="SwingStarter" />
+			<arg value="--vendor" />
+			<arg value="${installer.vendor}" />
+			<arg value="--description" />
+			<arg value="Starts a swing application from values specified in an .jnlp file." />
+			<arg value="--runtime-image" />
+			<arg value="${installer.jre}" />
+		</exec>
+		
+		<exec executable="${jpackage}" failonerror="true" dir="${swst.install}" osfamily="mac">
+			<arg value="-i" />
+			<arg value="${installer.input}" />
+			<arg value="--main-class" />
+			<arg value="com.sibvisions.rad.ui.swing.impl.SwingStarter" />
+			<arg value="--main-jar" />
+			<arg value="${jar.name.jvxclient}" />
+			<arg value="--type" />
+			<arg value="${installer.type.mac}" />
+			<arg value="--name" />
+			<arg value="SwingStarter" />
+			<arg value="--vendor" />
+			<arg value="${installer.vendor}" />
+			<arg value="--description" />
+			<arg value="Starts a swing application from values specified in an .jnlp file." />
+			<arg value="--runtime-image" />
+			<arg value="${installer.jre}" />
+		</exec>
+		
+		<exec executable="${jpackage}" failonerror="true" dir="${swst.install}" osfamily="unix">
+			<arg value="-i" />
+			<arg value="${installer.input}" />
+			<arg value="--main-class" />
+			<arg value="com.sibvisions.rad.ui.swing.impl.SwingStarter" />
+			<arg value="--main-jar" />
+			<arg value="${jar.name.jvxclient}" />
+			<arg value="--type" />
+			<arg value="${installer.type.linux}" />
+			<arg value="--name" />
+			<arg value="SwingStarter" />
+			<arg value="--vendor" />
+			<arg value="${installer.vendor}" />
+			<arg value="--description" />
+			<arg value="Starts a swing application from values specified in an .jnlp file." />
+			<arg value="--runtime-image" />
+			<arg value="${installer.jre}" />
+		</exec>
+		
+	</target>
+	
+	<target name="bundle.installer" depends="build.jvx, create.jre" >
+		
+		<delete dir="${swst.install}/application" />
+		
+		<copy todir="${swst.install}/application/">
+			<fileset dir="${installer.resources}">
+			  <include name="build_installer.xml" />
+			</fileset>
+		</copy>
+
+		<copy todir="${swst.install}/application/ant/installer">
+			<fileset dir="${installer.input}" />
+		</copy>
+		
+		<copy todir="${swst.install}/application/ant/installer/jre">
+			<fileset dir="${installer.jre}" />
+		</copy>
+		
+	</target>
+
+	<!-- 
+  	***************************************************************** 
+  	* PUBLIC START TASKS   
+  	***************************************************************** 
+  	-->
+
+	<target name="start.run" description="Runs the demo application">
+		
+		<java jar="${demoapp}/${jar.name.demoapp}" fork="true">
+			<classpath>
+				<path refid="jvx.classpath" />
+			</classpath>
+		</java>
+		
+	</target>
+	
+	<!-- 
+	  This task builds an installer for the swing starter application. Following steps have to be taken for this to work:
+	  
+		 1. Install OpenJDK 16
+		 2. Enable .NET 3.5 Features (Control Panel\All Control Panel Items\Programs and Features\Turn Windows Features On/Off)
+		 3. Install WIX Toolset -> add to PATH
+		 
+	  The application.jnlp and a newly built jvxclient.jar is used for this.
+		  
+	  For this starter to work the "start.create.demoapp" task has to be called first and the tomcat server started. 
+		 
+ 	  This task also builds a special jre for the installer. If you need to add more modules to the jre see create.jre 
+		 
+	  ****
+	  
+	  This task also populates the installation folder with the needed jre and jvxclient.jar to use this installer in projects. 
+      Afterwards the folder can be copied into your projects base directory where you can edit the parameters for the installer build.
+      
+	  You also have to replace the included application.jnlp with the jnlp of your project. 
+	-->
+	<target name="start.create.installer" depends="jvm15, clean.start, create.installer, bundle.installer" description="Creates the custom installer" />
+
+	<!-- 
+	  This task builds a test application for the swing starter and copies it to the JVx.Server WebContent directory. 
+	  
+	  For the swing starter to work you have to make sure the JVx.Server is running in a Tomcat. The application.jnlp codebase has to be set accordingly. 
+	-->
+	<target name="start.create.demoapp" depends="clean.start, jar" description="Creates the demo application jar and copies it to the JVx.Server" />
+
+</project>

@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<server>
+  
+  <logfactory><!-- full qualified class name --></logfactory>
+    
+  <!-- 
+    the full qualified class name of the object provider, 
+    empty to use the default object provider 
+  -->
+  <objectprovider>
+      <!-- 
+      <class>full.qualified.class</class>
+      <accesscontroller>full.qualified.class</accesscontroller>
+      -->
+  </objectprovider>
+  
+  <sessionmanager>
+      <!-- 
+      <class>full.qualified.class</class>
+      <controllerInterval>milliseconds</controllerInterval>
+       -->
+       <!-- millis -->
+      <controllerInterval>3000</controllerInterval>
+  </sessionmanager>
+  
+  <!-- minutes, seconds, "interval" * factor 
+  <alive timeout="1" timeoutSeconds="15" timeoutFactor="4" />
+   -->
+  
+  <!-- <logfactory>full.qualified.class</logfactory> -->
+  <timeout>
+    <!-- MasterSession timeout in minutes -->
+    <mastersession>360</mastersession>
+    <!-- SubSession timeout in minutes -->
+    <subsession>360</subsession>
+  </timeout>
+
+  <!-- Upload configuration (default: /com/sibvisions/rad/server/http/upload/) -->  
+  <upload>
+    <searchpath></searchpath>
+  </upload>
+  
+  <!-- ON | OFF -->
+  <globalmetadatacache>OFF</globalmetadatacache>
+  
+  <serializer>
+    <allow>remote.net.ObjectSerializer</allow>
+    <deny></deny>
+  </serializer>
+  
+</server>

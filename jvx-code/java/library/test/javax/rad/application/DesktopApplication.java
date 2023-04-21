@@ -1,0 +1,197 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 27.11.2010 - [JR] - creation
+ */
+package javax.rad.application;
+
+import javax.rad.application.genui.UILauncher;
+import javax.rad.genui.UIDimension;
+import javax.rad.genui.container.UIInternalFrame;
+import javax.rad.genui.layout.UIBorderLayout;
+import javax.rad.remote.IConnection;
+import javax.rad.ui.IComponent;
+import javax.rad.util.ExceptionHandler;
+
+import com.sibvisions.rad.application.Application;
+import com.sibvisions.rad.util.DirectObjectConnection;
+
+/**
+ * The <code>DesktopApplication</code> is a simple test application which extends {@link Application}
+ * and opens a default internal frame direct after a successful login. You should extend this class
+ * and implement abstract methods. The only method is {@link #getDefaultComponent()} which returns
+ * the content for the default frame.
+ * 
+ * @author René Jahn
+ */
+public abstract class DesktopApplication extends Application
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/** the internal connection. */
+	protected DirectObjectConnection connection;
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Creates a new instance of <code>DesktopApplication</code>.
+	 * 
+	 * @param pLauncher the launcher
+	 */
+	public DesktopApplication(UILauncher pLauncher)
+	{
+		super(pLauncher);
+	}
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Abstract methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Gets the component for the default frame, shown after login.
+	 * 
+	 * @return the default component
+	 * @throws Exception if the initialization of the component failed
+	 */
+	public abstract IComponent getDefaultComponent() throws Exception;
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Overwritten methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected IConnection createConnection() throws Exception
+	{
+		connection = new DirectObjectConnection();
+		
+		return connection;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected String getApplicationName()
+	{
+		return "DesktopApplication";
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	protected void afterLogin()
+	{
+		super.afterLogin();
+		
+		showDefaultFrame();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+	public void notifyVisible()
+	{
+		//"AutoLogin" :)
+		try
+		{
+			doLogin(null);
+		}
+		catch (Throwable th)
+		{
+			ExceptionHandler.show(th);
+		}
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// User-defined methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Shows an internal frame on the desktop with the component returned
+	 * from {@link #getDefaultComponent()}.
+	 */
+	protected void showDefaultFrame()
+	{
+		try
+		{
+			ComponentFrame frame = new ComponentFrame();
+			
+			configureFrame(frame);
+			
+			frame.pack();
+			frame.setVisible(true);
+		}
+		catch (Throwable th)
+		{
+			ExceptionHandler.show(th);
+		}
+	}
+	
+	//****************************************************************
+	// Subclass definition
+	//****************************************************************
+
+	/**
+	 * A simple internal frame which shows a simple component.
+	 * 
+	 * @author René Jahn
+	 */
+	private final class ComponentFrame extends UIInternalFrame
+	{
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+		// Initialization
+		//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+		/**
+		 * Creates a new instance of <code>TableFrame</code> and configures the content.
+		 * 
+		 * @throws Throwable if an initialization error occurs
+		 */
+		private ComponentFrame() throws Throwable
+		{
+			super(getDesktopPane());
+			
+			UIBorderLayout blThis = new UIBorderLayout();
+			blThis.setMargins(5, 5, 5, 5);
+			
+		    setLayout(blThis);
+		    
+		    IComponent comp = getDefaultComponent(); 
+		    
+		    if (!comp.isMinimumSizeSet())
+		    {
+		        comp.setMinimumSize(new UIDimension(640, 480));
+		    }
+		    
+		    setTitle(comp.getName());
+		    
+		    add(comp);
+		}
+		
+	}	// TableFrame
+	
+}	// DesktopApplication

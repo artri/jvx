@@ -1,0 +1,171 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 19.11.2009 - [HM] - creation
+ */
+package com.sibvisions.rad.ui.web.impl;
+
+import javax.rad.ui.IPoint;
+
+import com.sibvisions.util.type.StringUtil;
+
+/**
+ * Web server implementation of {@link IPoint}.
+ * 
+ * @author Martin Handsteiner
+ */
+public class WebPoint extends WebResource
+                      implements IPoint
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class Members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	  
+	/** the x position. */
+	private int x;
+	/** the y position. */
+	private int y;
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	  
+    /**
+     * Creates a new instance of <code>WebPoint</code>.
+     *
+     * @see IPoint
+     */
+    public WebPoint()
+    {
+    }
+
+    /**
+     * Creates a new instance of <code>WebPoint</code> with the given x and y.
+     *
+     * @param pX the x value
+     * @param pY the y value
+     * @see IPoint
+     */
+    public WebPoint(int pX, int pY)
+    {
+    	x = pX;
+    	y = pY;
+    }
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Abstract methods implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /**
+	 * {@inheritDoc}
+	 */
+    @Override
+    public String getAsString()
+    {
+    	return x + "," + y; 
+    }
+
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Interface implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+    public int getX()
+    {
+    	return x;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+    public void setX(int pX)
+    {
+    	x = pX;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+    public int getY()
+    {
+    	return y;
+    }
+
+	/**
+	 * {@inheritDoc}
+	 */
+    public void setY(int pY)
+    {
+    	y = pY;
+    }
+    
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Overwritten methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean equals(Object obj)
+    {
+        if (obj instanceof WebPoint)
+        {
+            WebPoint p = (WebPoint)obj;
+            
+            return x == p.x && y == p.y;
+        }
+        return false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public int hashCode()
+    {
+        return 7 + (x * 17) ^ (y * 31);
+    }
+
+    /**
+	 * {@inheritDoc}
+	 */
+    @Override
+    public void setAsString(String pValue)
+    {
+    	int[] values = StringUtil.parseInteger(pValue, ",");
+    	
+    	if (values != null && values.length >= 2)
+    	{
+        	x = values[0];
+        	y = values[1];
+    	}
+    }
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String toString()
+    {
+        return super.toString() + " (" + x + ", " + y + ")"; 
+    }
+    
+}	// WebPoint

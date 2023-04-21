@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<videos xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="./test/com/sibvisions/util/xml/video.xsd">
+
+  <music2>
+    <title>Video Title 1</title>
+    <artist>Artist 1</artist>
+  </music2>
+  
+  <music>
+    <title>Video Title 2</title>
+    <artist>Artist 2</artist>
+    <artist>Artist 3</artist>
+  </music>
+  
+</videos>

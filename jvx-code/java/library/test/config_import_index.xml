@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+   <include>/config_import_index.properties</include>
+   
+   <datasource />
+   <datasource />
+   <datasource />
+</application>

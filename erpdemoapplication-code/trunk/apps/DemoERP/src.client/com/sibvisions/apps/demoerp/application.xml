@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+  <!-- Connection parameters -->
+  <Application.serverbase>http://localhost/Demoerp</Application.serverbase>
+  <Application.connectionClass>com.sibvisions.rad.server.DirectServerConnection</Application.connectionClass>
+  <_Application.connectionClass>com.sibvisions.rad.remote.http.HttpConnection</_Application.connectionClass>
+  <Application.connectionParams>url</Application.connectionParams>
+  <Application.connectionParams.url.name>service</Application.connectionParams.url.name>
+  <Application.connectionParams.url.value>[Application.serverbase]/services/Server</Application.connectionParams.url.value>
+  <Application.authenticator>com.sibvisions.apps.auth.UserPwdAuthenticator</Application.authenticator>
+  <!-- UI parameters -->
+  <Application.translation>/com/sibvisions/apps/demoerp/translation.xml</Application.translation>
+  <Application.iconstyle>modern</Application.iconstyle>
+  <Application.Login.application>DemoERP</Application.Login.application>
+  <Application.Login.username/>
+  <Application.Login.password/>
+  <Application.Login.image>/com/sibvisions/apps/demoerp/images/login.png</Application.Login.image>
+  <Application.Login.loadImage>/com/sibvisions/apps/demoerp/images/loader.gif</Application.Login.loadImage>
+  <Application.Login.background>230,230,230</Application.Login.background>
+  <Application.Login.background_center>240,240,240</Application.Login.background_center>
+  <Application.Menu.ToolBar.small>true</Application.Menu.ToolBar.small>
+  <Application.Menu.exit.visible>true</Application.Menu.exit.visible>
+  <Application.Menu.changePassword.visible>true</Application.Menu.changePassword.visible>
+  <Application.Menu.undo.visible>false</Application.Menu.undo.visible>
+  <Application.Menu.redo.visible>false</Application.Menu.redo.visible>
+  <Application.Desktop.background>255,255,255</Application.Desktop.background>
+  <Application.Desktop.topimage>/com/sibvisions/apps/demoerp/images/top_shadow.png</Application.Desktop.topimage>
+  <Application.Desktop.topimage.valign>top</Application.Desktop.topimage.valign>
+  <Application.Desktop.topimage.halign>Stretch</Application.Desktop.topimage.halign>
+  <Application.Desktop.image>/com/sibvisions/apps/demoerp/images/background.jpg</Application.Desktop.image>
+  <Application.Desktop.image.valign>Stretch</Application.Desktop.image.valign>
+  <Application.Desktop.image.halign>Stretch</Application.Desktop.image.halign>
+  <Application.InternalFrame.image>/com/sibvisions/apps/demoerp/images/frame.png</Application.InternalFrame.image>
+  <Application.title>Enterprise Resource Planning</Application.title>
+  <Application.About.text>Demo ERP\n\nSIB Visions GmbH\nWehlistra&#223;e 29 / Stair 1 / 2nd Floor\nA-1200 Vienna</Application.About.text>
+  <Application.WelcomeScreen/>
+  <Application.version>1.3</Application.version>
+  <Application.language>en</Application.language>
+  <Company.name>SIB Visions GmbH</Company.name>
+  <Company.url>http://www.sibvisions.com/jvx</Company.url>
+</application>

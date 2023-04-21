@@ -1,0 +1,1829 @@
+<!-- 
+Copyright 2009 SIB Visions GmbH
+
+Licensed under the Apache License, Version 2.0 (the "License"); you may not
+use this file except in compliance with the License. You may obtain a copy of
+the License at
+ 
+http://www.apache.org/licenses/LICENSE-2.0
+ 
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+License for the specific language governing permissions and limitations under
+the License.
+-->
+
+<project name="JVx" default="start.complete"
+         xmlns:artifact="antlib:org.apache.maven.artifact.ant"
+         xmlns:staging="antlib:org.sonatype.nexus.ant.staging"
+	     xmlns:jacoco="antlib:org.jacoco.ant">
+
+  <!-- 
+    ***************************************************************** 
+  	* information   
+  	***************************************************************** 
+  	-->
+
+  <description>JVx build</description>
+
+  <!-- 
+  	***************************************************************** 
+  	* global properties
+  	***************************************************************** 
+  	-->
+
+  <property name="jar.name.util" value="jvxutil.jar" />
+  <property name="jar.name.genmodel" value="jvxmodel.jar" />
+  <property name="jar.name.genui" value="jvxgenui.jar" />
+  <property name="jar.name.fastrpc" value="jvxremote.jar" />
+  <property name="jar.name.client" value="jvxclient.jar" />
+  <property name="jar.name.clientserver" value="jvx.jar" />
+  <property name="jar.name.mobile" value="jvxmobile.jar" />
+
+  <property name="war.name" value="jvx.war"/>
+
+  <property name="release.name" value="jvx"/>
+  
+  <!-- 
+  	***************************************************************** 
+  	* general properties   
+  	***************************************************************** 
+  	-->
+
+  <property name="build" location="${basedir}/../build" />
+  <property name="licence" location="${basedir}" />
+  <property name="buildnumber" location="${build}/buildnumber/" />
+  <property name="temp" location="${build}/temp" />
+  <property name="install" location="${build}/install" />
+  <property name="release" location="${build}/release" />
+  <property name="quality" location="${build}/quality" />
+  <property name="javadoc" location="${install}/doc/api" />
+
+  <property name="src" location="${basedir}/src" />
+  <property name="src.swing" location="${basedir}/../swing/src" />
+  <property name="src.intern" location="${basedir}/intern" />
+  <property name="src.test" location="${basedir}/test" />
+  <property name="libs" location="${basedir}/lib" />
+  <property name="libs.log4j" location="${libs}/log4j" />
+  <property name="libs.mariadb" location="${libs}/mariadb" />
+  <property name="libs.informix" location="${libs}/informix" />
+  <property name="libs.swing" location="${basedir}/../swing/lib" />
+  <property name="libs.imageio" location="${libs}/imageio" />
+  <property name="rad" location="${basedir}/rad" />
+  <property name="maven" location="${basedir}/maven" />
+
+  <property name="classes" location="${temp}/classes" />
+  <property name="classes.debug" location="${temp}/classes.debug" />
+  <property name="classes.test" location="${temp}/classes.test" />
+  <property name="classes.util" location="${temp}/classes.util" />
+  <property name="classes.javax.rad" location="${temp}/classes.javax.rad" />
+  <property name="classes.com.sibvisions.rad" location="${temp}/classes.com.sibvisions.rad" />
+  <property name="classes.genmodel" location="${temp}/classes.genmodel" />
+  <property name="classes.genui" location="${temp}/classes.genui" />
+  <property name="classes.fastrpc" location="${temp}/classes.fastrpc" />
+  <property name="classes.client" location="${temp}/classes.client" />
+  <property name="classes.clientserver" location="${temp}/classes.clientserver" />
+  <property name="classes.clientserver.debug" location="${temp}/classes.clientserver.debug" />
+  <property name="classes.appsserver" location="${temp}/classes.appsserver" /> 
+
+  <property name="webcontent" location="${basedir}/../server/tomcat/WebContent"/>
+ 
+<!-- (IDE Tests)	
+<property name="path"        value="/JVx.Server"/>
+<property name="port"        value="8081"/>
+-->
+	
+  <property name="host"        value="localhost"/>
+  <property name="path"        value="/jvx"/>
+  <property name="port"        value="9090"/>
+  <property name="username"    value="admin"/>
+  <property name="password"    value="admin"/>
+  
+  <!-- if already set through nightly build script, the value is not set again! -->
+  <property name="build.nightly" value="" />
+  
+  <!-- Maven snapshots and staging repository id and url -->
+  <property name="mvn.snapshotsrep.id" value="sonatype-nexus-snapshots" />
+  <property name="mvn.snapshotsrep.url" value="https://oss.sonatype.org/content/repositories/snapshots" />
+  <property name="mvn.stagingrep.id" value="sonatype-nexus-staging" />
+  <property name="mvn.stagingrep.url" value="https://oss.sonatype.org/service/local/staging/deploy/maven2" />
+ 
+  <!-- Compile properties -->
+  <property name="target.source" value="1.8" />
+  <property name="target.version" value="1.8" />
+
+  <property name="debug" value="on"/>
+  <property name="debuglevel" value="lines,vars,source"/>
+	
+  <!--
+  	***************************************************************** 
+  	* external taskdefinitions   
+  	***************************************************************** 
+  	-->
+
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${build}/ant-contrib.jar" />
+
+  <taskdef resource="org/jacoco/ant/antlib.xml" uri="antlib:org.jacoco.ant" classpath="${build}/jacoco/jacocoant.jar" />
+
+  <taskdef name="deploy"    classname="org.apache.catalina.ant.DeployTask" classpath="${build}/catalina-ant.jar"/>
+  <taskdef name="list"      classname="org.apache.catalina.ant.ListTask" classpath="${build}/catalina-ant.jar"/>
+  <taskdef name="reload"    classname="org.apache.catalina.ant.ReloadTask" classpath="${build}/catalina-ant.jar"/>
+  <taskdef name="resources" classname="org.apache.catalina.ant.ResourcesTask" classpath="${build}/catalina-ant.jar"/>
+  <taskdef name="roles"     classname="org.apache.catalina.ant.RolesTask" classpath="${build}/catalina-ant.jar"/>
+  <taskdef name="start"     classname="org.apache.catalina.ant.StartTask" classpath="${build}/catalina-ant.jar"/>
+  <taskdef name="stop"      classname="org.apache.catalina.ant.StopTask" classpath="${build}/catalina-ant.jar"/>
+  <taskdef name="undeploy"  classname="org.apache.catalina.ant.UndeployTask" classpath="${build}/catalina-ant.jar"/>
+
+  <typedef resource="org/apache/maven/artifact/ant/antlib.xml" uri="antlib:org.apache.maven.artifact.ant" classpath="${build}/maven/maven-ant-tasks-2.1.3.jar" />
+
+  <!-- 
+  	***************************************************************** 
+  	* task defaults   
+  	***************************************************************** 
+  	-->
+
+  <presetdef name="javac">
+    <javac includeantruntime="false">
+    </javac>
+  </presetdef>
+
+  <!-- 
+  	***************************************************************** 
+  	* logging   
+  	***************************************************************** 
+  	-->
+
+  <record name="${build}/build.log" />
+  
+  <!-- 
+  	***************************************************************** 
+  	* INTERNAL TASKS   
+  	***************************************************************** 
+  	-->
+
+  <!--
+    * setup tasks
+    -->
+
+  <target name="ci.intern">
+    <property name="ci.intern" value="true" />
+  </target>
+    
+  <target name="ci">
+    <property name="ci" value="true" />
+  </target>
+  
+  <target name="preconfigure.tomcat">
+  	
+    <!-- use 80 or configured port as tomcat port -->
+    <condition property="url" value="http://${host}" else="http://${host}:${port}">
+      <http url="http://${host}/RELEASE-NOTES.txt"/>
+    </condition>
+
+    <!-- Tomcat 7 has a different URL than previous versions -->
+    <condition property="url.manager" value="${url}/manager/text" else="${url}/manager">
+      <http url="${url}/manager/text" errorsBeginAt="404"/>
+    </condition>
+
+    <condition property="useTomcat" value="true" else="false">
+      <http url="${url.manager}" errorsBeginAt="404"/>
+    </condition>
+  	
+    <property name="url.jvx" value="${url}${path}"/>
+    
+    <echo>Use URL: ${url.manager} (${useTomcat})</echo>
+    
+  </target>
+
+  <target name="proxy.check">
+    <stopwatch name="timer_proxy"/>
+    
+    <if>
+      <not>
+        <isset property="ci" />
+      </not>
+      <then> 
+        <typedef name="canreach" classname="com.sibvisions.addons.ant.CanReach" classpath="${buildnumber}/addons.jar" />
+
+  	    <condition property="proxy.enabled">
+   	      <and>
+            <canreach host="10.0.0.1" port="3128"/>
+    	  </and>
+        </condition>
+      </then>
+    </if>
+    
+    <stopwatch name="timer_proxy" action="total"/>
+  </target>
+  
+  <target name="proxy" depends="proxy.check" if="proxy.enabled">
+    <stopwatch name="timer1"/>
+    
+    <property name="proxy.host" value="10.0.0.1"/>
+    <property name="proxy.port" value="3128"/>
+    <property name="proxy.user" value=""/>
+    <property name="proxy.pass" value=""/>
+      
+    <setproxy proxyhost="${proxy.host}" proxyport="${proxy.port}" proxyuser="${proxy.user}" proxypassword="${proxy.password}"/>
+    
+    <stopwatch name="timer1" action="total"/>
+  </target>
+  
+  <!-- 
+	* cleanup tasks 
+	-->
+
+  <target name="clean.start">
+    <stopwatch name="timer2"/>
+  	
+    <delete dir="${temp}" />
+    <delete dir="${install}" />
+    <delete dir="${release}" />
+    <delete dir="${quality}" />
+    
+    <stopwatch name="timer2" action="total"/>
+  </target>
+
+  <target name="clean.stop">
+    <stopwatch name="timer3"/>
+    
+     <delete dir="${temp}" /> 
+    
+    <stopwatch name="timer3" action="total"/>
+  </target>
+
+  <!-- 
+	* compile, build tasks 
+	-->
+
+  <target name="compile">
+    <stopwatch name="timer4"/>
+    
+    <delete dir="${classes}" />
+    
+    <delete dir="${classes.util}" />
+    <delete dir="${classes.javax.rad}" />
+    <delete dir="${classes.com.sibvisions.rad}" />
+    <delete dir="${classes.genmodel}" />
+    <delete dir="${classes.genui}" />
+    <delete dir="${classes.fastrpc}" />
+    <delete dir="${classes.client}" />
+    <delete dir="${classes.clientserver}" />
+    <delete dir="${classes.clientserver.debug}" />
+    <delete dir="${classes.appsserver}" />
+
+    <mkdir dir="${classes}" />
+
+    <mkdir dir="${classes.util}" />
+    <mkdir dir="${classes.javax.rad}" />
+    <mkdir dir="${classes.com.sibvisions.rad}" />
+    <mkdir dir="${classes.genmodel}" />
+    <mkdir dir="${classes.genui}" />
+    <mkdir dir="${classes.fastrpc}" />
+    <mkdir dir="${classes.client}" />
+    <mkdir dir="${classes.clientserver}" />
+    <mkdir dir="${classes.clientserver.debug}" />
+    <mkdir dir="${classes.appsserver}" />
+
+    <!-- compile all sources -->
+    <javac sourcepath="" destdir="${classes}" debug="${debug}" debuglevel="${debuglevel}" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+      <compilerarg value="-implicit:none"/>    	
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.imageio}">
+          <include name="*.jar" />
+        </fileset>
+        <pathelement location="${build}/junit-4.11.jar" />
+        <pathelement location="${build}/hamcrest-core-1.3.jar" />
+      </classpath>
+      <src path="${src}" />
+      <src path="${src.intern}" />
+      <compilerarg value="-XDstringConcat=inline" />
+    </javac>
+
+    <!-- copy resource files -->
+    <copy todir="${classes}">
+      <fileset dir="${src}">
+        <include name="logging.properties" />
+        <include name="**/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+      <fileset dir="${src.intern}">
+        <include name="**/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+    </copy>
+
+    <!-- compile only com.sibvisions.util sources -->
+    <javac sourcepath="" srcdir="${src}" destdir="${classes.util}" debug="${debug}" debuglevel="${debuglevel}" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+      <compilerarg value="-implicit:none"/>    	
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.imageio}">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+      <include name="com/sibvisions/util/**" />
+      <include name="javax/rad/io/IFileHandle**" />
+    </javac>
+
+    <!-- copy resource files -->
+    <copy todir="${classes.util}">
+      <fileset dir="${src}">
+        <include name="com/sibvisions/util/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+    </copy>
+
+
+    <!-- compile only javax.rad sources -->
+    <javac sourcepath="" srcdir="${src}" destdir="${classes.javax.rad}" debug="${debug}" debuglevel="${debuglevel}" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+      <compilerarg value="-implicit:none"/>	
+      <classpath>
+        <pathelement location="${classes.util}" />
+      </classpath>
+      <include name="javax/rad/**" />
+    </javac>
+
+    <!-- copy resource files -->
+    <copy todir="${classes.javax.rad}">
+      <fileset dir="${src}">
+        <include name="javax/rad/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+    </copy>
+
+
+    <!-- compile only com.sibvisions.rad sources -->
+    <javac sourcepath="" srcdir="${src}" destdir="${classes.com.sibvisions.rad}" debug="${debug}" debuglevel="${debuglevel}" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+      <compilerarg value="-implicit:none"/>    	
+      <classpath>
+        <pathelement location="${classes.util}" />
+        <pathelement location="${classes.javax.rad}" />
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+      <include name="com/sibvisions/rad/**" />
+      <include name="javax/annotation/**" />
+    </javac>
+
+    <!-- copy resource files -->
+    <copy todir="${classes.com.sibvisions.rad}">
+      <fileset dir="${src}">
+        <include name="com/sibvisions/rad/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+    </copy>
+
+
+    <!-- compile only model sources -->
+    <javac sourcepath="" srcdir="${src}" destdir="${classes.genmodel}" debug="${debug}" debuglevel="${debuglevel}" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+      <compilerarg value="-implicit:none"/>    	
+      <classpath>
+        <pathelement location="${classes.util}" />
+        <pathelement location="${classes.javax.rad}" />
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+      <include name="com/sibvisions/rad/persist/**" />
+      <include name="com/sibvisions/rad/model/**" />
+      <include name="com/sibvisions/rad/genui/**" />
+      <include name="com/sibvisions/rad/server/protocol/**" />
+      <include name="com/sibvisions/rad/server/annotation/**" />
+      <include name="com/sibvisions/rad/util/**" />
+    </javac>
+
+    <!-- copy resource files -->
+    <copy todir="${classes.genmodel}">
+      <fileset dir="${src}">
+        <include name="com/sibvisions/rad/persist/**" />
+        <include name="com/sibvisions/rad/model/**" />
+        <include name="com/sibvisions/rad/server/protocol/**" />
+        <include name="com/sibvisions/rad/server/annotation/**" />
+        <include name="com/sibvisions/rad/util/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+    </copy>
+
+
+    <!-- compile only sources for genui -->
+    <javac sourcepath="" srcdir="${src}" destdir="${classes.genui}" debug="${debug}" debuglevel="${debuglevel}" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+      <compilerarg value="-implicit:none"/>
+      <classpath>
+        <pathelement location="${classes.util}" />
+        <pathelement location="${classes.javax.rad}" />
+        <pathelement location="${classes.genmodel}" />
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+      <include name="com/sibvisions/rad/application/**" />
+    </javac>
+
+    <!-- copy resource files -->
+    <copy todir="${classes.genui}">
+      <fileset dir="${src}">
+        <include name="com/sibvisions/rad/application/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+    </copy>
+
+
+    <!-- compile only sources for rpc -->
+    <javac sourcepath="" srcdir="${src}" destdir="${classes.fastrpc}" debug="${debug}" debuglevel="${debuglevel}" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+	  <compilerarg value="-implicit:none"/>    	
+      <classpath>
+        <pathelement location="${classes.util}" />
+        <pathelement location="${classes.javax.rad}" />
+        <pathelement location="${classes.genmodel}" />
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+      <include name="com/sibvisions/rad/IPackageSetup**" />
+      <include name="com/sibvisions/rad/remote/**" />
+      <include name="com/sibvisions/rad/server/**" />
+      <include name="javax/annotation/**" />
+    </javac>
+
+    <!-- copy resource files -->
+    <copy todir="${classes.fastrpc}">
+      <fileset dir="${src}">
+        <include name="com/sibvisions/rad/IPackageSetup**" />
+        <include name="com/sibvisions/rad/remote/**" />
+        <include name="com/sibvisions/rad/server/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+    </copy>
+
+
+    <!-- compile only client sources -->
+    <javac sourcepath="" destdir="${classes.client}" debug="${debug}" debuglevel="${debuglevel}" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+	  <compilerarg value="-implicit:none"/>
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.imageio}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.swing}">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+
+      <compilerarg value="-XDstringConcat=inline" />	
+    	
+      <src path="${src}" />
+      <src path="${src.swing}" />
+
+      <include name="javax/rad/**" />
+      <include name="com/sibvisions/util/**" />
+      <include name="com/sibvisions/rad/**" />
+
+      <exclude name="javax/rad/server/**" />
+      <exclude name="com/sibvisions/rad/server/**" />
+      <exclude name="com/sibvisions/rad/persist/**" />
+    </javac>
+
+    <!-- copy resource files -->
+    <copy todir="${classes.client}">
+      <fileset dir="${src}">
+        <include name="javax/rad/**" />
+        <include name="com/sibvisions/util/**" />
+        <include name="com/sibvisions/rad/**" />
+        <include name="com/sibvisions/rad/remote/**" />
+        <include name="com/sibvisions/rad/server/**" />
+
+        <exclude name="javax/rad/server/**" />
+        <exclude name="com/sibvisions/rad/server/**" />
+        <exclude name="com/sibvisions/rad/persist/**" />
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+      
+      <!-- copy swing classes and resources -->
+      <fileset dir="${src.swing}">
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+      </fileset>
+
+    </copy>
+
+    <!-- compile only client and server sources (with DEBUG infos) -->
+    <javac sourcepath="" destdir="${classes.clientserver.debug}" debug="on" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+	  <compilerarg value="-implicit:none"/>
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+	    <fileset dir="${libs.imageio}">
+	      <include name="*.jar" />
+	    </fileset>
+        <fileset dir="${libs.swing}">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+      
+      <src path="${src}" />
+      <src path="${src.swing}" />
+      
+      <include name="javax/rad/**" />
+      <include name="javax/annotation/**" />
+      <include name="com/sibvisions/util/**" />
+      <include name="com/sibvisions/rad/**" />
+    </javac>
+
+    <!-- copy resource files -->
+    <copy todir="${classes.clientserver}">
+      <fileset dir="${src}">
+        <include name="javax/rad/**" />
+        <include name="com/sibvisions/util/**" />
+        <include name="com/sibvisions/rad/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+      
+      <!-- copy swing classes and resources -->
+      <fileset dir="${src.swing}">
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+    </copy>
+
+
+    <!-- compile only client and server sources -->
+    <javac sourcepath="" destdir="${classes.clientserver}" debug="${debug}" debuglevel="${debuglevel}" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+	  <compilerarg value="-implicit:none"/>
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+	    <fileset dir="${libs.imageio}">
+	      <include name="*.jar" />
+	    </fileset>
+        <fileset dir="${libs.swing}">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+      
+      <compilerarg value="-XDstringConcat=inline" />	
+    	
+      <src path="${src}" />
+      <src path="${src.swing}" />
+
+      <include name="javax/rad/**" />
+      <include name="javax/annotation/**" />    	
+      <include name="com/sibvisions/util/**" />
+      <include name="com/sibvisions/rad/**" />
+    </javac>
+
+    <!-- copy resource files -->
+    <copy todir="${classes.clientserver}">
+      <fileset dir="${src}">
+        <include name="javax/rad/**" />
+        <include name="com/sibvisions/util/**" />
+        <include name="com/sibvisions/rad/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+      
+      <!-- copy swing classes and resources -->
+      <fileset dir="${src.swing}">
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+    </copy>
+
+    
+    <!-- compile all server sources for the jvx apps (needed for tomcat deployment) -->
+    <javac sourcepath="" destdir="${classes.appsserver}" debug="on" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+	  <compilerarg value="-implicit:none"/>
+      <classpath>
+        <pathelement location="${classes}" />
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+      <src path="${rad}/apps/demo/src.server" />
+      <src path="${rad}/apps/democopy/src.server" />
+      <src path="${basedir}/../server/tomcat/src" />
+    </javac>
+
+    <!-- copy resource files -->
+    <copy todir="${classes.appsserver}">
+      <fileset dir="${rad}/apps/demo/src.server">
+        <include name="**/**" />
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+      <fileset dir="${rad}/apps/democopy/src.server">
+        <include name="**/**" />
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+      <fileset dir="${basedir}/../server/tomcat/src">
+        <include name="**/**" />
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>	
+    </copy>
+    
+    <stopwatch name="timer4" action="total"/>
+  </target>
+
+  <target name="jar" depends="compile">
+    <stopwatch name="timer5"/>
+    
+    <property name="manifest" location="${temp}/manifest" />
+
+    <property name="install.7zip" location="${install}/7zip" />
+
+    <delete dir="${install}" />
+
+    <mkdir dir="${install.7zip}" />
+
+    <!-- define late because of the classpath -->
+    <taskdef name="buildnr" classname="com.sibvisions.addons.ant.AntBuildNumber" classpath="${buildnumber}/addons.jar;${classes}" />
+    <buildnr buildfile="${buildnumber}/buildnr.properties" class="javax.rad.IPackageSetup" versionfield="JVX_OS_VERSION" name="JVx"/> 
+
+    <jar jarfile="${install}/${jar.name.util}" basedir="${classes.util}">
+	  <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+      <metainf dir="${webcontent}/META-INF">
+        <include name="services/**"/>
+      </metainf>
+    </jar>
+    
+    <jar jarfile="${install}/${jar.name.genmodel}" basedir="${classes.genmodel}">
+	  <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+    </jar>
+    
+    <jar jarfile="${install}/${jar.name.genui}" basedir="${classes.genui}">
+	  <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+    </jar>
+
+    <jar jarfile="${install}/${jar.name.fastrpc}" basedir="${classes.fastrpc}">
+	  <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+    </jar>
+    
+    <jar jarfile="${install}/${jar.name.mobile}" >
+	  <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+      <fileset dir="${classes.client}">
+        <exclude name="com/sibvisions/rad/ui/**" />
+        <exclude name="com/sibvisions/rad/application/**" />
+        <exclude name="javax/rad/application/genui/**" />
+      </fileset>
+    </jar>
+
+    <jar jarfile="${install}/${jar.name.client}" >
+	  <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+      <metainf dir="${webcontent}/META-INF">
+        <include name="services/**"/>
+      </metainf>
+      <fileset dir="${classes.client}">
+        <exclude name="com/sibvisions/util/Mail**" />
+      </fileset>
+    </jar>
+
+    <jar jarfile="${install}/${jar.name.clientserver}" basedir="${classes.clientserver}">
+	  <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+      <metainf dir="${webcontent}/META-INF">
+        <include name="services/**"/>
+      </metainf>
+    </jar>
+
+    <!-- 7zip for better compression -->
+
+    <!-- use the manifest from a jar file -->
+    <unzip src="${install}/${jar.name.util}" dest="${manifest}">
+      <patternset>
+        <include name="META-INF/**" />
+      </patternset>
+    </unzip>
+
+    <property name="util.args" value="a -r -tzip -mx=9 ${install.7zip}/${jar.name.util} ${classes.util}/* ${manifest}/*" />
+    <property name="genmodel.args" value="a -r -tzip -mx=9 ${install.7zip}/${jar.name.genmodel} ${classes.genmodel}/* ${manifest}/*" />
+    <property name="genui.args" value="a -r -tzip -mx=9 ${install.7zip}/${jar.name.genui} ${classes.genui}/* ${manifest}/*" />
+    <property name="fastrpc.args" value="a -r -tzip -mx=9 ${install.7zip}/${jar.name.fastrpc} ${classes.fastrpc}/* ${manifest}/*" />
+    <property name="client.args" value="a -r -tzip -mx=9 ${install.7zip}/${jar.name.client} ${classes.client}/* ${manifest}/*" />
+    <property name="clientserver.args" value="a -r -tzip -mx=9 ${install.7zip}/${jar.name.clientserver} ${classes.clientserver}/* ${manifest}/*" />
+
+    <condition property="binary.7zip" value="${build}/7za" else="7za">
+      <and>
+        <os family="Windows" />
+      </and>
+    </condition>
+
+    <exec executable="${binary.7zip}" failonerror="true" osfamily="Windows">
+      <arg line="${util.args}" />
+    </exec>
+    <exec executable="${binary.7zip}" failonerror="true" osfamily="Windows">
+      <arg line="${genmodel.args}" />
+    </exec>
+    <exec executable="${binary.7zip}" failonerror="true" osfamily="Windows">
+      <arg line="${genui.args}" />
+    </exec>
+    <exec executable="${binary.7zip}" failonerror="true" osfamily="Windows">
+      <arg line="${fastrpc.args}" />
+    </exec>
+    <exec executable="${binary.7zip}" failonerror="true" osfamily="Windows">
+      <arg line="${client.args}" />
+    </exec>
+    <exec executable="${binary.7zip}" failonerror="true" osfamily="Windows">
+      <arg line="${clientserver.args}" />
+    </exec>
+
+    <stopwatch name="timer5" action="total"/>
+  </target>
+
+  <target name="tomcat" depends="preconfigure.tomcat, junit-compile, junit-createdb">
+    <stopwatch name="timer6"/>
+
+    <property name="tomcat" location="${temp}/tomcat"/>
+
+    <delete dir="${tomcat}"/>
+
+    <mkdir dir="${tomcat}"/>
+    <mkdir dir="${tomcat}/WEB-INF/lib"/>
+    <mkdir dir="${tomcat}/WEB-INF/rad"/>
+
+    <!-- protected area -->
+    <copy todir="${tomcat}/WEB-INF">
+      <fileset dir="${webcontent}/WEB-INF">
+        <include name="web.xml"/>
+      </fileset>
+    </copy>
+
+    <copy todir="${tomcat}/WEB-INF/lib">
+      <fileset dir="${libs}">
+        <include name="*.jar"/>
+        <exclude name="servlet.jar"/>
+        <exclude name="javaws.jar"/>
+        <exclude name="db2jcc*.jar"/>
+        <exclude name="derby*.jar"/>
+        <exclude name="mysql*.jar"/>
+        <exclude name="oracle*.jar"/>
+        <exclude name="postgresql*.jar"/>
+      </fileset>
+      <fileset dir="${libs.log4j}">
+        <include name="*.jar" />
+      </fileset>
+    </copy>
+
+    <!-- build needed jvx apps server jar file -->
+    <jar jarfile="${tomcat}/WEB-INF/lib/appsserver.jar">
+      <fileset dir="${classes}">
+        <exclude name="**/json_binary.txt" />
+        <exclude name="**/json_binary_simple.txt" />
+      </fileset>
+      <fileset dir="${classes.test}">
+        <include name="jndi_*.xml" />
+        <include name="**/*.class" />
+        <exclude name="**/Test*.class" />
+        <exclude name="**/*Test.class" />
+      </fileset>
+    </jar>
+    <jar jarfile="${tomcat}/WEB-INF/lib/appsserver.jar" basedir="${classes.appsserver}" update="true"/>
+
+    <copy todir="${tomcat}/WEB-INF/rad">
+      <fileset dir="${rad}">
+        <include name="**/config.xml"/>
+        <include name="/server/**"/>
+      </fileset>
+    </copy>
+
+    <!-- NO client area, because the apps are only for unit tests -->
+    <!-- NO client lib, because the apps are only for unit tests -->
+    
+    <zip destfile="${tomcat}/${war.name}" encoding="utf8">
+      <zipfileset dir="${tomcat}" />
+    </zip>
+
+	<if>
+      <istrue value="${useTomcat}" />
+      <then>
+	    <stop url="${url.manager}" username="${username}" password="${password}" path="${path}" failonerror="false" />
+	    <undeploy url="${url.manager}" username="${username}" password="${password}" path="${path}" failonerror="false" />
+	    <deploy url="${url.manager}" username="${username}" password="${password}" path="${path}" war="file:${tomcat}/${war.name}"/>
+	    <stop url="${url.manager}" username="${username}" password="${password}" path="${path}"/>
+      </then>
+	</if>
+
+    <stopwatch name="timer6" action="total"/>
+  </target>
+
+  <target name="opensource.nojavadoc" depends="jar">
+    <stopwatch name="timer7"/>
+    
+    <mkdir dir="${release}"/>
+
+    <jar jarfile="${release}/${jar.name.client}">
+      <fileset dir="${classes.client}">
+        <exclude name="com/sibvisions/rad/ui/swing/ext/plaf/**"/>
+      </fileset>
+      
+  	  <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+      
+      <metainf dir="${webcontent}/META-INF">
+        <include name="services/**"/>
+      </metainf>
+    </jar>
+
+    <jar jarfile="${release}/${jar.name.clientserver}">
+      <fileset dir="${classes.clientserver}">
+        <exclude name="com/sibvisions/rad/ui/swing/ext/plaf/**"/>
+      </fileset>
+
+      <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}${build.nightly}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}${build.nightly}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+      <metainf dir="${webcontent}/META-INF">
+        <include name="services/**"/>
+      </metainf>
+    </jar>
+    
+    <zip destfile="${release}/${release.name}-${build.version}.zip">
+      <zipfileset dir="${release}">
+        <include name="${jar.name.client}" />
+        <include name="${jar.name.clientserver}" />
+      </zipfileset>
+      <zipfileset dir="${libs}" prefix="lib">
+        <include name="commons-fileupload*.jar" />
+      </zipfileset>
+      <zipfileset dir="${licence}">
+        <include name="LICENSE.txt" />
+        <include name="NOTICE.txt" />
+      </zipfileset>
+    </zip>
+
+    <zip destfile="${release}/${release.name}-${build.version}_src.zip">
+      <zipfileset dir="${basedir}/../swing">
+        <include name="src/**"/>
+        <include name="test/**"/>
+        
+        <exclude name="*/com/sibvisions/rad/ui/swing/ext/plaf/**"/>
+        <exclude name="test/*.java"/>
+      </zipfileset>
+
+      <zipfileset dir="${basedir}">
+        <!--<include name="lib/**" />-->
+        <include name="src/**"/>
+        <include name="intern/remote/**"/>
+        <include name="test/**"/>
+        <include name="rad/**"/>
+        <include name="testdbs/**"/>
+          
+        <exclude name="test/*.java"/>
+
+        <exclude name="**/**.log"/>
+        <exclude name="**/**.bak"/>
+        <exclude name="**/**.svn"/>
+
+        <exclude name="**/*.rtf"/>
+        <exclude name="**/DB2_9x/**"/>
+        <exclude name="**/mssql2005/**"/>
+        <exclude name="**/derby10/**"/>
+        <exclude name="**/mysql5_0/**"/>
+        <exclude name="**/oracle/**"/>
+        <exclude name="**/postgresql8_3/**"/>
+      
+      </zipfileset>
+      <zipfileset dir="${licence}">
+        <include name="LICENSE.txt" />
+      </zipfileset>
+      <zipfileset dir="${licence}" fullpath="NOTICE.txt">
+        <include name="NOTICE_src.txt" />
+      </zipfileset>
+    </zip>
+    
+    <stopwatch name="timer7" action="total"/>  	
+  </target>
+
+  <target name="opensource" depends="jar,javadoc,opensource.nojavadoc">
+    <stopwatch name="timer12" action="elapsed"/>
+
+  	<zip destfile="${release}/${release.name}-${build.version}_javadoc.zip">
+      <zipfileset dir="${javadoc}" prefix="api" />
+      <zipfileset dir="${licence}">
+        <include name="LICENSE.txt" />
+      </zipfileset>
+    </zip>
+    
+    <stopwatch name="timer12" action="total"/>  	
+  </target>
+  
+  <target name="maven.snapshot" depends="proxy">
+  
+  	<property name="maven.version.postfix" value="-SNAPSHOT" />
+
+    <property name="mvn.id" value="${mvn.snapshotsrep.id}" />
+    <property name="mvn.url" value="${mvn.snapshotsrep.url}" />
+
+  </target>
+  
+  <target name="maven" depends="proxy">
+  
+    <property name="maven.version.postfix" value="" />
+
+    <condition property="gpgexecutable" value="C:\Program Files (x86)\GNU\GnuPG\pub\gpg.exe" else="gpg">
+      <and>
+        <os family="Windows" />
+      </and>
+    </condition>
+  
+    <!-- define late because of the classpath -->
+    <taskdef name="buildnr" classname="com.sibvisions.addons.ant.AntBuildNumber" classpath="${buildnumber}/addons.jar;${classes}" />
+    <buildnr buildfile="${buildnumber}/buildnr.properties" loadOnly="true"/> 
+
+    <!-- Maven coordinates -->
+    <property name="mvn.groupId" value="com.sibvisions" />
+
+    <propertyregex property="versionnumber.1" input="${build.version}" regexp=" " replace="_" global="true" defaultValue="${build.version}"/>
+    <propertyregex property="versionnumber" input="${versionnumber.1}" regexp="_beta" replace="" global="true" defaultValue="${versionnumber.1}"/>
+
+    <!-- artifacts' name, which follows the convention of Maven -->
+  	<property name="mvn.jvx.jar" value="${release}/maven/${release.name}-${versionnumber}${maven.version.postfix}.jar" />
+	<property name="mvn.jvx.sources.jar" value="${release}/maven/${release.name}-${versionnumber}${maven.version.postfix}-sources.jar" />
+	<property name="mvn.jvx.javadoc.jar" value="${release}/maven/${release.name}-${versionnumber}${maven.version.postfix}-javadoc.jar" />
+  	<property name="mvn.jvxclient.jar" value="${release}/maven/${release.name}client-${versionnumber}${maven.version.postfix}.jar" />
+	<property name="mvn.jvxclient.sources.jar" value="${release}/maven/${release.name}client-${versionnumber}${maven.version.postfix}-sources.jar" />
+	<property name="mvn.jvxclient.javadoc.jar" value="${release}/maven/${release.name}client-${versionnumber}${maven.version.postfix}-javadoc.jar" />
+  
+    <property name="mvn.id" value="${mvn.stagingrep.id}" />
+    <property name="mvn.url" value="${mvn.stagingrep.url}" />
+  
+    <mkdir dir="${release}/maven" />
+  
+    <zip destfile="${mvn.jvx.jar}">
+      <zipfileset src="${release}/${jar.name.clientserver}"/>
+    </zip>
+    
+    <zip destfile="${mvn.jvxclient.jar}">
+      <zipfileset src="${release}/${jar.name.client}"/>
+    </zip>
+    
+    <zip destfile="${mvn.jvx.sources.jar}">
+      <zipfileset dir="${src}/" includes="**" excludes="**/package.html" prefix=""/>
+      <zipfileset dir="${src.swing}/" excludes="**/package.html" prefix=""/>
+      <zipfileset dir="${src.intern}/" includes="**/remote/**" excludes="**/package.html" prefix=""/>
+    </zip>
+
+    <zip destfile="${mvn.jvxclient.sources.jar}">
+      <zipfileset dir="${src}/" prefix="">
+        <include name="javax/rad/**" />
+        <include name="com/sibvisions/util/**" />
+        <include name="com/sibvisions/rad/**" />
+
+        <exclude name="javax/rad/server/**" />
+        <exclude name="com/sibvisions/rad/server/**" />
+        <exclude name="com/sibvisions/rad/persist/**" />
+        <exclude name="**/package.html" />
+      </zipfileset>
+      <zipfileset dir="${src.swing}/" prefix="">
+        <include name="javax/rad/**" />
+        <include name="com/sibvisions/rad/**" />
+        <exclude name="**/package.html" />
+      </zipfileset>
+    </zip>
+    
+    <unzip src="${release}/${release.name}-${build.version}_javadoc.zip" dest="${release}/maven/javadoc"/>
+
+    <zip destfile="${mvn.jvx.javadoc.jar}">
+      <zipfileset dir="${release}/maven/javadoc/api" />
+    </zip>
+
+    <copy file="${mvn.jvx.javadoc.jar}" tofile="${mvn.jvxclient.javadoc.jar}" />
+
+    <property name="maven.tmp" location="${temp}/maven" />
+        
+    <delete dir="${release}/maven/javadoc" />
+    <delete dir="${maven.tmp}" />
+    
+    <copy todir="${maven.tmp}">
+      <fileset dir="${maven}"/>
+    </copy>    
+    
+    <replace dir="${maven.tmp}" token="&lt;version&gt;1.1&lt;/version&gt;" value="&lt;version&gt;${versionnumber}${maven.version.postfix}&lt;/version&gt;">
+      <include name="**/pom.xml" />
+    </replace>
+
+    <!-- 
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      ~ JVx Client, Server and ApplicationServer pom 
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    -->
+
+	<artifact:mvn>
+		<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.4:sign-and-deploy-file" />
+		<arg value="-Durl=${mvn.url}" />
+		<arg value="-DrepositoryId=${mvn.id}" />
+		<arg value="-DpomFile=${maven.tmp}/jvxall/pom.xml" />
+		<arg value="-Dfile=${mvn.jvx.jar}" />
+		<arg value="-Dfiles=${mvn.jvx.sources.jar},${mvn.jvx.javadoc.jar}" />
+		<arg value="-Dclassifiers=sources,javadoc" />
+		<arg value="-Dtypes=jar,jar" />
+        <arg value="-Pgpg" />
+		<arg value="-Dgpg.executable=${gpgexecutable}" />
+	</artifact:mvn>
+ 
+    <!-- 
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      ~ JVx Server 
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    -->
+
+  	<artifact:mvn>
+  		<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.4:sign-and-deploy-file" />
+  		<arg value="-Durl=${mvn.url}" />
+  		<arg value="-DrepositoryId=${mvn.id}" />
+  		<arg value="-DpomFile=${maven.tmp}/jvxserver/pom.xml" />
+  		<arg value="-Dfile=${mvn.jvx.jar}" />
+  		<arg value="-Dfiles=${mvn.jvx.sources.jar},${mvn.jvx.javadoc.jar}" />
+  		<arg value="-Dclassifiers=sources,javadoc" />
+  		<arg value="-Dtypes=jar,jar" />
+        <arg value="-Pgpg" />
+  		<arg value="-Dgpg.executable=${gpgexecutable}" />
+  	</artifact:mvn>
+
+    <!-- 
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+      ~ JVx Client 
+      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    -->
+ 
+ 	<artifact:mvn>
+		<arg value="org.apache.maven.plugins:maven-gpg-plugin:1.4:sign-and-deploy-file" />
+		<arg value="-Durl=${mvn.url}" />
+		<arg value="-DrepositoryId=${mvn.id}" />
+		<arg value="-DpomFile=${maven.tmp}/jvxclient/pom.xml" />
+		<arg value="-Dfile=${mvn.jvxclient.jar}" />
+		<arg value="-Dfiles=${mvn.jvxclient.sources.jar},${mvn.jvxclient.javadoc.jar}" />
+		<arg value="-Dclassifiers=sources,javadoc" />
+		<arg value="-Dtypes=jar,jar" />
+        <arg value="-Pgpg" />
+		<arg value="-Dgpg.executable=${gpgexecutable}" />
+	</artifact:mvn>
+
+  </target>
+
+  <!-- 
+	* quality tasks 
+	-->
+
+  <target name="checkstyle">
+    <stopwatch name="timer8"/>
+  	
+    <taskdef resource="com/puppycrawl/tools/checkstyle/ant/checkstyle-ant-task.properties" classpath="${build}/checkstyle-8.29-all.jar" />
+    
+    <property name="checkstyle" location="${quality}/checkstyle" />
+
+    <!-- important because it is used in checkstyle.xml -->
+    <property name="project_loc" location="${basedir}" />
+
+    <delete dir="${checkstyle}" />
+    <mkdir dir="${checkstyle}" />
+
+    <checkstyle config="${basedir}/checkstyle_opensource.xml" failOnViolation="false">
+      <fileset dir="${src}" includes="**/*.java" />
+      <fileset dir="${src.test}" includes="**/*.java" />
+      <formatter type="plain" />
+      <formatter type="xml" toFile="${checkstyle}/checkstyle_errors.xml" />
+    </checkstyle>
+	
+    <xslt in="${checkstyle}/checkstyle_errors.xml" out="${checkstyle}/index.html" style="${build}/checkstyle_xsl/checkstyle-noframes-severity-sorted.xsl" />
+    <xslt in="${checkstyle}/checkstyle_errors.xml" out="${checkstyle}/index_simple.html" style="${build}/checkstyle_xsl/checkstyle-simple.xsl" />
+
+    <!-- cleanup -->
+    <delete>
+      <fileset dir="${checkstyle}">
+        <include name="*.xml" />
+      </fileset>
+    </delete>
+
+    <stopwatch name="timer8" action="total"/>
+  </target>
+
+  <target name="spotbugs">
+    <stopwatch name="timer9"/>
+    
+  	<property name="spotbugs.home" value="${build}/spotbugs-4.7.3" />
+
+  	<taskdef resource="edu/umd/cs/findbugs/anttask/tasks.properties" classpath="${spotbugs.home}/lib/spotbugs-ant.jar" />
+
+  	<property name="spotbugs" value="${quality}/spotbugs" />
+  	
+    <delete dir="${spotbugs}"/>
+    <mkdir dir="${spotbugs}"/>
+  	
+    <spotbugs home="${spotbugs.home}" output="html" outputFile="${spotbugs}/index.html" jvmargs="-Xmx512M" setExitCode="false">
+      <auxClasspath>
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.swing}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.imageio}">
+          <include name="*.jar" />
+        </fileset>
+      </auxClasspath>
+      <sourcePath path="${src}" />
+      <class location="${classes.clientserver.debug}"/>
+    </spotbugs>  	
+  	
+  	<replace file="${spotbugs}/index.html" token="Project:" value="Project: JVx - Enterprise Application Framework (ver. ${build.version})"/>
+  	<replaceregexp file="${spotbugs}/index.html" match="&lt;li&gt;(.*)&lt;/li&gt;" replace="&lt;li&gt;classes.clientserver.debug&lt;/li&gt;" byline="true"/>  	
+
+    <stopwatch name="timer9" action="total"/>
+  </target>
+
+  <target name="junit-compile" depends="preconfigure.tomcat">
+    <delete dir="${classes.debug}" />
+    <delete dir="${classes.test}" />
+
+    <mkdir dir="${classes.debug}" />
+    <mkdir dir="${classes.test}" />
+
+    <!-- compile all sources (WITH DEBUG INFOS) -->
+    <javac sourcepath="" destdir="${classes.debug}" debug="on" deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1">
+      <compilerarg value="-implicit:none"/>
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.imageio}">
+          <include name="*.jar" />
+        </fileset>
+        <pathelement location="${build}/junit-4.11.jar" />
+        <pathelement location="${build}/hamcrest-core-1.3.jar" />
+      </classpath>
+      <src path="${src}" />
+      <src path="${src.intern}" />
+    </javac>
+
+    <!-- copy resource files -->
+    <copy todir="${classes.debug}">
+      <fileset dir="${src}">
+        <include name="logging.properties" />
+        <include name="**/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+      <fileset dir="${src.intern}">
+        <include name="**/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+    </copy>
+  	
+  	<path id="junit.libs">
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+        <pathelement location="${classes}" />
+        <pathelement location="${classes.debug}" />
+        <pathelement location="${build}/junit-4.11.jar" />
+        <pathelement location="${build}/hamcrest-core-1.3.jar" /> 		
+    </path>
+
+    <!-- compile only test sources -->
+    <javac sourcepath="" destdir="${classes.test}" debug="on" debuglevel="lines,vars,source" 
+                         deprecation="on" source="${target.source}" target="${target.version}" encoding="ISO-8859-1" 
+                         excludes="**/research/**,**/TestDateUtil*">
+      <compilerarg value="-implicit:none"/>    	
+      <classpath refid="junit.libs" />
+      <src path="${src.test}" />
+    </javac>
+
+  	<!-- UTF-8 encoding -->
+    <javac sourcepath="" destdir="${classes.test}" debug="on" debuglevel="lines,vars,source" 
+                         deprecation="on" source="${target.source}" target="${target.version}" encoding="UTF-8" 
+                         includes="**/TestDateUtil*">
+      <compilerarg value="-implicit:none"/>    	
+      <classpath refid="junit.libs" />
+      <src path="${src.test}" />
+    </javac>
+  	
+    <!-- copy resource files -->
+    <copy todir="${classes.test}">
+      <fileset dir="${src.test}">
+        <include name="**/**" />
+
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+        <exclude name="META-INF/**" />
+      </fileset>
+    </copy>  
+  </target>
+  	
+  <target name="junit-createdb">
+    <!-- create databases -->
+
+    <java classname="TestDBToolbox" fork="true">
+      <jvmarg value="-Duser.timezone=&quot;Europe/Vienna&quot;" />
+      <classpath>
+        <pathelement location="${classes.debug}"/>
+        <pathelement location="${classes.test}"/>
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+        <!-- e.g. junit -->
+        <fileset dir="${build}">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+    </java>
+  </target>
+
+  <target name="junit" depends="preconfigure.tomcat, junit-compile">
+    <stopwatch name="timer10"/>
+    
+    <property name="junit" location="${quality}/junit"/>
+    <property name="jacoco" location="${quality}/jacoco"/>
+
+    <delete dir="${junit}"/>
+    <mkdir dir="${junit}"/>
+
+    <delete dir="${jacoco}"/>
+    <mkdir dir="${jacoco}"/>
+
+  	<!-- configuration will be needed for unit tests -->
+    <copy todir="${temp}/rad">
+      <fileset dir="${rad}">
+        <include name="**/*.xml"/>
+      </fileset>
+    </copy>  	
+
+	<if>
+      <istrue value="${useTomcat}" />
+      <then>
+	    <!-- start the webapp for unit tests. --> 
+	    <start url="${url.manager}" username="${username}" password="${password}" path="${path}"/>
+  	  </then>
+  	</if>
+
+    <!-- prepare logging -->
+    <replace file="${classes.debug}/logging.properties" token="com.sibvisions.level = OFF" value="com.sibvisions.level = ALL"/>      
+    
+  	<jacoco:coverage destfile="${jacoco}/cover.age">	
+	  <!-- timeout = 15 minutes -->
+	  <junit fork="yes" forkMode="perBatch" printsummary="no" haltonfailure="no" showoutput="false" dir="${basedir}" timeout="900000">
+	
+	    <!-- special tests in separate VM -->
+	    <batchtest todir="${junit}">
+	      <fileset dir="${classes.test}">
+	        <include name="com/sibvisions/util/TestThreadHandler.class"/>
+	      </fileset>
+	    </batchtest>
+	    <batchtest todir="${junit}">
+	      <fileset dir="${classes.test}">
+	        <include name="com/sibvisions/util/log/TestLoggerFactory.class"/>
+	      </fileset>
+	    </batchtest>
+	    <batchtest todir="${junit}">
+	      <fileset dir="${classes.test}">
+	        <include name="com/sibvisions/rad/server/config/TestApplicationZone.class"/>
+	      </fileset>
+	    </batchtest>
+        <batchtest todir="${junit}">
+	      <fileset dir="${classes.test}">
+	        <include name="com/sibvisions/rad/server/TestDirectServerConnection.class"/>
+	      </fileset>
+	    </batchtest>
+	    <batchtest todir="${junit}">
+	      <fileset dir="${classes.test}">
+	        <include name="com/sibvisions/rad/server/security/TestDBSecurityManager.class"/>
+	      </fileset>
+	    </batchtest>
+	    <batchtest todir="${junit}">
+	      <fileset dir="${classes.test}">
+	        <include name="remote/net/TestVMConnection.class"/>
+	      </fileset>
+	    </batchtest>
+	    <batchtest todir="${junit}">
+	      <fileset dir="${classes.test}">
+	        <include name="javax/rad/remote/TestConnections.class"/>
+	        <include name="javax/rad/remote/TestSubConnection.class"/>
+	      </fileset>
+	    </batchtest>
+	    <batchtest todir="${junit}">
+	      <fileset dir="${classes.test}">
+	        <include name="com/sibvisions/rad/remote/Test*.class"/>
+	        <exclude name="**/*$*.class"/>
+	      </fileset>
+	    </batchtest>
+	    <batchtest todir="${junit}">
+	      <fileset dir="${classes.test}">
+	        <include name="com/sibvisions/rad/model/remote/TestRemoteDataBook.class"/>
+	      </fileset>
+	    </batchtest>
+	    <batchtest todir="${junit}">
+	      <fileset dir="${classes.test}">
+	        <include name="com/sibvisions/rad/model/mem/Test*.class"/>
+	      	<exclude name="**/*$*.class"/>
+	      </fileset>
+	    </batchtest>
+	
+	    <!-- ALL other tests (same VM) -->
+	    <batchtest todir="${junit}">
+	      <fileset dir="${classes.test}">
+	        <include name="**/Test*.class"/>
+	
+	        <exclude name="**/*$*.class"/>
+	        <exclude name="com/sibvisions/rad/remote/**.class"/>
+	        <exclude name="com/sibvisions/rad/model/mem/**.class"/>
+	        <exclude name="javax/rad/remote/TestConnections.class"/>
+	        <exclude name="javax/rad/remote/TestSubConnection.class"/>
+	        <exclude name="remote/net/TestVMConnection.class"/>
+	        <exclude name="com/sibvisions/util/log/TestLoggerFactory.class"/>
+	        <exclude name="com/sibvisions/util/TestThreadHandler.class"/>
+	        <exclude name="com/sibvisions/rad/server/config/TestApplicationZone.class"/>
+	        <exclude name="com/sibvisions/rad/server/TestDirectServerConnection.class"/>
+	        <exclude name="com/sibvisions/rad/server/security/TestDBSecurityManager.class"/>
+	        <exclude name="com/sibvisions/rad/model/remote/TestRemoteDataBook.class"/>
+	        <exclude name="com/sibvisions/rad/server/security/mfa/auth/TestURLMFAuthenticator.class"/>
+	        <exclude name="com/sibvisions/rad/server/security/mfa/auth/TestTextInputMFAuthenticator.class"/>
+	          
+	        <!-- test databases are not installed on build machine -->
+	        <exclude name="com/sibvisions/rad/persist/jdbc/TestDB2DBAccess*"/>
+	        <exclude name="com/sibvisions/rad/persist/jdbc/TestDerbyDBAccess*"/>
+	        <exclude name="com/sibvisions/rad/persist/jdbc/TestEnumSupport*"/>
+	        <exclude name="com/sibvisions/rad/persist/jdbc/TestMSSQLDBAccess*"/>
+	        <exclude name="com/sibvisions/rad/persist/jdbc/TestMicrosoftSQLDBAccess*"/>
+	        <exclude name="com/sibvisions/rad/persist/jdbc/TestMySQLDBAccess*"/>
+	        <exclude name="com/sibvisions/rad/persist/jdbc/TestOracleDBAccess*"/>
+	        <exclude name="com/sibvisions/rad/persist/jdbc/TestPostgreSQLDBAccess*"/>
+	        <exclude name="com/sibvisions/rad/persist/jdbc/TestInformixDBAccess*"/>
+	        <exclude name="com/sibvisions/rad/persist/jdbc/TestH2DBAccess*"/>
+	        <exclude name="com/sibvisions/rad/persist/jdbc/TestMariaDBAccess*"/>
+	        <exclude name="com/sibvisions/rad/persist/jdbc/TestEDBDBAccessWin64*"/>
+			<exclude name="com/sibvisions/rad/persist/jdbc/TestSQLiteDBAccess*"/>
+	
+	        <!-- default package -->	
+		    <exclude name="TestFeatures.class"/>
+		    <exclude name="TestScriptEngine.class"/>
+	          
+	        <!-- called from 'compile' task -->
+	        <exclude name="TestDBToolbox.class"/>
+	      </fileset>
+	    </batchtest>
+
+	    <formatter type="xml" />
+	
+	    <classpath>
+	      <pathelement location="${classes.test}"/>
+	      <pathelement location="${classes.debug}"/>
+	      <pathelement location="${classes.appsserver}"/>
+	      <fileset dir="${libs}">
+	        <include name="*.jar" />
+	      </fileset>
+	      <fileset dir="${libs.log4j}">
+	        <include name="*.jar" />
+	      </fileset>
+	      <fileset dir="${libs.mariadb}">
+	        <include name="*.jar" />
+	      </fileset>
+	      <fileset dir="${libs.informix}">
+	        <include name="*.jar" />
+	      </fileset>
+	      <!-- needed for emma and junit -->
+	      <fileset dir="${build}">
+	        <include name="**/*.jar"/>
+	        <exclude name="findbugs-*/**"/>
+	      </fileset>
+	    </classpath>
+	
+	    <jvmarg value="-Dcom.sibvisions.rad.remote.TestHttpConnection=${url.jvx}/services/Server" />
+	    <jvmarg value="-Xmx384M"/>
+	    <jvmarg value="-Duser.timezone=&quot;Europe/Vienna&quot;" />
+	  </junit>
+  	</jacoco:coverage>
+
+    <!-- databases tests only with intern servers -->
+    <if>
+      <isset property="ci.intern" />
+      <then>
+      	<jacoco:coverage destfile="${jacoco}/cover.age" append="true">
+          <!-- timeout = 15 minutes -->
+          <junit fork="yes" forkMode="perBatch" printsummary="no" haltonfailure="no" showoutput="false" dir="${basedir}" timeout="900000">
+	        <batchtest todir="${junit}">
+	          <fileset dir="${classes.test}">
+	            <include name="com/sibvisions/rad/persist/jdbc/TestDB2DBAccess*"/>
+	            <include name="com/sibvisions/rad/persist/jdbc/TestDerbyDBAccess*"/>
+	            <include name="com/sibvisions/rad/persist/jdbc/TestEnumSupport*"/>
+	            <include name="com/sibvisions/rad/persist/jdbc/TestMSSQLDBAccess*"/>
+	            <include name="com/sibvisions/rad/persist/jdbc/TestMySQLDBAccess*"/>
+	            <include name="com/sibvisions/rad/persist/jdbc/TestOracleDBAccess*"/>
+	            <include name="com/sibvisions/rad/persist/jdbc/TestPostgreSQLDBAccess*"/>
+	          </fileset>
+	        </batchtest>
+
+            <formatter type="xml" />
+
+            <classpath>
+              <pathelement location="${classes.test}"/>
+              <pathelement location="${classes.debug}"/>
+              <pathelement location="${classes.appsserver}"/>
+              <fileset dir="${libs}">
+                <include name="*.jar" />
+              </fileset>
+              <fileset dir="${libs.log4j}">
+                <include name="*.jar" />
+              </fileset>
+              <fileset dir="${libs.mariadb}">
+                <include name="*.jar" />
+              </fileset>
+              <fileset dir="${libs.informix}">
+                <include name="*.jar" />
+              </fileset>
+              <!-- needed for jacoco and junit -->
+              <fileset dir="${build}">
+                <include name="**/*.jar"/>
+              </fileset>
+            </classpath>
+
+            <jvmarg value="-Demma.coverage.out.file=${emma}/coverage.emma" />
+            <jvmarg value="-Demma.coverage.out.merge=true" />
+            <jvmarg value="-Dcom.sibvisions.rad.remote.TestHttpConnection=${url.jvx}/services/Server" />
+            <jvmarg value="-Xmx384M"/>
+            <jvmarg value="-Duser.timezone=&quot;Europe/Vienna&quot;" />
+          </junit>
+      	</jacoco:coverage>
+      </then>
+    </if>
+
+    <junitreport todir="${junit}">
+      <fileset dir="${junit}">
+        <include name="TEST-*.xml"/>
+      </fileset>
+      <report format="frames" todir="${junit}"/>
+    </junitreport>
+  	
+  	<jacoco:report>
+      <executiondata>
+  	    <file file="${jacoco}/cover.age"/>
+  	  </executiondata>
+  		
+      <structure name="JVx - Enterprise Application Framework (ver. ${build.version})">
+  	    <classfiles> 
+  	      <fileset dir="${classes}">
+  	        <exclude name="com/sibvisions/rad/ui/**" />
+  	      	<exclude name="javax/rad/genui/**" />
+  	        <exclude name="javax/rad/application/**" />
+  	        <exclude name="javax/rad/ui/**" />
+  	        <exclude name="com/sibvisions/rad/application/**" />
+  	        <exclude name="com/sibvisions/rad/genui/celleditor/**" />
+  	        <exclude name="com/sibvisions/rad/server/http/rest/service/**" />
+  	        <exclude name="com/sibvisions/rad/server/object/**" />
+  	        <exclude name="com/sibvisions/rad/server/security/ntlm/**" />
+  	        <exclude name="com/sibvisions/rad/persist/jdbc/param/**" />
+  	        <exclude name="research/**" />
+  	        <exclude name="http/**" />
+  	        <exclude name="remote/**" />
+  	        <exclude name="*.class" />
+  	      </fileset>
+  	    </classfiles>
+  	    <sourcefiles encoding="UTF-8">
+  	      <fileset dir="${src}"/>
+  	    </sourcefiles>
+  	  </structure>
+  		
+  	  <html destdir="${jacoco}"/>
+  	</jacoco:report>  	
+  	
+    <!-- cleanup -->
+    <delete>
+      <fileset dir="${junit}">
+        <include name="*.xml"/>
+      </fileset>
+    </delete>
+  	
+  	<delete file="${jacoco}/cover.age" />
+
+	<if>
+      <istrue value="${useTomcat}" />
+      <then>
+	    <!-- stop the webapp after unit tests. -->
+	    <stop url="${url.manager}" username="${username}" password="${password}" path="${path}"/>
+  	  </then>
+  	</if>
+	
+    <stopwatch name="timer10" action="total"/>
+  </target>
+	
+  <target name="junit.bugfix" depends="junit-compile">
+    <stopwatch name="timer10"/>
+	    
+	<property name="junit" location="${quality}/junit"/>
+
+    <delete dir="${junit}"/>
+	<mkdir dir="${junit}"/>
+
+	<!-- configuration will be needed for unit tests -->
+	<copy todir="${temp}/rad">
+	  <fileset dir="${rad}">
+	    <include name="**/*.xml"/>
+	  </fileset>
+	</copy>  	
+
+    <!-- prepare logging -->
+    <replace file="${classes.debug}/logging.properties" token="com.sibvisions.level = OFF" value="com.sibvisions.level = ALL"/>      
+	    
+    <!-- timeout = 15 minutes -->
+    <junit fork="yes" forkMode="perBatch" printsummary="no" haltonfailure="no" showoutput="false" dir="${basedir}" timeout="900000">
+
+      <!-- ALL other tests (same VM) -->
+      <batchtest todir="${junit}">
+        <fileset dir="${classes.test}">
+          <include name="**/TestDateUtil*.class"/>
+        </fileset>
+      </batchtest>
+
+      <formatter type="xml" />
+
+      <classpath>
+        <pathelement location="${classes.test}"/>
+        <pathelement location="${classes.debug}"/>
+        <pathelement location="${classes.appsserver}"/>
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.mariadb}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.informix}">
+          <include name="*.jar" />
+        </fileset>
+        <!-- needed for emma and junit -->
+        <fileset dir="${build}">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+
+      <jvmarg value="-Dcom.sibvisions.rad.remote.TestHttpConnection=${url.jvx}/services/Server" />
+      <jvmarg value="-Xmx384M"/>
+      <jvmarg value="-Duser.timezone=&quot;Europe/Vienna&quot;" />
+    </junit>
+
+    <junitreport todir="${junit}">
+      <fileset dir="${junit}">
+        <include name="TEST-*.xml"/>
+      </fileset>
+      <report format="frames" todir="${junit}"/>
+    </junitreport>
+
+    <!-- cleanup -->
+  	
+    <delete>
+      <fileset dir="${junit}">
+        <include name="*.xml"/>
+      </fileset>
+    </delete>
+
+    <stopwatch name="timer10" action="total"/>
+  </target>	
+
+  <target name="javadoc" depends="proxy">
+    <stopwatch name="timer11"/>
+    
+    <delete dir="${javadoc}" />
+
+    <!-- define late because of the classpath -->
+    <taskdef name="buildnr" classname="com.sibvisions.addons.ant.AntBuildNumber" classpath="${buildnumber}/addons.jar" />
+    <buildnr buildfile="${buildnumber}/buildnr.properties" loadOnly="true"/> 
+
+    <if>
+      <istrue value="${proxy.enabled}" />
+      <then> 
+      	<property name="jd.host" value="-J-Dhttp.proxyHost=${proxy.host}"/>
+      	<property name="jd.port" value="-J-Dhttp.proxyPort=${proxy.port}"/>
+      	<property name="jd.user" value="-J-Dhttp.proxyUser=${proxy.user}"/>
+        <property name="jd.pwd"  value="-J-Dhttp.proxyPassword=${proxy.password}"/>
+      	
+      	<property name="jds.host" value="-J-Dhttps.proxyHost=${proxy.host}"/>
+      	<property name="jds.port" value="-J-Dhttps.proxyPort=${proxy.port}"/>
+      	<property name="jds.user" value="-J-Dhttps.proxyUser=${proxy.user}"/>
+        <property name="jds.pwd"  value="-J-Dhttps.proxyPassword=${proxy.password}"/>
+      </then>
+      <else>
+      	<property name="jd.host" value="-J-Dnone=none"/>
+      	<property name="jd.port" value="-J-Dnone=none"/>
+      	<property name="jd.user" value="-J-Dnone=none"/>
+        <property name="jd.pwd"  value="-J-Dnone=none"/>
+      	
+      	<property name="jds.host" value="-J-Dnone=none"/>
+      	<property name="jds.port" value="-J-Dnone=none"/>
+      	<property name="jds.user" value="-J-Dnone=none"/>
+        <property name="jds.pwd"  value="-J-Dnone=none"/>
+      </else>
+  	</if>
+  	
+    <javadoc packagenames="*" 
+       		 defaultexcludes="yes" 
+             excludepackagenames="com.sibvisions.rad.ui.swing.ext.plaf.*"
+             destdir="${javadoc}" 
+             author="false" 
+             version="false" 
+             use="true" 
+             windowtitle="JVx - Enterprise Application Framework (ver. ${build.version})"
+             source="${target.source}" 
+             encoding="ISO-8859-1">
+      <arg value="${jd.host}"/>
+      <arg value="${jd.port}"/>
+      <arg value="${jd.user}"/>
+      <arg value="${jd.pwd}"/>
+      <arg value="${jds.host}"/>
+      <arg value="${jds.port}"/>
+      <arg value="${jds.user}"/>
+      <arg value="${jds.pwd}"/>
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs.log4j}">
+          <include name="*.jar" />
+        </fileset>
+	    <fileset dir="${libs.imageio}">
+	      <include name="*.jar" />
+	    </fileset>
+        <fileset dir="${libs.swing}">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+      <sourcepath>
+        <pathelement location="${src}" />
+        <pathelement location="${src.swing}" />        
+      </sourcepath>
+      <doctitle>
+        <![CDATA[<h1>JVx - Enterprise Application Framework (ver. ${build.version})</h1>]]>
+      </doctitle>
+      <bottom><![CDATA[<i>Copyright &#169; 2009 SIB Visions GmbH. All Rights Reserved.</i>]]></bottom>
+   	  <link href="https://docs.oracle.com/javase/1.5.0/docs/api/"/>
+   	  <link href="https://docs.oracle.com/javaee/1.4/api/"/>
+      <link href="http://www.jfree.org/jfreechart/api/javadoc/" />
+      <link href="https://javadoc.io/doc/org.swinglabs.swingx/swingx-all/1.6.5-1/" />
+    </javadoc>    
+
+    <stopwatch name="timer11" action="total"/>
+  </target>
+
+  <!-- 
+  	***************************************************************** 
+  	* SPECIAL START TASKS   
+  	***************************************************************** 
+  	-->
+
+  <!-- continuous integration build (intern) -->
+  <target name="start.ci.intern" depends="ci.intern, ci, clean.start, jar, tomcat, junit, checkstyle, javadoc"/>
+
+  <!-- 
+  	***************************************************************** 
+  	* PUBLIC START TASKS   
+  	***************************************************************** 
+  	-->
+
+  <target name="start.release" depends="clean.start, opensource" description="Creates release libraries"/>
+  <target name="start.release.nojavadoc" depends="clean.start, opensource.nojavadoc" description="Creates release libraries"/>
+	
+  <target name="start.quality" depends="clean.start, compile, tomcat, junit, checkstyle, javadoc, spotbugs" description="Starts quality checks"/>
+
+  <target name="start.complete" depends="clean.start, opensource, tomcat, junit, checkstyle, spotbugs" description="Creates release libraries and checks quality"/>
+  <!-- for nightly build (snapshot) -->
+  <target name="start.complete.maven" depends="clean.start, maven.snapshot, opensource, maven, tomcat, junit, checkstyle, spotbugs" description="Complete build and maven snaphot publishing"/>
+  <target name="start.complete.maven.phase1" depends="clean.start, maven.snapshot, opensource, maven"/>
+  <target name="start.complete.maven.phase2" depends="tomcat, junit, checkstyle, spotbugs"/>
+
+  <target name="start.junit.bugfix" depends="clean.start, junit.bugfix" description="JUnit Bugfix Test task"/>
+	
+	
+  <!-- continuous integration build -->
+  <target name="start.ci" depends="ci, clean.start, jar, tomcat, junit, checkstyle, javadoc" description="Starts Continuous integration build"/>
+
+  <target name="start.maven" depends="clean.start, opensource, maven" description="Publishing a maven release"/>
+  <target name="start.maven.snapshot" depends="clean.start, maven.snapshot, opensource, maven" description="Publishing a maven snapshot"/>
+
+</project>

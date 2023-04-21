@@ -1,0 +1,259 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+  <title>Allgemeine Funktionen</title>
+  <link rel="stylesheet" href="structure.css" type="text/css">
+</head>
+
+<body>
+<h1>Allgemeine Funktionen</h1>
+Die Anwendung ist eine installationsfreie Java Applikation und wird als
+Rich Internet Application im Browser verwendet. 
+
+<p>Unmittelbar nach dem Start folgt die Anmeldung an das System.</p>
+
+<p><img alt=" " src=".images/logon.png" width="623" height="549"></p>
+
+<p>Danach stehen Ihnen neben den allgemeinen Funktion Programmfunktionen über
+das Menü, die Toolbar sowie über die Tastatur auch Applikationsspezifischen
+Funktionen zur Verfügung. </p>
+
+<p>In den folgenden Kapitel werden die allgemeinen Funktionen näher
+beschrieben. Falls Sie bereits ein erfahrener Windows Benutzer sind, können Sie
+diese auch überspringen.</p>
+
+<p></p>
+
+<h2>Menü und Toolbar</h2>
+
+<p>Über das Menü stehen Ihnen folgende allgemeine Funktionen zur Verfügung:</p>
+<ul>
+  <li>Datei 
+    <ul>
+      <li>Abmelden</li>
+      <p>Es wird der aktuell angemeldete Benutzer abgemeldet.</p>
+      <li>Anmelden</li>
+      <p>(ist wechselweise mit Abmelden sichtbar)</p>
+      <p>Durch die Eingabe von Benutzername und Passwort erfolgt hier die
+      Anmeldung an das System. Es besteht hier auch die Möglichkeit sich mit
+      einem anderen als dem Windows Domain Benutzer beim System anzumelden.</p>
+      <li>Speichern (Strg + S)</li>
+      <p>Mit diesem Menüpunkt werden alle Änderungen seit der letzten
+      &#x201e;Speichern&#x201c; Operation in die Datenbank gespeichert.</p>
+      <p>Sollten bei der Speicherung Fehler auftreten, wie z.B.:
+      Plausiblitätsprüfungen auf Datenkonsistenz dann wird der betroffene
+      Datensatz bzw. Eingabefeld markiert und eine entsprechende Fehlermeldung
+      ausgegeben. Weiters wird sobald ein Datensatz verlassen wird bzw. wenn
+      eine Maske geschlossen wird, automatisch ohne Rückfrage gespeichert.
+      Sollte die Applikation abnormal beendet werden (z.B.: Explorer wird
+      geschlossen bzw. mit den Task Manager sofort beendet), dann kann es dazu
+      kommen, das die Änderungen in der aktuellen noch nicht verlassenen Zeile
+      verworfen werden und damit nicht gespeichert werden. Daher melden Sie
+      sich am Ende Ihrer Arbeit immer ordentlich vom System ab.</p>
+      <li>Aktualisieren</li>
+      <p>Es werden alle Änderungen seit der letzten Speicherung verworfen und
+      der aktuelle Stand der Daten aus der Datenbank neu in die Applikation
+      geladen. Dies ist bei einer Multiuser Anwendung sinnvoll um die
+      Änderungen der anderen Benutzer sichtbar zu machen.</p>
+      <li>Beenden</li>
+      <p>Mit diesem Menüpunkt kann die Applikation ordentlich verlassen
+      werden.</p>
+    </ul>
+  </li>
+  <li>Fenster 
+    <ul>
+      <li>Karteireiter Ansicht / Fenster Ansicht</li>
+      <p>Mit dieser Funktion kann zwischen Karteireiter Ansicht und klassicher
+      Windows Fenster Ansicht gewechselt werden. In der Karteireiternansicht
+      wird pro Fenster ein Reiter angezeigt.</p>
+      <li>Alle Fenster schließen 
+        <p>Mit diesem Menüpunkt können Sie alle Fenster schließen.</p>
+      </li>
+      <li>pro Fenster ein Eintrag mit dem Namen 
+        <p>Mit diesem Menüpunkt können sie zum gewählten Fenster wechseln.</p>
+      </li>
+    </ul>
+  </li>
+  <li>Hilfe 
+    <ul>
+      <li>Inhaltsverzeichnis</li>
+      <p>In der Applikation kann jederzeit die Online Hilfe aufgerufen werden,
+      dabei ist pro Maske eine spezifische Hilfe/Beschreibung verfügbar. Mit
+      diesem Menüpunkt wird das Inhaltsverzeichnis der Hilfe aufgerufen. </p>
+      <li>Hilfe zu... 
+        <p>Mit diesem Menüpunkt können Sie die Hilfe zur gerade aktiven Maske
+        aufrufen.</p>
+      </li>
+      <li>Über... 
+        <p>Hier finden Sie neben Hersteller, Version und Kontakt zum Support,
+        weitere Systeminformationen zur Applikation, welche im Fehlerfall
+        entsprechend bekannt gegeben werden sollten.</p>
+      </li>
+    </ul>
+  </li>
+</ul>
+
+<p>Alle Funktionen des Menüs "Datei" können Sie auch über die gleich
+bezeichneten Buttons in der Toolbar aufrufen.</p>
+
+<p></p>
+
+<h2>Navigations- und Bearbeitungsfunktionen, Tastatur</h2>
+
+<p>In jeder Maske der Applikation kann die Navigation sowohl mit der Tastatur,
+als auch mit der Maus erfolgen. Daher kann sowohl mit der Maus zwischen den
+Datensätzen gewechselt, Buttons angeklickt, Auswahlisten aktiviert und gewählt
+werden, als auch über die Tastatur.</p>
+
+<table border="0" style="width: 100%">
+  <caption></caption>
+  <col>
+  <col>
+  <tbody>
+    <tr>
+      <td width="160px"><strong>Taste</strong></td>
+      <td><strong>Bedeutung</strong></td>
+    </tr>
+    <tr>
+      <td>&lt;Strg&gt; + S</td>
+      <td>Speichern aller Änderungen</td>
+    </tr>
+    <tr>
+      <td>&lt;Cursortaste hinauf&gt;</td>
+      <td>Es wird auf einen Datensatz oberhalb gewechselt</td>
+    </tr>
+    <tr>
+      <td>&lt;Cursortaste hinunter&gt;</td>
+      <td>Es wird auf einen Datensatz unterhalb gewechselt</td>
+    </tr>
+    <tr>
+      <td>&lt;F2&gt;</td>
+      <td>Es wird das aktuelle Feld in der Tabelle bearbeitet. Falls es sich um
+        eine Dropdownliste handelt wird diese aktiviert und es kann eine
+        Auswahl mittels Wildcards getroffen werden.</td>
+    </tr>
+    <tr>
+      <td>&lt;Tabulator&gt;</td>
+      <td>Es wird soweit Java technisch möglich in das nächste Eingabefeld bzw.
+        Tabellen Spalte gewechselt.</td>
+    </tr>
+    <tr>
+      <td>&lt;Shift&gt; +&lt;Tabulator&gt;</td>
+      <td>Es wird soweit Java technisch möglich in das vorherige Eingabefeld
+        bzw. in die vorherige Tabellen Spalte gewechselt.</td>
+    </tr>
+    <tr>
+      <td>&lt;Einfg&gt;</td>
+      <td>Es wird in der aktuell gewählten Tabelle ein neuer Datensatz
+        eingefügt.</td>
+    </tr>
+    <tr>
+      <td>&lt;Entf&gt;</td>
+      <td>Es wird in der aktuell gewählten Tabelle der aktuelle markierte
+        Datensatz gelöscht.</td>
+    </tr>
+    <tr>
+      <td>&lt;Strg&gt; + &lt;C&gt;</td>
+      <td>Es wird in der aktuell markierte Text in einem Eingabefeld in die
+        Zwischenablage kopiert.</td>
+    </tr>
+    <tr>
+      <td>&lt;Strg&gt; + &lt;V&gt;</td>
+      <td>Es wird in der aktuelle Text aus der Zwischenablage an der aktuelle
+        Cursorposition im Eingabefeld eingefügt.</td>
+    </tr>
+    <tr>
+      <td>&lt;Strg&gt; + &lt;X&gt;</td>
+      <td>Es wird in der aktuell markierte Text in einem Eingabefeld
+        ausgeschnitten und in die Zwischenablage kopiert.</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Es können in dieser Applikation auch in den Tabellen die Werte der Spalten
+bearbeitet werden und ist daher nicht auf die Detailmasken beschränkt.</p>
+
+<p></p>
+
+<h2>Tabellenspezifische Toolbar</h2>
+
+<p>In der Appliaktion sind in den verschiedensten Masken immer wieder Tabellen
+zu finden. Jede Tabelle hat eine Toolbar mit folgenden Tabellen orientierten
+Funktionen:</p>
+
+<p></p>
+
+<p><img alt="" src=".images/add.png" width="16"
+height="16">&#x201e;einfügen&#x201c; - Mit diesem Button können neue Datensätze
+hinzugefügt werden, Alternativ kann auch die &#x201e;Einfg&#x201c; Taste in der
+aktuell gewählten (selektierten) Tabelle verwendet werden.</p>
+
+<p><img alt="" src=".images/delete.png" width="16"
+height="16">&#x201e;löschen&#x201c; - Mit dieser Funktion wird der aktuell
+selektierte Datensatz und seine dazugehörigen Detaildaten gelöscht. Dies kann
+auch über die &#x201e;Entf&#x201c; Taste durchgeführt werden.</p>
+
+<p><img alt="" src=".images/export.png" width="16" height="16">&#x201e;CSV
+Export nach MS EXCEL&#x201c; &#x2013; Mit dieser Funktion werden alle Daten der
+Tabelle als CSV Datei exportiert, welche in einem EXCEL im Internetexplorer
+geöffnet wird. Dabei enthält die Datei die Spaltenüberschriften laut der
+aktuellen Tabelle sowie die jeweiligen gefilterten bzw. sortierten Daten ohne
+Formatierung. Diese kann in EXCEL geöffnet und mit den Funktionen, welche Ihnen
+EXCEL anbietet weiterbearbeitet werden.</p>
+
+<p></p>
+
+<p>Zusätzlich kann in allen Tabellen über jede Spalte direkt sortiert werden.
+Dies erfolgt über Doppelklick auf die jeweilige Spalte, wobei hier zwischen
+&#x201e;aufsteigend&#x201c;, &#x201e;absteigend&#x201c; oder &#x201e;keine
+Sortierung&#x201c;, pro Spalte umgeschaltet werden kann.</p>
+
+<p></p>
+
+<h2>Dropdownlisten</h2>
+
+<p><img alt="" src=".images/dropdownlist.png" width="274" height="221"></p>
+
+<p>Weiters werden an vielen Stellen Dropdownlisten eingesetzt um Werte aus
+vordefinierten Wertelisten bzw. Stammdaten auszuwählen. Dabei ist zu beachten,
+dass nur diese Werte bzw. &#x201e; &#x201c; (falls das Feld kein Pflichtfeld
+ist) ausgewählt werden können. Andere Werte sind nicht möglich, außer es ist
+explizit in der Maske anders beschrieben.</p>
+
+<p>Grundsätzlich kann der Wert mittels Maus bzw. Tastatur direkt aus der Liste
+ausgewählt werden. Zusätzlich wird die Liste der möglichen Werte reduziert,
+sobald der Benutzer beginnt die ersten Zeichen einzugeben. Standardmäßig
+erfolgt die Reduzierung erst, wenn die Dropdownliste durch Benutzerinteraktion
+geöffnet wird. Dabei ist zu beachten, dass die Dropdownliste standardmäßig
+geschlossen ist, und sich auch nicht automatisch öffnet. </p>
+
+<p>In Dropdownlisten werden die Werte ohne Beachtung der Groß-/Kleinschreibung
+(&#x201e;case insensitive&#x201c; Filterung) reduziert.</p>
+
+<p></p>
+
+<h2>Filter</h2>
+
+<p>In einigen der in den folgenden Abschnitten beschriebenen Masken sind Filter
+vorgesehen. Für diese Filter gilt folgendes:</p>
+<ul>
+  <li>Die Filterung erfolgt Groß-/Kleinschreibung unsensible (case
+  insensitiv)</li>
+  <li>Es werden alle befüllten Filter Felder UND verknüpft, daher es werden nur
+    Ergebniszeilen angezeigt, bei welchen alle Kriterien gelten</li>
+  <li>Es kann auch mit Wildcards * (steht für ein beliebiges Zeichen)
+    gefiltert werden. 
+    <p>z.B.: Li* liefern alle Standorte die mit Li beginnen -&gt;
+    Linz, Lienz, &#x2026;</p>
+  </li>
+  <li>Sollte das Filterfeld eine Dropdownliste haben, dann können nur die Werte
+    der Dropdownliste oder kein Wert (" ") gewählt werden. 
+    <p>Bei ausgewählten Filterfeldern mit Dropdownliste sind auch beliebige
+    Texte inkl. Wildcards möglich. Die ist in der jeweiligen Maske
+    beschrieben.</p>
+  </li>
+</ul>
+
+<p></p>
+</body>
+</html>

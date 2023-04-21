@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+  <securitymanager>
+    <class>com.sibvisions.rad.server.security.XmlSecurityManager</class>
+    <userfile>users.xml</userfile>
+    <passwordvalidator>
+      <class>com.sibvisions.rad.server.security.validation.DefaultPasswordValidator</class>
+      <digit>true</digit>
+      <letter>true</letter>
+      <specialchar>true</specialchar>
+      <mixedcase>true</mixedcase>
+      <notequaluser>true</notequaluser>
+    </passwordvalidator>
+  </securitymanager>
+</application>

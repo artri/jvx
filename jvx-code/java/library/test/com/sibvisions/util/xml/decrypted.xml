@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config>
+
+  <user>admin</user>
+  <password>admin</password> 
+
+  <authentication>
+    <param>text</param>
+    <param>
+      <element name="name">
+        text
+      </element>
+    </param>
+  </authentication>
+  
+</config>

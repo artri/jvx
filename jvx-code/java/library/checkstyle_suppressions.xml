@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE suppressions PUBLIC
+    "-//Puppy Crawl//DTD Suppressions 1.1//EN"
+    "http://www.puppycrawl.com/dtds/suppressions_1_1.dtd">
+
+<suppressions>
+    <suppress checks="ConstantName"
+              files="UIColor.java"
+              lines="33-171"/>
+              
+    <suppress checks="JavadocMethod"
+              files="java[\\/]library[\\/]src[\\/]com[\\/]sibvisions[\\/]rad[\\/]server[\\/]http[\\/]rest[\\/]service[\\/]mixin[\\/].*Mixin\.java"/>
+    
+    <suppress checks="InnerAssignment"
+              files="Internalize.java"/>
+    <suppress checks="InnerAssignment"
+              files="MemDataBook.java"/>
+              
+    <!-- special source folders -->
+    
+    <suppress checks="JavadocPackage"
+              files="java[\\/]library[\\/]test[\\/].*"/>
+    <!-- important for CI build -->
+    <suppress checks="JavadocPackage"
+              files="library[\\/]test[\\/].*"/>
+    
+    <suppress checks="JavadocPackage"
+              files="java[\\/]library[\\/]test.manual[\\/].*"/>
+    <suppress checks="JavadocPackage"
+              files="java[\\/]library[\\/]rad[\\/].*"/>
+    <suppress checks=".+"
+              files="java[\\/]library[\\/]intern[\\/].*"/>
+</suppressions>

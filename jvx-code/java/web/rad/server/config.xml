@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<server>
+  <codebase>
+    <deny>/com/sibvisions/rad/server/</deny>
+    <deny>/META-INF/</deny>
+  </codebase>
+  
+  <!-- 
+    the full qualified class name of the object provider, 
+    empty to use the default object provider 
+  -->
+  <objectprovider></objectprovider>
+  
+  <timeout>
+    <!-- MasterSession timeout in minutes -->
+    <mastersession>360</mastersession>
+    <!-- SubSession timeout in minutes -->
+    <subsession>360</subsession>
+  </timeout>
+</server>

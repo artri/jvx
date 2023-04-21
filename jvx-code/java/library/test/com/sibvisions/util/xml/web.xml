@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd" id="WebApp_ID" version="2.5">
+
+  <!--
+   **************************************************************************
+    Context configuration 
+   **************************************************************************
+   -->
+
+  <display-name></display-name>
+
+  <welcome-file-list>
+    <welcome-file>index.html</welcome-file>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+  <!--
+   **************************************************************************
+    JVx configuration
+   **************************************************************************
+   -->
+
+  <!-- Servlet for accessing the JVx server through http(s) streaming protocol. -->
+  <servlet>
+    <servlet-name>ServletServer</servlet-name>
+    <display-name>Servlet based server</display-name>
+    <servlet-class>com.sibvisions.rad.server.http.ServletServer</servlet-class>
+  </servlet>
+      
+  <servlet-mapping>
+    <servlet-name>ServletServer</servlet-name>
+    <url-pattern>/services/Server</url-pattern>
+  </servlet-mapping>
+
+  <!-- Servlet for downloading content (reports, csv export, any binary data). -->
+  <servlet>
+    <servlet-name>DownloadServlet</servlet-name>
+    <display-name>DownloadServlet server</display-name>
+    <servlet-class>com.sibvisions.rad.server.http.DownloadServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>DownloadServlet</servlet-name>
+    <url-pattern>/services/Download</url-pattern>
+  </servlet-mapping>
+
+  <!-- Servlet for uploading content (images, import files, any binary data). -->
+  <servlet>
+    <servlet-name>UploadServlet</servlet-name>
+    <display-name>Servlet based file upload</display-name>
+    <servlet-class>com.sibvisions.rad.server.http.UploadServlet</servlet-class>
+  </servlet>
+      
+  <servlet-mapping>
+    <servlet-name>UploadServlet</servlet-name>
+    <url-pattern>/services/Upload</url-pattern>
+  </servlet-mapping>
+
+  <!-- Online Help integration. -->
+  <servlet>
+    <servlet-name>Help</servlet-name>
+    <display-name>The help system</display-name>
+    <servlet-class>com.sibvisions.rad.help.server.HelpServiceImpl</servlet-class>
+  </servlet>
+  
+  <servlet-mapping>
+    <servlet-name>Help</servlet-name>
+    <url-pattern>/help/services/Help</url-pattern>
+  </servlet-mapping>
+
+  <!--
+   **************************************************************************
+    WebUI configuration
+   **************************************************************************
+   -->
+
+  <!-- Application management -->  
+  <servlet>
+    <servlet-name>WebLauncherServiceImpl</servlet-name>
+    <servlet-class>com.sibvisions.rad.ui.gwt.server.WebLauncherServiceImpl</servlet-class>
+    
+    <init-param>
+      <param-name>main</param-name>
+      <param-value></param-value>
+    </init-param>     
+
+    <init-param>
+      <param-name>config</param-name>
+      <param-value></param-value>
+    </init-param>     
+    
+    <init-param>
+      <param-name>Application.Menu.exit.visible</param-name>
+      <param-value>false</param-value>
+    </init-param>     
+    
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>WebLauncherServiceImpl</servlet-name>
+    <url-pattern>/webui/services/webLauncher</url-pattern>
+  </servlet-mapping>
+
+  <!-- Image management -->  
+  <servlet>
+    <servlet-name>ImageServlet</servlet-name>
+    <servlet-class>com.sibvisions.rad.ui.gwt.server.ImageServlet</servlet-class>
+  </servlet>
+
+  <servlet-mapping>
+    <servlet-name>ImageServlet</servlet-name>
+    <url-pattern>/webui/images/*</url-pattern>
+  </servlet-mapping>
+
+  <!--
+   ************************************************************************** 
+    Special mime-type mappings 
+   **************************************************************************
+   -->
+   
+  <!-- Mime type for csv export. -->  
+  <mime-mapping> 
+    <extension>csv</extension> 
+    <mime-type>application/vnd.ms-excel</mime-type> 
+  </mime-mapping>
+
+</web-app>

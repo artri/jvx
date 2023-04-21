@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<web-app id="WebApp_ID" 
+         version="2.4" 
+         xmlns="http://java.sun.com/xml/ns/j2ee" 
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+    
+  <!--
+  **************************************************************************
+  Context configuration
+  **************************************************************************
+  -->
+    
+  <display-name>JVx.vaadin</display-name>
+
+  <welcome-file-list>
+	<welcome-file>index.html</welcome-file>
+	<welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+  <context-param>
+	<param-name>productionMode</param-name>
+	<param-value>false</param-value>
+  </context-param>
+<!--  
+  <session-config>
+    <session-timeout>1</session-timeout>
+  </session-config>  
+-->  		
+  <!--
+  **************************************************************************
+  Servlet configuration
+  **************************************************************************
+  -->
+	
+  <servlet>
+	<servlet-name>VaadinServlet</servlet-name>
+	<servlet-class>com.sibvisions.rad.ui.vaadin.server.VaadinServlet</servlet-class>
+		
+	<init-param>
+	  <param-name>UI</param-name>
+	  <param-value>com.sibvisions.rad.ui.vaadin.impl.VaadinUI</param-value>
+	</init-param>
+		
+	<init-param>
+	  <param-name>widgetset</param-name>
+  	  <param-value>com.sibvisions.rad.ui.vaadin.ext.ui.Widgetset</param-value>
+	</init-param>
+		
+	<init-param>
+      <param-name>main</param-name>
+      <param-value>com.sibvisions.apps.simpleapp.SimpleApplication</param-value>
+    </init-param>
+             
+    <init-param>
+      <param-name>config</param-name>
+      <param-value>/com/sibvisions/apps/simpleapp/application.xml</param-value>
+    </init-param>   
+    
+    <init-param>
+      <param-name>pushmode</param-name>
+      <param-value>automatic</param-value>
+    </init-param>
+    
+    <!-- 
+    <init-param>
+      <param-name>theme</param-name>
+      <param-value>jvx_valo</param-value>
+    </init-param>
+    -->
+    
+    <async-supported>true</async-supported>
+  </servlet>
+	
+  <servlet-mapping>
+	<servlet-name>VaadinServlet</servlet-name>
+	<url-pattern>/*</url-pattern>
+  </servlet-mapping>
+	
+</web-app>

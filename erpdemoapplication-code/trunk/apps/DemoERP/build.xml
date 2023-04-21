@@ -1,0 +1,702 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project name="DemoERP" default="start.complete">
+  
+  <!--
+  *****************************************************************
+  * information
+  *****************************************************************
+  -->
+  
+  <description>Demo ERP</description>
+  
+  <!--
+  *****************************************************************
+  * global properties
+  *****************************************************************
+  -->
+  
+  <property name="company.name" value="SIB Visions GmbH"/>
+  
+  <property name="company.url" value="http://visionx.sibvisions.com"/>
+  
+  <property name="app.title" value="DemoERP"/>
+  
+  <property name="app.title_original" value="Enterprise Resource Planning"/>
+  
+  <property name="app.name" value="DemoERP"/>
+  
+  <property name="app.version" value="1.1"/>
+  
+  <property name="app.sign" value="false"/>
+  
+  <property name="app.config.encrypt" value="false"/>
+  
+  <property name="jar.name.client" value="${app.name}.jar"/>
+  
+  <property name="jar.name.client.all" value="${app.name}_all.jar"/>
+  
+  <property name="jar.name.client.all.signed" value="${app.name}_all_signed.jar"/>
+  
+  <property name="jar.name.server" value="${app.name}server.jar"/>
+  
+  <property name="war.name" value="${app.title}.war"/>
+  
+  <!--
+  *****************************************************************
+  * general properties
+  *****************************************************************
+  -->
+  
+  <property name="ant" location="${basedir}/ant"/>
+  
+  <property name="build" location="${basedir}/build"/>
+  
+  <property name="buildnumber" location="${ant}/buildnumber"/>
+  
+  <property name="temp" location="${build}/temp"/>
+  
+  <property name="src.client" location="src.client"/>
+  
+  <property name="src.server" location="src.server"/>
+  
+  <property name="src.test" location="test"/>
+  
+  <property name="libs" location="libs"/>
+  
+  <property name="help" location="help"/>
+  
+  <property name="webcontent" location="${basedir}/WebContent"/>
+  
+  <property name="classes" location="${temp}/classes"/>
+  
+  <property name="classes.client" location="${temp}/classes.client"/>
+  
+  <property name="classes.server" location="${temp}/classes.server"/>
+  
+  <property name="classes.test" location="${temp}/classes.test"/>
+  
+  <property name="install" location="${build}/install"/>
+  
+  <property name="javadoc" location="${install}/doc"/>
+  
+  <property name="quality" location="${build}/quality"/>
+  
+  <property name="url" value="http://tomcat"/>
+  
+  <!--
+  Tomcat 7
+  <property name="url.manager" value="${url}/manager/text"/>
+  -->
+  
+  <!-- Tomcat 6 -->
+  
+  <property name="url.manager" value="${url}/manager"/>
+  
+  <property name="path" value="/${app.title}"/>
+  
+  <property name="username" value="username"/>
+  
+  <property name="password" value="password"/>
+  
+  <!-- source file encoding -->
+  
+  <property name="javac.encoding" value="Cp1252"/>
+  
+  <property name="sign.tsaurl" value="http://sha256timestamp.ws.symantec.com/sha256/timestamp"/>
+  
+  <property name="sign.digestalg" value="SHA-256"/>
+  
+  <property name="sign.sigalg" value="SHA256withRSA"/>
+  
+  <property name="src.version" location="1.7"/>
+  
+  <property name="target.version" location="1.7"/>
+  
+  <!--
+  *****************************************************************
+  * external taskdefinitions
+  *****************************************************************
+  -->
+  
+  <!-- tomcat support -->
+  
+  <taskdef name="deploy" classname="org.apache.catalina.ant.DeployTask" classpath="${ant}/catalina-ant.jar"/>
+  
+  <taskdef name="reload" classname="org.apache.catalina.ant.ReloadTask" classpath="${ant}/catalina-ant.jar"/>
+  
+  <taskdef name="start" classname="org.apache.catalina.ant.StartTask" classpath="${ant}/catalina-ant.jar"/>
+  
+  <taskdef name="stop" classname="org.apache.catalina.ant.StopTask" classpath="${ant}/catalina-ant.jar"/>
+  
+  <taskdef name="undeploy" classname="org.apache.catalina.ant.UndeployTask" classpath="${ant}/catalina-ant.jar"/>
+  
+  <!-- code style support -->
+  
+  <taskdef resource="checkstyletask.properties" classpath="${ant}/checkstyle-all-5.1.jar"/>
+  
+  <!-- code coverage support -->
+  
+  <taskdef resource="emma_ant.properties" classpath="${ant}/emma_ant.jar;${ant}/emma.jar;"/>
+  
+  <!-- build number support -->
+  
+  <taskdef name="buildnr" classname="com.sibvisions.addons.ant.AntBuildNumber" classpath="${buildnumber}/addons.jar"/>
+  
+  <!-- filter jar files support -->
+  
+  <taskdef name="filterjar" classname="com.sibvisions.addons.ant.FilterJarTask" classpath="${buildnumber}/addons.jar"/>
+  
+  <!-- service files merge support -->
+  
+  <taskdef name="servicemerge" classname="com.sibvisions.addons.ant.ServiceMergeTask" classpath="${buildnumber}/addons.jar;${libs}/server/jvx.jar"/>
+  
+  <!-- secure signing -->
+  
+  <taskdef name="securesign" classname="com.sibvisions.addons.ant.SecureSign" classpath="${buildnumber}/addons.jar;${libs}/server/jvx.jar"/>
+  
+  <!-- config encryption -->
+  
+  <taskdef name="configencrypt" classname="com.sibvisions.addons.ant.XmlEncryptionTask" classpath="${buildnumber}/addons.jar;${libs}/server/jvx.jar"/>
+  
+  <!-- if(ant) support -->
+  
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${ant}/ant-contrib-1.0b3.jar"/>
+  
+  <!--
+  *****************************************************************
+  * logging
+  *****************************************************************
+  -->
+  
+  <mkdir dir="${build}"/>
+  
+  <record name="${build}/build.log"/>
+  
+  <!--
+  *****************************************************************
+  * INTERNAL TASKS
+  *****************************************************************
+  -->
+  
+  <!-- * cleanup tasks -->
+  
+  <target name="clean.start">
+    <delete dir="${temp}"/>
+    <delete dir="${install}"/>
+  </target>
+  
+  <target name="clean.stop">
+    <delete dir="${temp}"/>
+  </target>
+  
+  <!--
+  *****************************************************************
+  * compile, build tasks
+  *****************************************************************
+  -->
+  
+  <target name="compile">
+    <delete dir="${classes.client}"/>
+    <delete dir="${classes.server}"/>
+    <mkdir dir="${classes.client}"/>
+    <mkdir dir="${classes.server}"/>
+    <!-- compile client sources -->
+    <javac srcdir="${src.client}" destdir="${classes.client}" debug="off" deprecation="on" source="${src.version}" target="${target.version}" encoding="${javac.encoding}">
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${libs}/client">
+          <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${libs}/client/ext" erroronmissingdir="false">
+          <include name="*.jar"/>
+        </fileset>
+      </classpath>
+    </javac>
+    <!-- copy ressource files -->
+    <copy todir="${classes.client}">
+      <fileset dir="${src.client}">
+        <include name="**/*"/>
+        <exclude name="**/*.java"/>
+        <exclude name="**/package.html"/>
+      </fileset>
+    </copy>
+    <!-- replace debugs -->
+    <!--
+    <replace dir="${classes.client}" value="_Application.Login.username">
+    <include name="**/application.xml" />
+    <replacetoken>Application.Login.username</replacetoken>
+    </replace>
+    
+    <replace dir="${classes.client}" value="_Application.Login.password">
+    <include name="**/application.xml" />
+    <replacetoken>Application.Login.password</replacetoken>
+    </replace>
+    -->
+    <!-- compile server sources -->
+    <javac srcdir="${src.server}" destdir="${classes.server}" debug="off" deprecation="on" source="${src.version}" target="${target.version}" encoding="${javac.encoding}">
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${libs}/server">
+          <include name="*.jar"/>
+        </fileset>
+        <fileset dir="${libs}/server/ext" erroronmissingdir="false">
+          <include name="*.jar"/>
+        </fileset>
+      </classpath>
+    </javac>
+    <!-- copy ressource files -->
+    <copy todir="${classes.server}">
+      <fileset dir="${src.server}">
+        <include name="**/*"/>
+        <exclude name="logging.properties"/>
+        <exclude name="**/*.java"/>
+        <exclude name="**/package.html"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="jar" depends="compile">
+    <delete dir="${install}"/>
+    <mkdir dir="${install}"/>
+    <buildnr buildfile="${buildnumber}/buildnr.properties" version="${app.version}" name="${app.title}"/>
+    <!-- create the jar files -->
+    <jar jarfile="${install}/${jar.name.client}" basedir="${classes.client}">
+      <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}"/>
+        <attribute name="Implementation-Vendor" value="${company.name}"/>
+      </manifest>
+    </jar>
+    <jar jarfile="${install}/${jar.name.server}" basedir="${classes.server}">
+      <manifest>
+        <attribute name="Implementation-Title" value="${build.versionstring}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}"/>
+        <attribute name="Implementation-Vendor" value="${company.name}"/>
+      </manifest>
+    </jar>
+  </target>
+  
+  <target name="jarall" depends="jar">
+    <servicemerge todir="${temp}/services/">
+      <fileset dir="${libs}" includes="*.jar"/>
+      <fileset dir="${libs}/client" includes="*.jar"/>
+      <fileset dir="${libs}/client/ext" includes="*.jar" erroronmissingdir="false"/>
+    </servicemerge>
+    <!-- all jars together (this step is also needed for signed mode) -->
+    <filterjar excludesInZips="META-INF/**">
+      <zipgroupfileset dir="${libs}" includes="*.jar"/>
+      <zipgroupfileset dir="${libs}/client" includes="*.jar"/>
+      <zipgroupfileset dir="${libs}/client/ext" includes="*.jar" erroronmissingdir="false"/>
+      <zipgroupfileset dir="${install}" includes="${jar.name.client}"/>
+      <jar destfile="${install}/${jar.name.client.all}" duplicate="preserve">
+        <zipfileset dir="${temp}/services/" prefix="META-INF/services/"/>
+        <manifest>
+          <attribute name="Implementation-Title" value="${build.versionstring}"/>
+          <attribute name="Implementation-Version" value="b${build.number} ${build.date}"/>
+          <attribute name="Implementation-Vendor" value="${company.name}"/>
+          <attribute name="Codebase" value="*"/>
+          <attribute name="Permissions" value="sandbox"/>
+          <attribute name="Application-Name" value="${app.title_original}"/>
+        </manifest>
+      </jar>
+    </filterjar>
+    <if>
+      <istrue value="${app.sign}"/>
+      <then>
+        <filterjar excludesInZips="META-INF/**">
+          <zipgroupfileset dir="${libs}" includes="*.jar"/>
+          <zipgroupfileset dir="${libs}/client" includes="*.jar"/>
+          <zipgroupfileset dir="${libs}/client/ext" includes="*.jar" erroronmissingdir="false"/>
+          <zipgroupfileset dir="${install}" includes="${jar.name.client}"/>
+          <jar destfile="${install}/${jar.name.client.all.signed}" duplicate="preserve">
+            <zipfileset dir="${temp}/services/" prefix="META-INF/services/"/>
+            <manifest>
+              <attribute name="Implementation-Title" value="${build.versionstring}"/>
+              <attribute name="Implementation-Version" value="b${build.number} ${build.date}"/>
+              <attribute name="Implementation-Vendor" value="${company.name}"/>
+              <attribute name="Codebase" value="*"/>
+              <attribute name="Permissions" value="all-permissions"/>
+              <attribute name="Application-Name" value="${app.title_original}"/>
+            </manifest>
+          </jar>
+        </filterjar>
+        <securesign sign="${app.sign}" updateManifest="false" keystoreXml="${ant}/keystore/keystore.xml" digestalg="${sign.digestalg}" sigalg="${sign.sigalg}" tsaurl="${sign.tsaurl}">
+          <fileset dir="${install}">
+            <include name="${jar.name.client.all.signed}"/>
+          </fileset>
+        </securesign>
+      </then>
+    </if>
+  </target>
+  
+  <target name="war" depends="jarall">
+    <property name="webapp" location="${temp}/webapp"/>
+    <delete dir="${webapp}"/>
+    <mkdir dir="${webapp}/server"/>
+    <mkdir dir="${webapp}/app"/>
+    <mkdir dir="${webapp}/public"/>
+    <!-- signed or unsinged (use right files) -->
+    <if>
+      <istrue value="${app.sign}"/>
+      <then>
+        <copy todir="${webapp}/public">
+          <fileset dir="${webcontent}">
+            <include name="index_signed.html"/>
+            <include name="applet_signed.jnlp"/>
+            <include name="application_signed.jnlp"/>
+          </fileset>
+          <regexpmapper from="(.*)\_signed\.(.*)" to="\1.\2"/>
+        </copy>
+        <replace file="${webapp}/public/index.html" value="applet.jnlp" token="applet_signed.jnlp"/>
+      </then>
+      <else>
+        <copy todir="${webapp}/public">
+          <fileset dir="${webcontent}">
+            <include name="index.html"/>
+            <include name="applet.jnlp"/>
+            <include name="application.jnlp"/>
+          </fileset>
+        </copy>
+      </else>
+    </if>
+    <tstamp>
+      <format property="touch.time.war" pattern="MMddyyyyHHmmss"/>
+    </tstamp>
+    <replaceregexp file="${webapp}/public/index.html" match="&apos;applet.jnlp\?install=.*&apos;" replace="&apos;applet.jnlp\?install=${touch.time.war}&apos;" byline="true"/>
+    <!-- set server-options -->
+    <if>
+      <available file="${webcontent}/WEB-INF/rad/apps/${app.name}/config.xml" type="file"/>
+      <then>
+        <copy file="${webcontent}/WEB-INF/rad/apps/${app.name}/config.xml" tofile="${webapp}/app/config.xml"/>
+      </then>
+      <else>
+        <copy file="${basedir}/config.xml" tofile="${webapp}/app/config.xml"/>
+      </else>
+    </if>
+    <if>
+      <istrue value="${app.config.encrypt}"/>
+      <then>
+        <configencrypt file="${webapp}/app/config.xml">
+          <node name="/application/securitymanager"/>
+          <node name="/application/lifecycle"/>
+          <node name="/application/datasource"/>
+        </configencrypt>
+      </then>
+    </if>
+    <if>
+      <available file="${webcontent}/WEB-INF/rad/apps/${app.name}/mobile.xml" type="file"/>
+      <then>
+        <copy file="${webcontent}/WEB-INF/rad/apps/${app.name}/mobile.xml" tofile="${webapp}/app/mobile.xml"/>
+      </then>
+      <else>
+        <copy file="${basedir}/mobile.xml" tofile="${webapp}/app/mobile.xml"/>
+      </else>
+    </if>
+    <copy file="${webcontent}/WEB-INF/rad/server/config.xml" tofile="${webapp}/server/config.xml"/>
+    <replace file="${webapp}/app/config.xml" value="&lt;property name=&quot;client.metadata_cacherole&quot;&gt;GLOBAL&lt;/property&gt;" token="&lt;property name=&quot;client.metadata_cacherole&quot;&gt;OFF&lt;/property&gt;"/>
+    <replace file="${webapp}/server/config.xml" value="&lt;globalmetadatacache&gt;ON&lt;/globalmetadatacache&gt;" token="&lt;globalmetadatacache&gt;OFF&lt;/globalmetadatacache&gt;"/>
+    <zip destfile="${webapp}/jvx_rad.jar" encoding="utf8">
+      <zipfileset dir="${webapp}/app" prefix="rad/apps/${app.name}/">
+        <include name="config.xml"/>
+        <include name="mobile.xml"/>
+      </zipfileset>
+      <zipfileset dir="${basedir}/reports" prefix="rad/apps/${app.name}/reports">
+        <exclude name="Database*.rtf"/>
+        <exclude name="Specification*.rtf"/>
+        <exclude name="report.png"/>
+        <exclude name="**/.*/**"/>
+      </zipfileset>
+      <zipfileset dir="${webapp}/server" prefix="rad/server/">
+        <include name="config.xml"/>
+      </zipfileset>
+      <zipfileset dir="${webcontent}/WEB-INF/rad/server" prefix="rad/server/">
+        <include name="*license.xml"/>
+        <exclude name="license.xml"/>
+      </zipfileset>
+      <zipfileset dir="${webcontent}/help" prefix="rad/apps/${app.name}/help"/>
+    </zip>
+    <zip destfile="${install}/${war.name}" encoding="utf8">
+      <zipfileset dir="${webapp}/public" prefix=""/>
+      <zipfileset dir="${webcontent}" prefix="">
+        <include name="*.*"/>
+        <exclude name="app*.jnlp"/>
+        <exclude name="index*.html"/>
+        <exclude name="*.jar"/>
+      </zipfileset>
+      <zipfileset dir="${install}" prefix="">
+        <include name="${jar.name.client.all}"/>
+        <include name="${jar.name.client.all.signed}"/>
+      </zipfileset>
+      <zipfileset dir="${webcontent}/help" prefix="help/">
+        <include name="**"/>
+        <exclude name="**/.*/**"/>
+      </zipfileset>
+      <zipfileset dir="${webcontent}/help" prefix="help/">
+        <include name="**/.images/**"/>
+      </zipfileset>
+      <zipfileset dir="${basedir}/reports" prefix="WEB-INF/rad/apps/${app.name}/reports/" erroronmissingdir="false">
+        <include name="**"/>
+        <exclude name="Database*.rtf"/>
+        <exclude name="Specification*.rtf"/>
+        <exclude name="report.png"/>
+        <exclude name="**/.*/**"/>
+      </zipfileset>
+      <zipfileset dir="${webcontent}/WEB-INF" prefix="WEB-INF/">
+        <exclude name="**/.*"/>
+        <exclude name="rad/apps/${app.name}/config.xml"/>
+        <exclude name="rad/apps/${app.name}/mobile.xml"/>
+        <exclude name="rad/server/config.xml"/>
+      </zipfileset>
+      <zipfileset dir="${webcontent}/VAADIN" prefix="VAADIN/"/>
+      <zipfileset dir="${webapp}/app" prefix="WEB-INF/rad/apps/${app.name}/">
+        <include name="config.xml"/>
+        <include name="mobile.xml"/>
+      </zipfileset>
+      <zipfileset dir="${webapp}/server" prefix="WEB-INF/rad/server/">
+        <include name="config.xml"/>
+      </zipfileset>
+      <zipfileset dir="${src.server}" prefix="WEB-INF/classes">
+        <include name="logging.properties"/>
+      </zipfileset>
+      <zipfileset dir="${libs}" prefix="WEB-INF/lib">
+        <include name="*.jar"/>
+      </zipfileset>
+      <zipfileset dir="${libs}/server" prefix="WEB-INF/lib">
+        <include name="*.jar"/>
+        <exclude name="servlet.jar"/>
+      </zipfileset>
+      <zipfileset dir="${libs}/server/ext" prefix="WEB-INF/lib" erroronmissingdir="false">
+        <include name="*.jar"/>
+      </zipfileset>
+      <zipfileset dir="${libs}/client" prefix="WEB-INF/lib">
+        <include name="*.jar"/>
+        <exclude name="jvxclient.jar"/>
+        <exclude name="appsclient.jar"/>
+        <exclude name="projx.jar"/>
+        <exclude name="jvxmobile-api.jar"/>
+        <exclude name="projxvaadin-api.jar"/>
+      </zipfileset>
+      <zipfileset dir="${libs}/client/ext" prefix="WEB-INF/lib" erroronmissingdir="false">
+        <include name="*.jar"/>
+      </zipfileset>
+      <zipfileset dir="${webapp}" prefix="WEB-INF/lib">
+        <include name="jvx_rad.jar"/>
+      </zipfileset>
+      <zipfileset dir="${install}" prefix="WEB-INF/lib">
+        <include name="${jar.name.client}"/>
+        <include name="${jar.name.server}"/>
+      </zipfileset>
+    </zip>
+  </target>
+  
+  <target name="tomcat">
+    <stop url="${url.manager}" username="${username}" password="${password}" path="${path}" failonerror="false"/>
+    <undeploy url="${url.manager}" username="${username}" password="${password}" path="${path}" failonerror="false"/>
+    <deploy url="${url.manager}" username="${username}" password="${password}" path="${path}" war="file:${install}/${war.name}"/>
+    <start url="${url.manager}" username="${username}" password="${password}" path="${path}"/>
+  </target>
+  
+  <target name="webcontent" depends="jarall">
+    <delete>
+      <fileset dir="${webcontent}">
+        <include name="*.jar"/>
+      </fileset>
+    </delete>
+    <copy todir="${webcontent}">
+      <fileset dir="${install}">
+        <include name="${jar.name.client.all}"/>
+        <include name="${jar.name.client.all.signed}"/>
+      </fileset>
+    </copy>
+    <tstamp>
+      <format property="touch.time" pattern="MMddyyyyHHmmss"/>
+    </tstamp>
+    <replaceregexp file="${webcontent}/index.html" match="&apos;applet.jnlp\?install=.*&apos;" replace="&apos;applet.jnlp\?install=${touch.time}&apos;" byline="true"/>
+    <replaceregexp file="${webcontent}/index_signed.html" match="&apos;applet_signed.jnlp\?install=.*&apos;" replace="&apos;applet_signed.jnlp\?install=${touch.time}&apos;" byline="true"/>
+  </target>
+  
+  <!--
+  *****************************************************************
+  * quality tasks
+  *****************************************************************
+  -->
+  
+  <target name="javadoc">
+    <delete dir="${javadoc}"/>
+    <buildnr buildfile="${buildnumber}/buildnr.properties" loadOnly="true"/>
+    <javadoc failonerror="false" packagenames="*" defaultexcludes="yes" destdir="${javadoc}" author="false" version="false" use="true" windowtitle="${app.title_original} (ver. ${build.version})">
+      <sourcefiles>
+        <fileset dir="${src.client}">
+          <include name="**/*.java"/>
+        </fileset>
+        <fileset dir="${src.server}">
+          <include name="**/*.java"/>
+        </fileset>
+      </sourcefiles>
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+      <doctitle><![CDATA[<h1>${app.title_original} (ver. ${build.version})</h1>]]></doctitle>
+      <bottom><![CDATA[<i>Copyright &#169; 2009 $ {company.name}.</i>]]></bottom>
+      <link href="http://docs.oracle.com/javase/5/docs/api/"/>
+    </javadoc>
+  </target>
+  
+  <target name="checkstyle">
+    <property name="checkstyle" location="${quality}/checkstyle"/>
+    <delete dir="${checkstyle}"/>
+    <mkdir dir="${checkstyle}"/>
+    <checkstyle config="${basedir}/checkstyle.xml" failOnViolation="false">
+      <fileset dir="${src.client}" includes="**/*.java"/>
+      <fileset dir="${src.server}" includes="**/*.java"/>
+      <fileset dir="${src.test}" includes="**/*.java"/>
+      <formatter type="plain"/>
+      <formatter type="xml" toFile="${checkstyle}/checkstyle_errors.xml"/>
+    </checkstyle>
+    <xslt in="${checkstyle}/checkstyle_errors.xml" out="${checkstyle}/dummy.html" style="${ant}/checkstyle-frames-errors.xsl"/>
+    <xslt in="${checkstyle}/checkstyle_errors.xml" out="${checkstyle}/index_simple.html" style="${ant}/checkstyle-simple.xsl"/>
+    <!-- cleanup -->
+    <delete file="${checkstyle}/dummy.html"/>
+    <delete>
+      <fileset dir="${checkstyle}">
+        <include name="*.xml"/>
+      </fileset>
+    </delete>
+  </target>
+  
+  <target name="junit">
+    <delete dir="${classes}"/>
+    <delete dir="${classes.test}"/>
+    <mkdir dir="${classes}"/>
+    <mkdir dir="${classes.test}"/>
+    <!-- compile client and server sources (WITH DEBUG INFOS) -->
+    <javac sourcepath="" destdir="${classes}" debug="on" deprecation="on" source="${src.version}" target="${target.version}" encoding="${javac.encoding}">
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="**/*.jar"/>
+        </fileset>
+      </classpath>
+      <src path="${src.client}"/>
+      <src path="${src.server}"/>
+    </javac>
+    <!-- copy resource files -->
+    <copy todir="${classes}">
+      <fileset dir="${src.client}">
+        <include name="**/**"/>
+        <exclude name="**/*.java"/>
+        <exclude name="**/package.html"/>
+      </fileset>
+      <fileset dir="${src.server}">
+        <include name="**/**"/>
+        <exclude name="**/*.java"/>
+        <exclude name="**/package.html"/>
+      </fileset>
+    </copy>
+    <!-- compile only test sources (WITH DEBUG INFOS) -->
+    <javac sourcepath="" destdir="${classes.test}" debug="on" debuglevel="lines,vars,source" deprecation="on" source="${src.version}" target="${target.version}" encoding="${javac.encoding}">
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="**/*.jar"/>
+        </fileset>
+        <pathelement location="${classes}"/>
+        <pathelement location="${ant}/junit-4.3.1.jar"/>
+      </classpath>
+      <src path="${src.test}"/>
+    </javac>
+    <!-- copy resource files -->
+    <copy todir="${classes.test}">
+      <fileset dir="${src.test}">
+        <include name="**/**"/>
+        <exclude name="**/*.java"/>
+        <exclude name="**/package.html"/>
+      </fileset>
+    </copy>
+    <property name="junit" location="${quality}/junit"/>
+    <property name="emma" location="${quality}/emma"/>
+    <property name="emma.instr" location="${temp}/emma_instructions"/>
+    <delete dir="${junit}"/>
+    <mkdir dir="${junit}"/>
+    <delete dir="${emma}"/>
+    <delete dir="${emma.instr}"/>
+    <mkdir dir="${emma.instr}"/>
+    <!--
+    give classes into a jar because emma need zip/jar or directories as instrpath
+    
+    instrpath doesn't work with filesets <type type="dir">
+    -->
+    <jar jarfile="${emma.instr}/classes.jar" basedir="${classes}"/>
+    <emma enabled="true">
+      <instr destdir="${emma.instr}" metadatafile="${emma}/metadata.emma" merge="true" instrpath="${emma.instr}/classes.jar"/>
+    </emma>
+    <junit fork="yes" printsummary="no" haltonfailure="no" showoutput="false" dir="${basedir}">
+      <batchtest fork="yes" todir="${junit}">
+        <fileset dir="${classes.test}">
+          <include name="**/Test*.class"/>
+          <include name="**/*Test.class"/>
+          <exclude name="**/*$*.class"/>
+        </fileset>
+      </batchtest>
+      <formatter type="xml"/>
+      <classpath>
+        <pathelement location="${emma.instr}"/>
+        <pathelement location="${classes}"/>
+        <pathelement location="${classes.test}"/>
+        <fileset dir="${libs}">
+          <include name="**/*.jar"/>
+        </fileset>
+        <!-- needed for emma and junit -->
+        <fileset dir="${ant}">
+          <include name="*.jar"/>
+        </fileset>
+      </classpath>
+      <jvmarg value="-Demma.coverage.out.file=${emma}/coverage.emma"/>
+      <jvmarg value="-Demma.coverage.out.merge=true"/>
+    </junit>
+    <junitreport todir="${junit}">
+      <fileset dir="${junit}">
+        <include name="TEST-*.xml"/>
+      </fileset>
+      <report todir="${junit}"/>
+    </junitreport>
+    <emma enabled="true">
+      <report>
+        <sourcepath>
+          <dirset dir="${src.client}"/>
+          <dirset dir="${src.server}"/>
+        </sourcepath>
+        <fileset dir="${emma}">
+          <include name="*.emma"/>
+        </fileset>
+        <html outfile="${emma}/coverage.html"/>
+      </report>
+    </emma>
+    <!-- cleanup -->
+    <delete>
+      <fileset dir="${junit}">
+        <include name="*.xml"/>
+      </fileset>
+    </delete>
+  </target>
+  
+  <!--
+  *****************************************************************
+  * PUBLIC START TASKS
+  *****************************************************************
+  -->
+  
+  <target name="start.complete" depends="clean.start, war, javadoc, clean.stop" description="Creates web application archive and all relevant libraries"/>
+  
+  <target name="start.deploy" depends="start.complete, tomcat" description="Deploys the application to the configured remote Tomcat"/>
+  
+  <target name="start.quality" depends="checkstyle, junit, javadoc" description="Starts quality checks"/>
+  
+  <target name="start.webcontent" depends="clean.start, webcontent" description="Deployes client to local WebContent directory"/>
+
+</project>

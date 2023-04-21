@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<editmodel:ClassDiagramEditModel xmi:version="2.0" xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:editmodel="editmodel.xmi" xmlns:options="options.xmi" name="application" size="1572,835" id="javax.rad.application" metadata="uml2-1.0" initialized="true" tag="1000" key="32303037303533312D31303030204A56782F726A61686E">
+  <children xsi:type="editmodel:InterfaceEditModel" targetConnections="//@children.15/@sourceConnections.0" name="ILauncher" location="1017,30" size="106,43" id="javax.rad.application/ILauncher" runTimeClassModel="setParameter(Ljava.lang.String;Ljava.lang.String;),pARAM_APPLICATIONLANGUAGE,pARAM_UIFACTORY,getParameter(Ljava.lang.String;),setRegistryKey(Ljava.lang.String;Ljava.lang.String;),getRegistryKey(Ljava.lang.String;),pARAM_APPLICATIONNAME,showFileHandle(Ljavax.rad.io.IFileHandle;),pARAM_LOGFACTORY,pARAM_CODEBASE,getFileHandle(Ljavax.rad.application.IFileHandleReceiver;Ljava.lang.String;),saveFileHandle(Ljavax.rad.io.IFileHandle;Ljava.lang.String;),showFileHandle(Ljavax.rad.io.IFileHandle;Ljavax.rad.ui.IRectangle;Ljava.lang.String;),showDocument(Ljava.lang.String;Ljavax.rad.ui.IRectangle;Ljava.lang.String;),cancelPendingThreads(),pARAM_SERVERBASE">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:InterfaceEditModel" targetConnections="//@children.2/@sourceConnections.0" name="IContent" location="472,30" size="95,43" id="javax.rad.application/IContent" runTimeClassModel="setOpener(LOP;),notifyVisible(),notifyDestroy(),getOpener()">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:InterfaceEditModel" targetConnections="//@children.3/@sourceConnections.0" name="IApplication" location="105,135" size="118,43" id="javax.rad.application/IApplication" runTimeClassModel="getLauncher(),showMessage(LOP;IILjava.lang.String;Ljava.lang.String;Ljava.lang.String;),getApplicationPane(),getContentPane()">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" targetConnections="//@children.4/@sourceConnections.0 //@children.6/@sourceConnections.0 //@children.13/@sourceConnections.0 //@children.14/@sourceConnections.0" autoLocated="true" id="javax.rad.application/IContent&lt;-javax.rad.application/IApplication" source="//@children.2" target="//@children.1" targetEnd="//@children.2/@sourceConnections.0/@children.1" sourceEnd="//@children.2/@sourceConnections.0/@children.0" connectionRouterKind="GeneralizationManhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="59,0" anchorKind="FixedAtEdge" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="47,43" anchorKind="FixedAtEdge"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:InterfaceEditModel" targetConnections="//@children.10/@sourceConnections.1" name="IWorkScreenApplication" location="27,246" size="196,43" id="javax.rad.application/IWorkScreenApplication" runTimeClassModel="getRoles(),getWorkScreens(),getContents(),javax.rad.application.IWorkScreenApplication.Modality,openWorkScreen(Ljava.lang.String;Ljavax.rad.application.IWorkScreenApplication.Modality;),openContent(Ljavax.rad.ui.IComponent;Ljava.lang.String;ZLjavax.rad.application.IContent;),close(Ljavax.rad.application.IContent;),openContent(Ljavax.rad.ui.IComponent;Ljava.lang.String;ZLjava.lang.String;[Ljava.lang.Object;),hasRole(Ljava.lang.String;)">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" targetConnections="//@children.5/@sourceConnections.0" autoLocated="true" id="javax.rad.application/IApplication&lt;-javax.rad.application/IWorkScreenApplication" source="//@children.3" target="//@children.2" targetEnd="//@children.3/@sourceConnections.0/@children.1" sourceEnd="//@children.3/@sourceConnections.0/@children.0" connectionRouterKind="GeneralizationManhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="98,0" anchorKind="FixedAtEdge" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="59,43" anchorKind="FixedAtEdge"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:InterfaceEditModel" targetConnections="//@children.8/@sourceConnections.0" name="IWorkScreen" location="515,135" size="124,43" id="javax.rad.application/IWorkScreen" runTimeClassModel="save(),reload(),isModal(),getApplication(),setModal(Z)">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" autoLocated="true" id="javax.rad.application/IContent&lt;-javax.rad.application/IWorkScreen" source="//@children.4" target="//@children.2/@sourceConnections.0" targetEnd="//@children.4/@sourceConnections.0/@children.1" sourceEnd="//@children.4/@sourceConnections.0/@children.0" connectionRouterKind="GeneralizationManhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="62,0" anchorKind="FixedAtEdge" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:ClassEditModel" targetConnections="//@children.7/@sourceConnections.1" name="Application" location="262,246" size="114,43" id="javax.rad.application.genui/Application" runTimeClassModel="showError(LOP;Ljava.lang.String;Ljava.lang.String;),getCursor(),showInformation(LOP;Ljava.lang.String;),showError(LOP;Ljava.lang.String;),getApplicationPane(),pARAM_SETUP_CLASS,launcher,getLauncher(),showQuestion(LOP;Ljava.lang.String;Ljava.lang.String;),Application(Ljavax.rad.application.genui.UILauncher;),showInformation(LOP;Ljava.lang.String;Ljava.lang.String;),setCursor(Ljavax.rad.ui.ICursor;),showQuestion(LOP;Ljava.lang.String;Ljava.lang.String;Ljava.lang.String;)">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" id="javax.rad.application/IApplication&lt;-javax.rad.application.genui/Application" source="//@children.5" target="//@children.3/@sourceConnections.0" targetEnd="//@children.5/@sourceConnections.0/@children.1" sourceEnd="//@children.5/@sourceConnections.0/@children.0" connectionRouterKind="GeneralizationManhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="34,0" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="0,-28" attachSource="true"/>
+    </sourceConnections>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" targetConnections="//@children.8/@sourceConnections.1" id="javax.rad.application.genui/Content&lt;-javax.rad.application.genui/Application" source="//@children.5" target="//@children.6" targetEnd="//@children.5/@sourceConnections.1/@children.1" sourceEnd="//@children.5/@sourceConnections.1/@children.0" connectionRouterKind="GeneralizationManhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="56,0" anchorKind="FixedAtEdge" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="45,43" anchorKind="FixedAtEdge"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:ClassEditModel" targetConnections="//@children.5/@sourceConnections.1" name="Content" location="273,135" size="91,43" id="javax.rad.application.genui/Content" runTimeClassModel="opener,setOpener(LOP;),notifyVisible(),Content(),notifyDestroy(),getOpener()">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" id="javax.rad.application/IContent&lt;-javax.rad.application.genui/Content" source="//@children.6" target="//@children.2/@sourceConnections.0" targetEnd="//@children.6/@sourceConnections.0/@children.1" sourceEnd="//@children.6/@sourceConnections.0/@children.0" connectionRouterKind="GeneralizationManhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="44,0" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="1,0"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:ClassEditModel" targetConnections="//@children.10/@sourceConnections.0" name="RemoteApplication" location="247,450" size="163,43" id="javax.rad.application.genui/RemoteApplication" runTimeClassModel="RemoteApplication(Ljavax.rad.application.genui.UILauncher;Ljavax.rad.remote.AbstractConnection;),connection,eventAfterLogin(),eventAfterLogout,isConnected(),eventAfterLogin,getConnection(),setConnection(Ljavax.rad.remote.AbstractConnection;),eventAfterLogout(),RemoteApplication(Ljavax.rad.application.genui.UILauncher;)">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" id="javax.rad.application/IConnectable&lt;-javax.rad.application.genui/RemoteApplication" source="//@children.7" target="//@children.11" targetEnd="//@children.7/@sourceConnections.0/@children.1" sourceEnd="//@children.7/@sourceConnections.0/@children.0" connectionRouterKind="GeneralizationManhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="131,0" anchorKind="FixedAtEdge" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="56,43" anchorKind="FixedAtEdge"/>
+    </sourceConnections>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" id="javax.rad.application.genui/Application&lt;-javax.rad.application.genui/RemoteApplication" source="//@children.7" target="//@children.5" targetEnd="//@children.7/@sourceConnections.1/@children.1" sourceEnd="//@children.7/@sourceConnections.1/@children.0" connectionRouterKind="Manhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="50,0" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="35,43"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:ClassEditModel" targetConnections="//@children.9/@sourceConnections.0" name="WorkScreen" location="517,246" size="120,43" id="javax.rad.application.genui/WorkScreen" runTimeClassModel="application,showError(LOP;Ljava.lang.String;Ljava.lang.String;),reload(),showInformation(LOP;Ljava.lang.String;),showError(LOP;Ljava.lang.String;),setModal(Z),WorkScreen(Ljavax.rad.application.IWorkScreenApplication;),save(),showQuestion(LOP;Ljava.lang.String;Ljava.lang.String;),getApplication(),isModal(),showInformation(LOP;Ljava.lang.String;Ljava.lang.String;),modal,showQuestion(LOP;Ljava.lang.String;Ljava.lang.String;Ljava.lang.String;)">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" autoLocated="true" id="javax.rad.application/IWorkScreen&lt;-javax.rad.application.genui/WorkScreen" source="//@children.8" target="//@children.4" targetEnd="//@children.8/@sourceConnections.0/@children.1" sourceEnd="//@children.8/@sourceConnections.0/@children.0" connectionRouterKind="Manual">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="60,0" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="62,43"/>
+    </sourceConnections>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" id="javax.rad.application.genui/Content&lt;-javax.rad.application.genui/WorkScreen" source="//@children.8" target="//@children.5/@sourceConnections.1" targetEnd="//@children.8/@sourceConnections.1/@children.1" sourceEnd="//@children.8/@sourceConnections.1/@children.0" connectionRouterKind="GeneralizationManhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="60,0" anchorKind="FixedAtEdge" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="1,-246" anchorKind="FixedAtEdge"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:ClassEditModel" name="RemoteWorkScreen" location="492,330" size="169,43" id="javax.rad.application.genui/RemoteWorkScreen" runTimeClassModel="connection,isConnected(),getConnection(),getApplication(),setConnection(Ljavax.rad.remote.AbstractConnection;),RemoteWorkScreen(Ljavax.rad.application.IWorkScreenApplication;Ljavax.rad.remote.AbstractConnection;),RemoteWorkScreen(Ljavax.rad.application.IWorkScreenApplication;)">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" autoLocated="true" id="javax.rad.application.genui/WorkScreen&lt;-javax.rad.application.genui/RemoteWorkScreen" source="//@children.9" target="//@children.8" targetEnd="//@children.9/@sourceConnections.0/@children.1" sourceEnd="//@children.9/@sourceConnections.0/@children.0" connectionRouterKind="Manual">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="84,0" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="59,43"/>
+    </sourceConnections>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" autoLocated="true" id="javax.rad.application/IConnectable&lt;-javax.rad.application.genui/RemoteWorkScreen" source="//@children.9" target="//@children.11" targetEnd="//@children.9/@sourceConnections.1/@children.1" sourceEnd="//@children.9/@sourceConnections.1/@children.0" connectionRouterKind="Manual">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="0,21" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="126,21"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:ClassEditModel" name="RemoteWorkScreenApplication" location="82,555" size="241,43" id="javax.rad.application.genui/RemoteWorkScreenApplication" runTimeClassModel="openWorkScreen(Ljava.lang.String;),RemoteWorkScreenApplication(Ljavax.rad.application.genui.UILauncher;),RemoteWorkScreenApplication(Ljavax.rad.application.genui.UILauncher;Ljavax.rad.remote.AbstractConnection;)">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" targetConnections="//@children.12/@sourceConnections.0" id="javax.rad.application.genui/RemoteApplication&lt;-javax.rad.application.genui/RemoteWorkScreenApplication" source="//@children.10" target="//@children.7" targetEnd="//@children.10/@sourceConnections.0/@children.1" sourceEnd="//@children.10/@sourceConnections.0/@children.0" connectionRouterKind="GeneralizationManhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="120,0" anchorKind="FixedAtEdge" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="81,43" anchorKind="FixedAtEdge"/>
+    </sourceConnections>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" id="javax.rad.application/IWorkScreenApplication&lt;-javax.rad.application.genui/RemoteWorkScreenApplication" source="//@children.10" target="//@children.3" targetEnd="//@children.10/@sourceConnections.1/@children.1" sourceEnd="//@children.10/@sourceConnections.1/@children.0" connectionRouterKind="Manual">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="44,0" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="98,43"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:InterfaceEditModel" targetConnections="//@children.9/@sourceConnections.1 //@children.7/@sourceConnections.0" name="IConnectable" location="322,330" size="126,43" id="javax.rad.application/IConnectable" runTimeClassModel="isConnected(),getConnection(),setConnection(Ljavax.rad.remote.AbstractConnection;)">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:ClassEditModel" name="Application" location="375,555" size="167,43" id="com.sibvisions.rad.application/Application" runTimeClassModel="doLogout(Ljavax.rad.ui.event.UIActionEvent;),doExit(Ljavax.rad.ui.event.UIActionEvent;),callError(Ljavax.rad.remote.event.CallErrorEvent;),doHelp(Ljavax.rad.ui.event.UIActionEvent;),doErrorClosed(Ljavax.rad.ui.event.UIWindowEvent;),pARAM_MENU_EXIT_VISIBLE,getMenuBar(),getError(),objectCalled(Ljavax.rad.remote.event.CallEvent;),login,connectionReOpened(Ljavax.rad.remote.event.ConnectionEvent;),doLogin(Ljavax.rad.ui.event.UIActionEvent;),doChangePassword(Ljavax.rad.ui.event.UIActionEvent;),getLogin(),doShowChangePassword(Ljavax.rad.ui.event.UIActionEvent;),showErrorDialog(),error,propertyChanged(Ljavax.rad.remote.event.PropertyEvent;),getDesktopPane(),getToolBar(),getContentPane(),doHideChangePassword(Ljavax.rad.ui.event.UIActionEvent;),doShowLogin(Ljavax.rad.ui.event.UIActionEvent;),showMessage(LOP;IILjava.lang.String;Ljava.lang.String;Ljava.lang.String;),connectionOpened(Ljavax.rad.remote.event.ConnectionEvent;),createMenuItem(Ljava.lang.String;Ljava.lang.String;Ljava.lang.String;Ljavax.rad.genui.UIImage;),notifyVisible(),actionCalled(Ljavax.rad.remote.event.CallEvent;),Application(Ljavax.rad.application.genui.UILauncher;),createToolBarButton(Ljava.lang.String;Ljava.lang.String;Ljava.lang.String;Ljavax.rad.genui.UIImage;),notifyDestroy(),doAbout(Ljavax.rad.ui.event.UIActionEvent;),handleException(Ljava.lang.Throwable;),connectionClosed(Ljavax.rad.remote.event.ConnectionEvent;),doHideLogin(Ljavax.rad.ui.event.UIActionEvent;)">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" autoLocated="true" id="javax.rad.application.genui/RemoteApplication&lt;-com.sibvisions.rad.application/Application" source="//@children.12" target="//@children.10/@sourceConnections.0" targetEnd="//@children.12/@sourceConnections.0/@children.1" sourceEnd="//@children.12/@sourceConnections.0/@children.0" connectionRouterKind="GeneralizationManhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="83,0" anchorKind="FixedAtEdge" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="0,14" anchorKind="FixedAtEdge"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:ClassEditModel" name="Error" location="622,555" size="167,43" id="com.sibvisions.rad.application/Error" runTimeClassModel="opener,addError(Ljava.lang.Throwable;),eventShowDetails,eventShowDetails(),getOpener(),doDetails(Ljavax.rad.ui.event.UIActionEvent;),eventHideDetails(),setOpener(LOP;),notifyVisible(),notifyDestroy(),getErrors(),doOk(Ljavax.rad.ui.event.UIActionEvent;),Error(Ljavax.rad.ui.container.IDesktopPanel;),getMessage(),eventHideDetails">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" id="javax.rad.application/IContent&lt;-com.sibvisions.rad.application/Error" source="//@children.13" target="//@children.2/@sourceConnections.0" targetEnd="//@children.13/@sourceConnections.0/@children.1" sourceEnd="//@children.13/@sourceConnections.0/@children.0" connectionRouterKind="GeneralizationManhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="84,0" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="0,-17" attachSource="true"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:ClassEditModel" name="Message" location="817,555" size="167,43" id="com.sibvisions.rad.application/Message" runTimeClassModel="opener,setOpener(LOP;),doCancel(Ljavax.rad.ui.event.UIActionEvent;),notifyVisible(),notifyDestroy(),doClose(Ljavax.rad.ui.event.UIWindowEvent;),doOk(Ljavax.rad.ui.event.UIActionEvent;),getOpener(),Message(Ljavax.rad.genui.container.UIDesktopPanel;IILjava.lang.String;Ljava.lang.String;Ljava.lang.String;)">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" autoLocated="true" id="javax.rad.application/IContent&lt;-com.sibvisions.rad.application/Message" source="//@children.14" target="//@children.2/@sourceConnections.0" targetEnd="//@children.14/@sourceConnections.0/@children.1" sourceEnd="//@children.14/@sourceConnections.0/@children.0" connectionRouterKind="GeneralizationManhattan">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="83,0" anchorKind="FixedAtEdge" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="0,22"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <children xsi:type="editmodel:ClassEditModel" name="UILauncher" location="1012,555" size="115,43" id="javax.rad.application.genui/UILauncher" runTimeClassModel="setParameter(Ljava.lang.String;Ljava.lang.String;),getFileHandle(Ljavax.rad.application.IFileHandleReceiver;),saveFileHandle(Ljavax.rad.io.IFileHandle;),getParameter(Ljava.lang.String;),getFileHandle(Ljava.lang.Object;Ljava.lang.String;),setRegistryKey(Ljava.lang.String;Ljava.lang.String;),getRegistryKey(Ljava.lang.String;),showFileHandle(Ljavax.rad.io.IFileHandle;),createFileHandleReceiver(Ljava.lang.Object;Ljava.lang.String;),getFileHandle(Ljava.lang.Object;Ljava.lang.String;Ljava.lang.String;),getFileHandle(Ljavax.rad.application.IFileHandleReceiver;Ljava.lang.String;),showFileHandle(Ljavax.rad.io.IFileHandle;Ljavax.rad.ui.IRectangle;Ljava.lang.String;),saveFileHandle(Ljavax.rad.io.IFileHandle;Ljava.lang.String;),showDocument(Ljava.lang.String;Ljavax.rad.ui.IRectangle;Ljava.lang.String;),handleException(Ljava.lang.Throwable;),cancelPendingThreads(),UILauncher(Ljavax.rad.application.ILauncher;)">
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <children xsi:type="editmodel:CompartmentEditModel" size="0,0"/>
+    <sourceConnections xsi:type="editmodel:GeneralizationEditModel" autoLocated="true" id="javax.rad.application/ILauncher&lt;-javax.rad.application.genui/UILauncher" source="//@children.15" target="//@children.0" targetEnd="//@children.15/@sourceConnections.0/@children.1" sourceEnd="//@children.15/@sourceConnections.0/@children.0" connectionRouterKind="Manual">
+      <children xsi:type="editmodel:AssociationEndEditModel" location="57,0" attachSource="true"/>
+      <children xsi:type="editmodel:AssociationEndEditModel" location="52,43"/>
+    </sourceConnections>
+    <classifierPreferences xsi:type="editmodel:UMLClassDiagramClassifierPreference" showStereotype="true" attributeSorter="Natural" methodSorter="Natural" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+  </children>
+  <diagramOptions xsi:type="options:ClassDiagramOptions" level="-1" showScope="InPackage" properties="wireOptions=1;Product=eUML2"/>
+  <boardSetting snapToGeometry="true" gridEnabled="true" gridSpacing="15,15" gridOrigin="0,0" rulerUnit="pixel" gridVisibility="false">
+    <leftRuler/>
+    <topRuler/>
+  </boardSetting>
+  <classDiagramPreferences xsi:type="editmodel:UMLClassDiagramPreference" showPopupBars="true" showConnectionHandles="true" attributeSorter="Natural" methodSorter="Natural" showClassStereotype="true" showPackageStereotype="true" showDependencyStereotype="true" showInterfaceStereotype="true" innerClassSorter="Natural" showPublicAttributes="true" showPackageAttributes="true" showStaticAttributes="true" showPublicMethods="true" showPackageMethods="true" showStaticMethods="true" showPublicInnerClasses="true" showPackageInnerClasses="true" showStaticInnerClasses="true" packageIndication="3" showAttributeProperty="true"/>
+</editmodel:ClassDiagramEditModel>

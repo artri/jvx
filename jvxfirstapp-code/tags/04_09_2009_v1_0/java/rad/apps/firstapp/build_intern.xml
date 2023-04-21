@@ -1,0 +1,364 @@
+<project name="JVxFirstApp" default="start.complete">
+
+  <!-- 
+    ***************************************************************** 
+  	* information   
+  	***************************************************************** 
+  	-->
+
+  <description>First application with Enterprise Application Framework - JVx</description>
+
+  <!-- 
+  	***************************************************************** 
+  	* global properties   
+  	***************************************************************** 
+  	-->
+
+  <property name="jar.name.client" value="jvxfirstapp.jar" />
+  <property name="jar.name.server" value="jvxfirstappserver.jar" />
+  <property name="war.name"        value="jvxfirstapp.war" />
+  <property name="project.name"    value="jvxfirstapp" />
+
+  <!-- 
+  	***************************************************************** 
+  	* global properties   
+  	***************************************************************** 
+  	-->
+
+  <property name="rad" location="${basedir}/../../../" />
+
+  <property name="build" location="${basedir}/build" />
+  <property name="buildnumber" location="${build}/buildnumber/" />
+  <property name="temp" location="${build}/temp" />
+
+  <property name="src.client" location="${basedir}/src.client" />
+  <property name="src.server" location="${basedir}/src.server" />
+  <property name="libs" location="${basedir}/libs" />
+  <property name="help" location="${basedir}/help" />
+  <property name="webcontent" location="${basedir}/deployment" />
+  <property name="classes.client" location="${temp}/classes.client" />
+  <property name="classes.server" location="${temp}/classes.server" />
+
+  <property name="install" location="${build}/install" />
+  <property name="javadoc" location="${install}/doc" />
+
+  <!-- 
+  	***************************************************************** 
+  	* external taskdefinitions   
+  	***************************************************************** 
+  	-->
+  
+  <taskdef resource="net/sf/antcontrib/antcontrib.properties" classpath="${build}/ant-contrib.jar" />
+
+  <!-- 
+  	***************************************************************** 
+  	* logging   
+  	***************************************************************** 
+  	-->
+
+  <record name="${build}/build.log" />
+
+  <!-- 
+  	***************************************************************** 
+  	* INTERNAL TASKS   
+  	***************************************************************** 
+  	-->
+
+  <!-- 
+	* cleanup tasks 
+	-->
+
+  <target name="clean.start">
+    <delete dir="${temp}" />
+    <delete dir="${install}" />
+  </target>
+
+  <target name="clean.stop">
+    <delete dir="${temp}" />
+  </target>
+
+  <!-- 
+	* compile, build tasks 
+	-->
+
+  <target name="compile">
+
+    <delete dir="${classes.client}" />
+    <delete dir="${classes.server}" />
+
+    <mkdir dir="${classes.client}" />
+    <mkdir dir="${classes.server}" />
+
+    <!-- compile the client sources -->
+    <javac srcdir="${src.client}" destdir="${classes.client}" debug="on" deprecation="on" source="1.5" target="1.5" encoding="ISO-8859-1">
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs}/client">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs}/server">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+    </javac>
+
+    <!-- copy ressource files -->
+    <copy todir="${classes.client}">
+      <fileset dir="${src.client}">
+        <include name="**/*" />
+        
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+      </fileset>
+    </copy>
+
+    <!-- compile the server sources -->
+    <javac srcdir="${src.server}" destdir="${classes.server}" debug="on" deprecation="on" source="1.5" target="1.5" encoding="ISO-8859-1">
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="*.jar" />
+        </fileset>
+        <fileset dir="${libs}/server">
+          <include name="*.jar" />
+        </fileset>
+      </classpath>
+    </javac>
+
+    <!-- copy ressource files -->
+    <copy todir="${classes.server}">
+      <fileset dir="${src.server}">
+        <include name="**/*" />
+        
+        <exclude name="logging.properties" />
+        <exclude name="**/*.java" />
+        <exclude name="**/package.html" />
+      </fileset>
+    </copy>
+    
+  </target>
+    
+  <target name="jar" depends="compile">
+
+    <delete dir="${install}" />
+    
+    <mkdir dir="${install}" />
+
+    <!-- define late because of the classpath -->
+    <taskdef name="buildnr" classname="com.sibvisions.addons.ant.AntBuildNumber" classpath="${buildnumber}/addons.jar;${classes.client};${libs}/server/jvx.jar" />
+    <buildnr buildfile="${buildnumber}/buildnr.properties" class="apps.firstapp.FirstApplication" versionfield="VERSION" name="JVxFirstApp"/> 
+
+    <!-- create the jar files -->
+    <jar jarfile="${install}/${jar.name.client}" basedir="${classes.client}">
+  	  <manifest>
+  	    <attribute name="Specification-Title" value="${build.versionstring}"/>
+        <attribute name="Specification-Version" value="b${build.number}"/>
+        <attribute name="Specification-Vendor" value="SIB Visions GmbH"/>
+        <attribute name="Implementation-Title" value="${build.versionstring}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+    </jar>
+    
+    <jar jarfile="${install}/${jar.name.server}" basedir="${classes.server}" >
+  	  <manifest>
+  	    <attribute name="Specification-Title" value="${build.versionstring}"/>
+        <attribute name="Specification-Version" value="b${build.number}"/>
+        <attribute name="Specification-Vendor" value="SIB Visions GmbH"/>
+        <attribute name="Implementation-Title" value="${build.versionstring}"/>
+        <attribute name="Implementation-Version" value="b${build.number} ${build.date}"/> 
+        <attribute name="Implementation-Vendor" value="SIB Visions GmbH"/>
+      </manifest>
+    </jar>      
+
+  </target>
+
+  <target name="war" depends="jar">
+
+    <property name="webapp" location="${temp}/webapp" />
+
+    <delete dir="${webapp}" />
+
+    <mkdir dir="${webapp}" />
+    <mkdir dir="${webapp}/WEB-INF/lib" />
+    <mkdir dir="${webapp}/WEB-INF/classes" />
+    <mkdir dir="${webapp}/WEB-INF/rad" />
+
+    <copy todir="${webapp}">
+      <fileset dir="${webcontent}">
+        <include name="index.html" />
+        <include name="favicon.ico" />
+      </fileset>
+      <fileset dir="${libs}/client">
+        <include name="*.jar" />
+      </fileset>
+      <fileset dir="${install}">
+        <include name="${jar.name.client}" />
+      </fileset>
+    </copy>
+
+    <copy file="${webcontent}/web.xml" todir="${webapp}/WEB-INF/" />
+
+    <copy todir="${webapp}/WEB-INF/lib">
+      <fileset dir="${libs}/server">
+        <include name="*.jar" />
+        <exclude name="servlet.jar" />
+      </fileset>
+      <fileset dir="${install}">
+        <include name="${jar.name.server}" />
+      </fileset>
+    </copy>
+
+    <copy todir="${webapp}/WEB-INF/rad">
+      <fileset dir="${basedir}">
+        <include name="**/config.xml" />
+        <include name="**/users.xml" />
+      </fileset>
+    </copy>
+
+    <copy todir="${webapp}/help">
+      <fileset dir="${help}">
+        <exclude name="*.svn" />
+        <exclude name="**/*.svn" />
+      </fileset>
+    </copy>
+
+    <zip destfile="${install}/${war.name}" encoding="utf8">
+      <zipfileset dir="${webapp}" />
+    </zip>
+
+  </target>
+
+  <target name="source">
+
+    <delete>
+      <fileset dir="${install}">
+        <include name="${project.name}-*.zip" />
+      </fileset>
+    </delete>
+    
+    <!-- define late because of the classpath -->
+    <taskdef name="buildnr" classname="com.sibvisions.addons.ant.AntBuildNumber" classpath="${buildnumber}/addons.jar" />
+    <buildnr buildfile="${buildnumber}/buildnr.properties" loadOnly="true"/> 
+
+    <zip destfile="${install}/${project.name}-${build.version}.zip">
+      <zipfileset dir="${rad}">
+        <include name="**/src.client/**" />
+        <include name="**/src.server/**" />
+        <include name="**/libs/**" />
+        <include name="**/test/**" />
+        <include name="**/db/**" />
+        <include name="**/.classpath" />
+        <include name="**/*.launch" />
+
+        <include name="server/**" />
+        
+        <exclude name="**/db/*.log" />
+        <exclude name="**/libs/server/help.jar" />
+        
+      </zipfileset>
+      <zipfileset dir="${basedir}">
+        <include name="LICENSE.txt" />
+        <include name="NOTICE.txt" />
+      </zipfileset>
+      <zipfileset dir="${webcontent}" prefix="rad/apps/firstapp">
+        <include name=".project"/>
+      </zipfileset>
+    </zip>
+
+  </target>
+  
+  <!-- 
+  	 *
+  	 * documentation tasks 
+     * 
+  	 -->
+
+  <target name="javadoc">
+
+    <delete dir="${javadoc}" />
+
+    <!-- define late because of the classpath -->
+    <taskdef name="buildnr" classname="com.sibvisions.addons.ant.AntBuildNumber" classpath="${buildnumber}/addons.jar" />
+    <buildnr buildfile="${buildnumber}/buildnr.properties" loadOnly="true"/> 
+
+    <javadoc packagenames="*" defaultexcludes="yes" destdir="${javadoc}" author="false" version="false" use="true" windowtitle="JVx - First application (ver. ${build.version})">
+      <sourcefiles>
+        <fileset dir="${src.client}">
+          <include name="**/*.java" />
+        </fileset>
+        <fileset dir="${src.server}">
+          <include name="**/*.java" />
+        </fileset>
+      </sourcefiles>
+      <classpath>
+        <fileset dir="${libs}">
+          <include name="**/*.jar" />
+        </fileset>
+      </classpath>
+      <doctitle><![CDATA[<h1>JVx - First application (ver. ${build.version})</h1>]]></doctitle>
+      <bottom><![CDATA[<i>Copyright &#169; 2009 SIB Visions GmbH. All Rights Reserved.</i>]]></bottom>
+    </javadoc>
+  </target>
+
+  <!-- 
+  	***************************************************************** 
+  	* PUBLIC START TASKS   
+  	***************************************************************** 
+  	-->
+
+  <!-- updates all dependent libraries to their current version -->
+  <target name="start.updatelibs">
+  
+    <property name="install.jvx" location="${build}/../../../../../../../../sibvisions/jvx/trunk/java/build/release" />
+    <property name="install.help" location="${build}/../../../../../../../../sibvisions/jvx/trunk/java/help/build/install" />
+    
+    <copy todir="${libs}/client">
+      <fileset dir="${install.jvx}">
+        <include name="jvxclient.jar" />
+      </fileset>
+    </copy>
+
+    <copy todir="${libs}/server">
+      <fileset dir="${install.jvx}">
+        <include name="jvx.jar" />
+      </fileset>
+      <fileset dir="${install.help}">
+        <include name="help.jar" />
+      </fileset>
+    </copy>
+
+    <delete>
+      <fileset dir="${help}">
+        <exclude name="structure/**" />
+        <exclude name="index.html" />
+        <exclude name="images/company.png" />
+        <exclude name=".svn/**" />
+      </fileset>
+    </delete>
+    
+    <copy todir="${help}">
+      <fileset dir="${install.help}/help">
+        <exclude name="structure/**" />
+        <exclude name="index.html" />
+        <exclude name="images/company.png" />
+      </fileset>
+    </copy>
+    
+    <!-- copy project/customer specific content only if not available -->
+    <if>
+      <not><available file="${help}/index.html"/></not>
+      <then><copy file="${install.help}/help/index.html" todir="${help}"/></then>
+    </if>
+
+    <if>
+      <not><available file="${help}/images/company.png"/></not>
+      <then><copy file="${install.help}/help/images/company.png" todir="${help}/images"/></then>
+    </if>
+    
+  </target>
+  
+  <target name="start.complete" depends="clean.start, war, source, javadoc, clean.stop" />
+  
+</project>

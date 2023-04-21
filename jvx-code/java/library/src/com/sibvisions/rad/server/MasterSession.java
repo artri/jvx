@@ -1,0 +1,700 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 01.10.2008 - [JR] - creation
+ * 05.10.2008 - [JR] - implemented password change mechanism
+ *                   - validate authentication in constructor (moved from SessionManager)
+ * 03.11.2008 - [JR] - change password during login without triggering through the database 
+ * 23.02.2010 - [JR] - #18: constructor: set inactive interval direct         
+ * 28.03.2010 - [JR] - #103: constructor: set predefined connection properties
+ * 07.06.2010 - [JR] - #49: access control support    
+ * 18.11.2010 - [JR] - #206: ApplicationZone is now a clone, getApplicationZone made protected
+ * 30.06.2011 - [JR] - #407: /application/liveconfig support for up-to-date config properties 
+ * 22.09.2011 - [JR] - #474: checkAccess implemented in constructor
+ * 23.06.2016 - [JR] - push feature    
+ * 21.12.2017 - [JR] - #1868: alive interval (timeout) introduced   
+ */
+package com.sibvisions.rad.server;
+
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.rad.remote.ChangePasswordException;
+import javax.rad.remote.IConnectionConstants;
+import javax.rad.server.AbstractObjectProvider;
+import javax.rad.server.IConfiguration;
+import javax.rad.server.ResultObject;
+import javax.rad.server.SessionContext;
+import javax.rad.server.push.PushMessage;
+import javax.rad.server.push.PushMessage.MessageType;
+
+import com.sibvisions.rad.server.config.ApplicationZone;
+import com.sibvisions.rad.server.config.Configuration;
+import com.sibvisions.rad.server.protocol.ICategoryConstants;
+import com.sibvisions.rad.server.protocol.ICommandConstants;
+import com.sibvisions.rad.server.protocol.ProtocolFactory;
+import com.sibvisions.rad.server.protocol.Record;
+import com.sibvisions.rad.server.security.IAccessController;
+import com.sibvisions.rad.server.security.ISecurityManager;
+import com.sibvisions.rad.server.security.reset.IResetPasswordManager;
+import com.sibvisions.util.ArrayUtil;
+import com.sibvisions.util.ChangedHashtable;
+import com.sibvisions.util.type.CommonUtil;
+import com.sibvisions.util.type.StringUtil;
+import com.sibvisions.util.xml.XmlNode;
+
+/**
+ * A <code>Session</code> is a server side session which will be started 
+ * when an <code>IConnection</code> connects to a remote server.<br>
+ * The session persists for a specified time period, across more than one request 
+ * from the <code>IConnection</code>.
+ * 
+ * @author René Jahn
+ */
+final class MasterSession extends AbstractSession
+                          implements IMasterSession
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Class members
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/** the list of opened sub sessions. */
+	private ArrayUtil<WeakReference<SubSession>> auSubSessions = null;
+	
+	/** object for synchronized access to the sub-session references. */
+	private Object oSyncSubSessions = new Object();	
+	
+	/** the frozen application zone for this session. */
+	private ApplicationZone zone;
+	
+	/** the access controller for this session. */
+	private IAccessController accessController;
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Initialization
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * Crates a new instance of <code>Session</code> with a unique
+	 * session ID and the start/create time.
+	 * 
+	 * @param pManager the assigned session manager
+	 * @param pProperties the initial session properties
+	 * @throws Exception if the authentication of the session failed
+	 * @see DefaultSessionManager
+	 */
+	MasterSession(DefaultSessionManager pManager, 
+			      ChangedHashtable<String, Object> pProperties) throws Exception
+	{
+		super(pManager, pProperties);
+		
+		try
+		{
+    		Record record = ProtocolFactory.openRecord(ICategoryConstants.SESSION, ICommandConstants.SESSION_CONFIGURATION);
+    
+    		String sLcoNameDefault;
+    		
+    		try
+    		{
+        		String sApplication = (String)pProperties.get(IConnectionConstants.APPLICATION);
+        		
+        		//use a frozen configuration as session config
+        		zone = (ApplicationZone)Configuration.getApplicationZone(sApplication).clone();
+        
+        		//#407
+        		if (!Boolean.valueOf(zone.getProperty("/application/liveconfig")).booleanValue())
+        		{
+        			//BE careful, at the moment it is not possible to change properties/nodes of the configuration via 
+        			//IConfiguration (which is available in Lifecycle objects).
+        			//
+        			//If live-config is enabled, and config is not saved, all changes are lost
+        			zone.setUpdateEnabled(false);
+        		}
+        
+    		    initMaxInactiveInterval(pProperties, zone, "mastersession", 0);
+    		    initMaxAliveInterval(pProperties, zone);
+    
+        		//set predefined connection properties
+        		List<XmlNode> liProps = zone.getNodes("/application/connection/property");
+        		
+        		if (liProps != null)
+        		{
+        			XmlNode ndName;
+        			
+        			for (XmlNode node : liProps)
+        			{
+        				ndName = node.getNode("name");
+        				
+        				if (ndName != null && ndName.getValue() != null)
+        				{
+        					setPropertyIntern(ndName.getValue(), node.getValue());
+        				}
+        				else
+        				{
+        					log.debug("Invalid connection property: " + node);
+        				}
+        			}
+        		}
+        		
+        		//check the life-cycle object name
+        		
+        		String sLcoName = getLifeCycleName();
+        		
+        		sLcoNameDefault = zone.getProperty("/application/lifecycle/mastersession");
+        		
+        		if (StringUtil.isEmpty(sLcoName))
+        		{
+                    sLcoName = sLcoNameDefault;
+    
+                    //no life-cycle object name specified from the client -> use the configured object
+        			setLifeCycleName(sLcoName);
+        		}
+        		
+        		if (record != null)
+        		{
+        			//no password logging
+        			Map<String, Object> map = new HashMap<String, Object>(chtProperties);
+        			map.remove(IConnectionConstants.PASSWORD);
+        			
+        			record.setParameter(map);
+        		}
+            }
+            finally
+            {
+                CommonUtil.close(record);
+            }
+    		
+            record = ProtocolFactory.openRecord(ICategoryConstants.SESSION, ICommandConstants.SESSION_AUTHENTICATE);
+            
+            ISecurityManager ismSecurity;
+            
+            try
+            {
+                //Authenticate the session before using it!
+                ismSecurity = pManager.getSecurityManager(this);
+                
+                if (record != null)
+                {
+                    record.setParameter(ismSecurity.getClass().getSimpleName(), (String)pProperties.get(IConnectionConstants.RESETPASSWORD));
+                }
+
+                if (ismSecurity instanceof IResetPasswordManager
+                	&& Boolean.parseBoolean((String)pProperties.get(IConnectionConstants.RESETPASSWORD)))
+                {
+                	Record recReset = ProtocolFactory.openRecord(ICategoryConstants.SESSION, ICommandConstants.SESSION_RESETPASSWORD);
+                	
+                	if (recReset != null)
+                	{
+                		recReset.setParameter(getUserName());
+                	}
+                	
+                	try
+                	{
+                		((IResetPasswordManager)ismSecurity).resetPassword(this);
+                	}
+                	finally
+                	{
+                		CommonUtil.close(recReset);
+                	}
+                	
+                	//to be sure
+                	throw new ChangePasswordException();
+                }
+                else
+                {
+                    String sOldPassword = (String)pProperties.get(IConnectionConstants.OLDPASSWORD);
+	        		String sNewPassword = (String)pProperties.get(IConnectionConstants.NEWPASSWORD);
+    
+	        		preAuthentication(ismSecurity);
+	        		
+	        		try
+	        		{
+	        			ismSecurity.validateAuthentication(this);
+	        
+	        			//unset, because some client sends the old password when logging in
+	        			//(depends of the change password possibility)
+	        			setPropertyIntern(IConnectionConstants.OLDPASSWORD, null);
+	        			
+	        			postAuthentication(ismSecurity);
+	        		}
+	        		catch (Exception e)
+	        		{	        			
+	        			//Authentication is valid, but the user has to change the password -> send the password change
+	        			//request immediate
+	        			if (e instanceof ChangePasswordException && sNewPassword != null)
+	        			{
+	        				setNewPasswordIntern(sOldPassword, sNewPassword);
+	        				
+	        				sNewPassword = null;
+	    
+	                        postAuthentication(ismSecurity);
+	        			}
+	        			else
+	        			{
+	        			    throw e;
+	        			}
+	        		}
+	    
+	        		//change password during login (not triggered through the database!)
+	                if (sNewPassword != null)
+	                {
+	                    setNewPasswordIntern(sOldPassword, sNewPassword);
+	                }
+            	}
+            }
+            finally
+            {
+                CommonUtil.close(record);
+            }
+    		
+            record = ProtocolFactory.openRecord(ICategoryConstants.SESSION, ICommandConstants.SESSION_CHECK_ACCESS);
+            
+            try
+            {
+        		accessController = ismSecurity.getAccessController(this);
+        		
+        		//#474
+        		if (accessController != null)
+        		{
+                    if (record != null)
+                    {
+                        record.setParameter(accessController.getClass().getSimpleName());
+                    }
+    
+                    //Default Life-cycle object is always allowed
+        			if (sLcoNameDefault != null)
+        			{
+        				accessController.addAccess(sLcoNameDefault);
+        			}
+        			
+        			List<XmlNode> liAllowed = getApplicationZone().getNodes("/application/lifecycle/allow");
+        			
+        			if (liAllowed != null)
+        			{
+        				for (XmlNode node : liAllowed)
+        				{
+        					accessController.addAccess(node.getValue());
+        				}
+        			}
+        		}
+        
+        		//#474
+        		//Check, because it is possible that the client sets a user-defined life-cycle object name
+        		//and it is important that we ask the access controllor because we don't know the implementation
+        		//of the access controller!
+        		checkAccess();
+            }
+            finally
+            {
+                CommonUtil.close(record);
+            }
+		}
+		catch (Exception e)
+		{
+		    uninit();
+		    
+		    throw e;
+		}
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Abstract methods implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+    @Override
+	protected ApplicationZone getApplicationZone()
+	{
+		return zone;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+    @Override
+	public IAccessController getAccessController()
+	{
+		return accessController;
+	}
+
+    /**
+     * {@inheritDoc}
+     */
+	@Override
+    public final void setNewPassword(String pOldPassword, String pNewPassword) throws Exception
+    {
+        setLastAccessTime(System.currentTimeMillis());
+        
+        setNewPasswordIntern(pOldPassword, pNewPassword);
+    }
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Interface implementation
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IConfiguration getConfig()
+	{
+		return zone.getConfig();
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Overwritten methods
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * {@inheritDoc}
+	 */
+	@Override
+    protected void addCallBackResult(ResultObject pResult)
+    {
+	    DefaultSessionManager sessman = getSessionManager();
+	    
+	    if (sessman.hasPushReceiver(this))
+	    {
+	        sessman.push(new PushMessage(this, MessageType.Callback, pResult));
+	    }
+	    else
+	    {
+	        super.addCallBackResult(pResult);
+	    }
+    }	
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // User-defined methods
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Adds a sub session to the internal reference store.
+	 * 
+	 * @param pSubSession the sub session
+	 */
+	protected void addSubSession(SubSession pSubSession)
+	{
+		synchronized (oSyncSubSessions)
+		{
+			if (auSubSessions == null)
+			{
+				auSubSessions = new ArrayUtil<WeakReference<SubSession>>();
+			}
+		
+			auSubSessions.add(new WeakReference<SubSession>(pSubSession));
+		}
+	}
+	
+	/**
+	 * Removes a sub session from the internal reference store.
+	 * 
+	 * @param pSubSession the sub session
+	 */
+	protected void removeSubSession(SubSession pSubSession)
+	{
+		synchronized (oSyncSubSessions)
+		{
+			if (auSubSessions != null)
+			{
+				auSubSessions.remove(pSubSession);
+			
+				if (auSubSessions.size() == 0)
+				{
+					auSubSessions = null;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Gets the list of all available sub sessions.
+	 * 
+	 * @return all available sub sessions
+	 */
+	ArrayUtil<SubSession> removeSubSessions()
+	{
+		synchronized (oSyncSubSessions)
+		{
+			if (auSubSessions != null)
+			{
+				ArrayUtil<SubSession> auResult = null;
+
+				WeakReference<SubSession> wrSub;
+
+				SubSession wsSub;
+
+				for (int i = 0, cnt = auSubSessions.size(); i < cnt;) 
+				{
+					wrSub = auSubSessions.get(i);
+					
+					wsSub = wrSub.get();
+					
+					if (wsSub == null)
+					{
+						auSubSessions.remove(i);
+						cnt--;
+					}
+					else
+					{
+						if (auResult == null)
+						{
+							auResult = new ArrayUtil<SubSession>();
+						}
+						
+						auResult.add(wsSub);
+						
+						i++;
+					}
+				}
+				
+				auSubSessions = null;
+				
+				return auResult;
+			}
+			else
+			{
+				return null;
+			}
+		}
+	}
+	
+	/**
+	 * Gets a list of all currently available sub sessions. Be very careful with 
+	 * references to the sessions to avoid memory problems.
+	 * 
+	 * @return the list of sub sessions or <code>null</code> if no sub sessions are available
+	 */
+	ArrayUtil<SubSession> getSubSessions()
+	{
+        synchronized (oSyncSubSessions)
+        {
+            if (auSubSessions != null)
+            {
+                ArrayUtil<SubSession> auResult = null;
+
+                WeakReference<SubSession> wrSub;
+
+                SubSession wsSub;
+                
+                for (int i = 0, cnt = auSubSessions.size(); i < cnt;) 
+                {
+                    wrSub = auSubSessions.get(i);
+                    
+                    wsSub = wrSub.get();
+                    
+                    if (wsSub == null)
+                    {
+                        auSubSessions.remove(i);
+                        cnt--;
+                    }
+                    else
+                    {
+                        if (auResult == null)
+                        {
+                            auResult = new ArrayUtil<SubSession>();
+                        }
+                        
+                        auResult.add(wsSub);
+                        
+                        i++;
+                    }
+                }
+                
+                return auResult;
+            }
+        }
+        
+        return null;
+	}
+	
+	/**
+	 * Sets a new password for the current session user. The alive time will be updated.
+	 * 
+	 * @param pOldPassword the old password
+	 * @param pNewPassword the new password
+	 * @throws Exception if the new password can not be set
+	 */
+	private final void setNewPasswordIntern(String pOldPassword, String pNewPassword) throws Exception
+	{
+		setLastAliveTime(System.currentTimeMillis());
+		
+		//set the password properties direct to avoid the transfer to the client.
+		//If the properties are already set (maybe login with change password) then we have 
+		//no problem here!
+		chtProperties.put(IConnectionConstants.OLDPASSWORD, pOldPassword, false);
+		chtProperties.put(IConnectionConstants.NEWPASSWORD, pNewPassword, false);
+		
+		getSessionManager().getSecurityManager(this).changePassword(this);
+		
+		//removes the new password property from the client properties
+		//with next response!
+		setPropertyIntern(IConnectionConstants.OLDPASSWORD, null);
+		setPropertyIntern(IConnectionConstants.NEWPASSWORD, null);
+		
+		//Update password properties for this and all sub sessions!
+		setPassword(pNewPassword);
+		
+		synchronized (oSyncSubSessions)
+		{
+			if (auSubSessions != null)
+			{
+				WeakReference<SubSession> wrSub;
+
+				SubSession wsSub;
+
+				for (int i = 0, cnt = auSubSessions.size(); i < cnt;) 
+				{
+					wrSub = auSubSessions.get(i);
+					
+					wsSub = wrSub.get();
+
+					//remove sub session if not available
+					if (wsSub == null)
+					{
+						auSubSessions.remove(i);
+						cnt--;
+					}
+					else
+					{
+						wsSub.setPassword(pNewPassword);
+						
+						i++;
+					}
+				}
+				
+				auSubSessions = null;
+			}
+		}
+	}
+	
+    /**
+     * Triggers an before authentication.
+     * 
+     * @param pSecurityManager the security manager which will be used for the authentication
+     * @throws SecurityException if session creation is canceled
+     */
+    protected void preAuthentication(ISecurityManager pSecurityManager)
+    {
+        validateSessionCreation(pSecurityManager, "preAuthClass");
+    }
+
+    /**
+	 * Triggers an action after successful authentication.
+	 * 
+	 * @param pSecurityManager the used security manager
+	 * @throws SecurityException if session creation is canceled
+	 */
+	protected void postAuthentication(ISecurityManager pSecurityManager)
+	{
+        validateSessionCreation(pSecurityManager, "postAuthClass");
+	}
+	
+	/**
+	 * Creates and calls an {@link ISessionValidator} for the given mode.
+	 * 
+	 * @param pSecurityManager the security manager
+	 * @param pMode the validation mode
+	 * @throws RuntimeException or SecurityException if validation failed
+	 */
+	private void validateSessionCreation(ISecurityManager pSecurityManager, String pMode)
+	{
+        String sClass;
+        
+        try
+        {
+            sClass = zone.getProperty("/application/lifecycle/mastersession/" + pMode);
+        }
+        catch (Exception e)
+        {
+            log.error(e);
+            
+            return;
+        }
+	        
+        //no class -> nothing to be done
+        if (StringUtil.isEmpty(sClass))
+        {
+            return;
+        }
+        
+        AbstractObjectProvider oprov = getObjectProvider();
+	        
+        ClassLoader loader;
+	        
+        if (oprov instanceof DefaultObjectProvider)
+        {
+            loader = ((DefaultObjectProvider)oprov).getClassLoader(this); 
+        }
+        else
+        {
+            loader = null;
+        }
+	        
+        Class<?> clazz;
+
+        try
+        {
+            if (loader == null)
+            {
+                clazz = Class.forName(sClass);
+            }
+            else
+            {
+                clazz = Class.forName(sClass, true, loader);
+            }
+        }
+        catch (Throwable th)
+        {
+            log.error(th);
+            
+            return;
+        }
+        
+        SessionContext context = createSessionContext(null, null);
+
+        try
+        {
+            ISessionValidator validator = (ISessionValidator)clazz.newInstance();
+            validator.validate(this, pSecurityManager);
+        }
+	    catch (Exception ex)
+	    {
+	        log.info(ex);
+	        
+	        if (ex instanceof RuntimeException)
+	        {
+	            throw (RuntimeException)ex;
+	        }
+	        else
+	        {
+	            throw new SecurityException("Validation failed!", ex);
+	        }
+	    }
+        finally
+        {
+            if (context != null)
+            {
+                context.release();
+            }
+        }
+	}
+	
+}	// MasterSession

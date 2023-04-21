@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<jnlp spec="1.0+" codebase="http://localhost/Demoerp/">
+  <information>
+    <title>DemoERP</title>
+    <vendor>SIB Visions GmbH</vendor>
+    <description>DemoERP</description>
+    <description kind="short">DemoERP (1.0)</description>
+  </information>
+  <resources>
+    <j2se version="1.5+"/>
+    <jar href="DemoERP_all.jar" main="true"/>
+  </resources>
+  <application-desc main-class="com.sibvisions.rad.ui.swing.impl.SwingApplication">
+    <argument>&quot;com.sibvisions.apps.projx.ProjX&quot;</argument>
+    <argument>&quot;/com/sibvisions/apps/demoerp/application.xml&quot;</argument>
+    <argument>&quot;Application.serverbase=http://localhost/Demoerp/&quot;</argument>
+    <argument>&quot;Application.connectionClass=com.sibvisions.rad.remote.http.HttpConnection&quot;</argument>
+    <argument>&quot;Application.Menu.exit.visible=true&quot;</argument>
+  </application-desc>
+</jnlp>

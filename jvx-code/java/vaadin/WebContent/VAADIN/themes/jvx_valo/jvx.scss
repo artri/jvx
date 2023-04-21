@@ -1,0 +1,754 @@
+/* Import the valo theme. */
+@import "../valo/valo.scss";
+
+/* after all other styles. */
+@import "../jvxbase/jvxbase.scss";
+@import "application.scss";
+
+@mixin jvx_valo 
+{
+    /* Include all the styles from the valo theme */
+    @include valo;
+    
+    @include jvxbase;
+    
+    .v-ui
+    {
+    	position: static !important;
+    }
+    
+	/* WINDOW ********************************************************************/
+
+	.v-window.upload
+	{
+		width: 380px;
+		height: 90px;
+		min-width: 380px !important;
+    	min-height: 90px !important;
+    	
+    	
+		font-size: 12px;
+		font-style: normal;
+	}	
+	
+	.upload .v-button
+	{
+		height: 25px;
+		padding-left: 5px;
+	}
+
+	.v-window.save
+	{
+        padding: 5px;
+
+	    min-width: 150px !important;
+	    min-height: 90px !important; 
+	}	
+	
+	.v-window.save .v-button.continue
+	{
+	    padding: 5px;
+	}
+
+	.v-window.save .v-button.cancel
+	{
+		margin-top: 15px;
+	    padding: 2px;
+	}
+	
+	/* EDITORS *******************************************************************/
+
+	.v-textfield,
+	.v-textarea,
+	.v-filterselect [class*="input"],
+	.v-datefield [class*="textfield"]
+	{
+        -webkit-box-shadow: inset 0 0px 0 #f7f7f7, 0 1px 0 rgba(255, 255, 255, 0.1);
+        box-shadow: inset 0 0px 0 #f7f7f7, 0 1px 0 rgba(255, 255, 255, 0.1);	
+	}
+
+	/* LAYOUT ********************************************************************/
+
+    .jvxeditor
+    {
+        overflow: hidden;
+    }
+
+    .v-textfield.jvxeditor,    
+    .v-datefield.jvxeditor,
+    .v-filterselect.jvxeditor,
+    .v-textarea.jvxeditor,
+    .jvxcheckcellwrapper.jvxeditor
+    {
+        overflow: visible;
+    }
+
+    div.v-csslayout
+    {
+    	display: block;
+    }
+    
+    .v-gridlayout-slot
+    {
+    	line-height: normal;
+    }
+
+    .v-slot .v-label,
+    .v-jvx-panel-canvas .v-label
+    {
+	    line-height: $v-unit-size;
+	    display: table;
+	    height: auto;
+	    width: auto;
+	}
+
+	/* TOOLBAR *******************************************************************/
+    
+    .jvxtoolbar div.v-csslayout
+    {
+    	display: inline-block;
+    }
+    
+    .jvxtoolbar .v-button.v-widget
+    {
+    	display: inline-block;
+    }   
+
+	/* TABLE *********************************************************************/
+	
+    .v-table-cell-content div.v-csslayout
+    {
+    	display: inline-block;
+    }    
+    
+	.v-table .v-selected td
+	{
+		background: #4d749f repeat-x;
+	}
+	
+	.v-table-components-inside .v-table-cell-content
+	{
+	    border-top-color: transparent;
+	}
+	
+	.v-table-cell-content-vborderhidden 
+	{
+	    @extend .v-table-no-vertical-lines;
+	}
+	
+	.v-table-cell-content-hborder .v-table-cell-content
+	{
+        border-bottom: 0;
+	    border-top-color: #d4d4d4;
+	}
+	
+	.v-table-header-cell .v-table-caption-container
+	{
+	    line-height: $v-unit-size;
+	    padding-top: 0;
+	    padding-bottom: 0;
+	    padding-left: 9px;
+	    padding-right: 9px;
+	    vertical-align: middle;
+	}
+
+	/* GRID **********************************************************************/
+
+	.jvxgrid .v-grid-cell
+	{
+		height: 100%;
+	/*	line-height: $v-unit-size;*/
+	}
+	
+	.jvxgrid .v-clickablehtmlrenderer
+	{
+	    height: 100%;
+	    display: block;
+	}
+	
+	.jvxgrid .v-grid-cell-content
+	{
+	    height: 100%;
+	    line-height: $v-unit-size;
+		/*line-height: $v-unit-size;*/
+	}
+	
+	.jvxgrid .v-grid-cell-content contentcontainer
+	{
+	    display: block;
+	}
+
+	.jvxgrid .v-grid-cell-content contentcontainer.image
+	{
+	    height: 0;
+	}
+	
+	/* TREE **********************************************************************/
+
+    .jvxtree .v-table-cell-wrapper .v-label 
+    {
+    	margin-left: 3px;
+	    line-height: $v-unit-size;
+	    display: inline;
+	    height: auto;
+	    width: auto;
+	}	
+	
+	.jvxtree .v-treetable-treespacer
+	{
+	    margin-top: 6px;
+	}
+	
+	.jvxtree .v-table-row-odd
+	{
+	    background-color: transparent;
+	}	
+	
+	.jvxtree.v-table
+	{
+	   	background: white;
+	}
+	
+	.jvxtree .v-table-table
+	{
+	    box-shadow: none;
+	}
+	
+	.jvxtree .v-table-table td
+	{
+	    border-top: 1px solid transparent;
+	}
+	
+	/* TREEGRID ******************************************************************/
+	
+	.jvxtreegrid .v-treegrid-node
+	{
+	    height: 100%;
+	    display: block;
+	}
+	
+	.jvxtreegrid .v-treegrid-cell-content
+	{
+		height: 100%;
+		vertical-align: top;
+	}
+	
+	.jvxtreegrid .v-treegrid-expander,
+	.jvxtreegrid .v-grid-cell-content .contentcontainer
+	{
+	    line-height: $v-unit-size;
+	}
+	
+	.jvxtreegrid .v-treegrid-row-stripe > td
+	{
+	    background-color: white;
+	}
+	
+	.jvxtreegrid .v-treegrid-row > td
+	{
+	    border-bottom: 1px solid transparent;
+	}
+	
+	.jvxtreegrid .v-treegrid-tablewrapper
+	{
+	    background-color: white;
+	}
+	
+	/* COMBOBOX ******************************************************************/
+
+    .v-timeselection
+    {
+		min-width: 70px;
+    }
+    
+    .v-timeselection .v-datefield-calendarpanel-header
+    {
+    	display: none;
+    }
+    
+    .v-timeselection .v-datefield-calendarpanel-body
+    {
+    	display: none;
+    }   	
+		
+	.v-choicefield
+	{
+		background: transparent;
+	}	
+	
+	.v-choicefield.v-readonly
+	{
+    	cursor: default;
+    	opacity: 0.3;
+	}
+
+	.v-filterselect.v-readonly .v-filterselect-button
+	{
+		display: inline-block;
+	}
+	
+	.v-filterselect .v-filterselect-button:before
+	{
+	    left: 0;
+	}
+
+	.v-filterselect.v-readonly .v-filterselect-input-readonly
+	{
+		border: 1px solid #bcbdbe;
+		border-top-color: #a2a3a4;
+		border-bottom-color: #c0c1c2;
+	}
+	
+	.v-filterselect.v-readonly,
+	.v-filterselect.v-readonly .v-filterselect-input
+	{
+		background: transparent;
+	}
+
+	/* BUTTON ********************************************************************/
+
+    .v-button
+    {
+    	padding: 0px;
+    	
+    	height: auto;
+    }
+    
+    .v-button:focus.v-notfocusable:focus:after,
+    .v-menubar:focus.v-notfocusable:focus:after
+	{
+		box-shadow: none;
+		border-color: transparent;
+		background-image: none;
+	}
+
+    .v-button:focus.v-notfocusable:focus:after:not(:active),
+    .v-menubar:focus.v-notfocusable:focus:after:not(:active)
+    {
+		background-color: transparent;
+    }
+ 
+    .v-button-borderonmouse:hover 
+	{
+    	background-color: #fafafa;
+    	border-bottom-color: #bcbcbc;
+    	border-top-color: #c5c5c5;
+    	border: 1px solid #c5c5c5;
+    	border-radius: 4px;
+
+    	cursor: pointer;
+    	
+    	background-image: linear-gradient(to bottom,#fafafa 2%, #efefef 98%);
+    	background-image: -webkit-linear-gradient(top, #fafafa 2%, #efefef 98%);
+    	box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #e7e7e7, 0 2px 3px rgba(0, 0, 0, 0.05);
+	}
+	
+	.v-button-noborder:not(.v-button-borderonmouse):after
+	{
+    	transition: none;
+    	-moz-transition: none;
+    	-webkit-transition: none;
+	}
+	
+	.v-button-noborder:not(.v-button-borderonmouse),
+	.v-button-noborder:not(.v-button-borderonmouse):hover:after, 
+	.v-button-noborder:not(.v-button-borderonmouse):active:after,
+	.v-button-noborder:not(.v-button-borderonmouse):focus:after,
+	.v-button-noborder.v-button-borderonmouse:not(:hover), 
+	.v-button-noborder.v-button-borderonmouse:not(:hover):active,
+	.v-button-noborder.v-button-borderonmouse:not(:hover):after, 
+	.v-button-noborder.v-button-borderonmouse:not(:hover):focus:after,
+	.v-button-noborder.v-button-borderonmouse:not(:active):after
+	{
+		background-color: transparent;
+
+    	border-bottom-color: transparent;
+    	border-top-color: transparent;
+    	border: 1px solid transparent;
+    	border-radius: 4px;
+
+    	background-image: none;
+    	box-shadow: none;
+	}
+     
+    .v-button-wrap
+    {    
+    	background: none;
+    	padding: 0px;
+
+		height: auto;
+
+    	text-align: center;
+    }
+    
+    .v-button:focus .v-button-wrap
+    {    
+    	background: none;
+    }
+
+	.v-button-pressed 
+	{
+	    border-top: 1px solid #858585;
+	    border-left: 1px solid #858585;
+		border-right: 1px solid #858585;
+		border-bottom: 1px solid #858585;	
+		
+		background-image: linear-gradient(to bottom,#cacaca 2%, #efefef 98%);
+    	background-image: -webkit-linear-gradient(top, #cacaca 2%, #efefef 98%);
+		
+		box-shadow: none;
+	}	
+	
+	.v-button .v-icon 
+	{
+	    margin-right: 0;
+	    padding-right: 0;
+	}			
+	
+	.v-button-caption 
+	{
+	    margin-left: 0px;
+	}
+
+	.v-button.default-padding
+	{
+	    padding: 3px 6px 3px 6px;
+	}	
+
+	/* TEXTFIELD *****************************************************************/
+
+	.v-textfield-readonly,
+	.v-numberfield-readonly,
+	.v-textarea-readonly,
+	.v-filterselect-input-readonly,
+	.v-choicefield.v-readonly,
+	.v-choicefield.v-readonly .v-button-wrap
+	{
+		cursor: default !important;
+	}
+	
+	input.v-textfield-readonly,
+	input.v-numberfield-readonly,
+	textarea.v-textarea-readonly,
+	.v-textfield-readonly.v-textfield-focus,
+	.v-numberfield-readonly.v-numberfield-focus,
+	.v-textarea-readonly.v-textarea-focus
+	{
+		resize: none;
+		border-color: #A2A3A4 #BCBDBE #D2D3D4;
+		border-style: solid;
+	    border-width: 1px;
+	    background: transparent;
+	}
+	
+	input.v-textfield-readonly:focus,
+	input.v-numberfield-readonly:focus,
+	textarea.v-textarea-readonly:focus
+	{
+		outline: none;
+	}
+	
+	.v-textarea.jvxeditor
+	{
+	    padding: 3px 7px 3px 7px;
+	}
+	
+	/*
+	It's better UX to show the button (see jvxbase.scss)
+	
+	.v-datefield-popupcalendar.no-popup-button input
+	{
+	    padding-left: 7px;
+	}
+	*/
+	
+	/* CHOICE FIELD *****************************************************************/
+	
+	.jvxeditor-choicefield button.v-choicefield
+	{
+	    padding: 0;
+	}
+	
+	.jvxeditor-choicefield button
+	{
+	    height: 100%;
+	}
+	
+	.jvxeditor-choicefield button img.v-icon,
+	.v-table-cell-wrapper .v-choicefield img.v-icon
+	{
+	    vertical-align: inherit;
+	}
+	
+	.v-table-cell-wrapper .v-nativebutton.v-choicefield img.v-icon
+	{
+	    vertical-align: middle;
+	}
+	
+	.v-table-cell-wrapper .v-nativebutton.v-choicefield
+	{
+	    padding-top: 0;
+	    padding-bottom: 0;
+	    line-height: initial !important;
+	    height: initial !important;
+	}
+
+	/* CHECKBOX FIELD ***************************************************************/
+
+    .jvxeditor .jvxcheckcell
+    {
+        vertical-align: inherit;
+        line-height: $v-unit-size;
+    }
+    
+    .jvxeditor .jvxcheckcell label::before
+    {
+        margin-top: 3px;
+    }
+
+    .jvxeditor .jvxcheckcell label::after
+    {
+        margin-top: 3px;
+        line-height: $v-unit-size / 2;
+    }
+    
+    .v-table-cell-wrapper .jvxcheckcell
+    {
+        line-height: 14px !important;
+        vertical-align: middle;
+    }
+
+	/* RADIOBUTTON ***************************************************************/
+	
+	.v-radiobutton.v-has-width label 
+	{
+		white-space: nowrap;
+	}
+
+    :root & .v-radiobutton 
+    {
+		padding-left: round($v-unit-size * 0.75);
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+		
+    :root & .v-radiobutton > input ~ label:before, 
+    :root & .v-radiobutton > input ~ label:after 
+    {
+		top: 4px;
+		left: 2px;
+	}
+	
+	:root & .v-radiobutton > input:checked ~ label:after 
+	{
+		width: round(6px + ($v-unit-size - 24) * 0.075);
+		height: round(6px + ($v-unit-size - 24) * 0.075);
+		top: round(7px + ($v-unit-size - 24px) / 6);
+		left: round(5px + ($v-unit-size - 24px) / 6);
+	}
+	
+	/* CHECKBOX ***************************************************************/
+	
+	.v-checkbox.v-has-width label 
+	{
+		white-space: nowrap;
+	}
+
+    :root & .v-checkbox 
+    {
+		padding-left: round($v-unit-size * 0.75);
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+		
+    :root & .v-checkbox > input ~ label:before, 
+    :root & .v-checkbox > input ~ label:after 
+    {
+		top: 4px;
+		left: 2px;
+	}
+	
+	:root & .v-checkbox > input:checked ~ label:after 
+	{
+		top: 5px;
+	}
+
+	/* SWITCH ***************************************************************/
+	
+	.v-switch {
+		position: relative;
+		line-height: 14px;
+		white-space: nowrap;
+	}
+	
+	.v-switch.v-has-width label {
+		white-space: nowrap;
+	}
+
+	:root & .v-switch label {
+		-webkit-tap-highlight-color: transparent;
+		-webkit-touch-callout: none;
+		cursor: pointer;
+		display: inline-block;
+	}
+	
+	:root & .v-switch > input {
+		position: absolute;
+		clip: rect(0, 0, 0, 0);
+		left: 0.2em;
+		top: 0.2em;
+		z-index: 0;
+		margin: 0;
+	}
+	
+	:root & .v-switch > input:focus ~ label:before {
+		border-color: #197de1;
+		-webkit-box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
+		box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5);
+		-webkit-box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5), inset 0 1px 0 white, inset 0 -1px 0 #e7e7e7, 0 2px 3px rgba(0, 0, 0, 0.05);
+		box-shadow: 0 0 0 2px rgba(25, 125, 225, 0.5), inset 0 1px 0 white, inset 0 -1px 0 #e7e7e7, 0 2px 3px rgba(0, 0, 0, 0.05);
+	}
+	
+	:root & .v-switch > input ~ label:before, :root & .v-switch > input ~ label:after {
+		content: "";
+		display: inline-block;
+		box-sizing: border-box;
+		width: 14px;
+		height: 14px;
+		position: absolute;
+		top: round(4px - ($v-unit-size - 28px) * 0.1);
+		left: 2px;
+		border-radius: round($v-unit-size / 7);
+		font-size: 11px;
+		text-align: center;
+	}
+	
+	:root & .v-switch > input ~ label:before {
+		padding: 0 7px;
+		color: #191919;
+		font-weight: 400;
+		border-radius: round($v-unit-size * 0.5);
+		border: 1px solid #c5c5c5;
+		border-top-color: #c5c5c5;
+		border-bottom-color: #bcbcbc;
+		background-color: #fafafa;
+		background-image: -webkit-linear-gradient(top, #fafafa 2%, #efefef 98%);
+		background-image: linear-gradient(to bottom,#fafafa 2%, #efefef 98%);
+		-webkit-box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #e7e7e7, 0 2px 3px rgba(0, 0, 0, 0.05);
+		box-shadow: inset 0 1px 0 white, inset 0 -1px 0 #e7e7e7, 0 2px 3px rgba(0, 0, 0, 0.05);
+		text-shadow: 0 1px 0 rgba(255, 255, 255, 0.05);
+		padding: 0;
+		width: $v-unit-size;
+		height: round($v-unit-size * 0.5);
+	}
+	
+	:root & .v-switch > input ~ label:after {
+		content: "";
+		font-family: ThemeIcons;
+		color: transparent;
+		-webkit-transition: color 100ms;
+		-moz-transition: color 100ms;
+		transition: color 100ms;
+		width: round(($v-unit-size - 6px) * 0.35);
+		height: round(($v-unit-size - 6px) * 0.35);
+		top: 7px;
+		left: round($v-unit-size * 0.1 + 3.2px);
+		background: #80888f;
+	}
+	
+	:root & .v-switch > input:active ~ label:after {
+		background-color: rgba(125, 125, 125, 0.2);
+	}
+	
+	:root & .v-switch > input:checked ~ label:after {
+		top: 7px;
+		left: round($v-unit-size * 0.6 + 1.2px);
+		background: #197de1;
+	}
+	
+	.v-switch > .v-icon, .v-switch > label .v-icon {
+		margin: 0 5px 0 2px;
+		min-width: 1em;
+		cursor: pointer;
+	}
+	
+	.v-switch.v-disabled  > label, .v-switch.v-disabled  > .v-icon {
+		cursor: default;
+		opacity: 0.5;
+		filter: alpha(opacity=50) ;
+	}
+	
+	.v-switch.v-disabled  > label > .v-icon {
+		cursor: default;
+	}
+	
+	:root & .v-switch.v-disabled > input:active ~ label:after {
+		background: transparent;
+	}
+	
+	.v-switch.v-readonly  > label, .v-switch.v-readonly  > .v-icon {
+		cursor: default;
+	}
+	
+	.v-switch.v-readonly  > label > .v-icon {
+		cursor: default;
+	}
+	
+	:root & .v-switch.v-readonly > input:active ~ label:after {
+		background: transparent;
+	}
+	
+	:root & .v-switch.v-readonly > input ~ label:after {
+		opacity: 0.5;
+		filter: alpha(opacity=50) ;
+	}
+	
+	.v-formlayout-contentcell .v-switch, .v-formlayout-contentcell .v-radiobutton {
+		font-weight: 400;
+	}
+	
+	:root & .v-switch {
+		padding-left: round($v-unit-size * 1.25);
+		padding-top: 4px;
+		padding-bottom: 4px;
+	}
+
+	/* MENU *************************************************************************/
+
+	.v-menubar-popup .v-menubar.jvxmenubar .v-icon, 
+	.v-menubar-popup .v-menubar-submenu .v-icon 
+	{
+	    padding-bottom: 2px;
+	}
+
+	/* POPUP MENU BUTTON ************************************************************/
+
+	div.v-csslayout.wrappedpopupmenubutton
+	{
+	    display: flex;
+	}
+
+    .jvxpopupbutton:not(.v-menubar-submenu)
+    {
+	    display: flex;
+	    flex-grow: 1;
+    }
+
+	.jvxpopupbutton:not(.v-menubar-submenu) .v-menubar-menuitem:first-child
+	{
+ 	    flex-grow: 1;
+	}
+
+	.jvxpopupbutton:not(.v-menubar-submenu).v-no-defaultitem > .v-menubar-menuitem
+	{
+	    text-align: right;
+	}
+	
+	.jvxpopupmenubuttonpopup .v-menubar-menuitem 
+	{
+	    padding: 0 14px 0 7px;
+	}
+
+	@include application;
+}
+	

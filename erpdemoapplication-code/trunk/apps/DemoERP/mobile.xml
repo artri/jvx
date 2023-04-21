@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mobile>
+  <main>com.sibvisions.apps.projx.ProjX</main>
+  <config>/com/sibvisions/apps/demoerp/application.xml</config>
+</mobile>

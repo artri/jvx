@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+  <securitymanager>
+    <class>com.sibvisions.rad.server.security.mfa.MFASecurityManager</class>
+    <mfa enabled="true">
+	  <class>com.sibvisions.rad.server.security.XmlSecurityManager</class>
+	  <authenticator>
+	    <class>com.sibvisions.rad.server.security.mfa.auth.WaitMFAuthenticator</class>
+	    <notificationhandler>com.sibvisions.rad.server.security.mfa.auth.SysOutWaitNotificationHandler</notificationhandler>
+	  </authenticator>
+	</mfa>
+    <userfile>users.xml</userfile>
+  </securitymanager>
+</application>

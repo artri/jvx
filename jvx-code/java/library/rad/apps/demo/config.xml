@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<application>
+  <securitymanager>
+    <class>com.sibvisions.rad.server.security.DBSecurityManager</class>
+    <database>
+      <driver>org.hsqldb.jdbcDriver</driver>
+      <url>jdbc:hsqldb:hsql://localhost/demodb;ifexists=true</url>
+      <username>sa</username>
+      <password/>
+    </database>
+  </securitymanager>
+  <ntlm>
+    <init-param>
+      <!-- comma separated list or single entry -->
+      <param-name>jcifs.http.domainController</param-name>
+      <param-value>10.0.0.50</param-value>
+    </init-param>
+    <init-param>
+      <param-name>jcifs.smb.client.domain</param-name>
+      <param-value>SIBVISIONS.COM</param-value>
+    </init-param>
+    <init-param>
+      <param-name>jcifs.smb.client.responseTimeout</param-name>
+      <param-value>5000</param-value>
+    </init-param>
+  </ntlm>
+  <timeout>
+    <!-- MasterSession timeout in minutes -->
+    <mastersession>30</mastersession>
+  </timeout>
+  <!-- predefined life-cycle object names -->
+  <lifecycle>
+    <mastersession>demo.Session</mastersession>
+    <application>demo.Application</application>
+    <allow>demo.special.Address</allow>
+    <allow>demo.special.DoesNotExist</allow>
+  </lifecycle>
+  <!-- objects to be injected into the lifecycle object -->
+  <!--
+  examples
+  <inject object="monitoring" name="monitoring"/>
+  
+  <inject class="com.package.app.MyClass" name="myClass"/>
+  
+  <inject ...>
+  <allow instanceof="com.sibvisions.rad.server.MasterSession"/>
+  <allow lifecyclename="com.package.app.screen.User"/>
+  </inject>
+  -->
+  <inject object="monitoring" name="monitoring"/>
+  <!--
+  <connection>
+  <property name="client.loglevel">ALL</property>
+  <property name="client.mode">Development</property>
+  </connection>
+  -->
+</application>

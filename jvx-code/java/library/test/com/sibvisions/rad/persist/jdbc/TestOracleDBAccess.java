@@ -1,0 +1,782 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 28.03.2010 - [JR] - creation
+ * 18.03.2013 - [RH] - #632: DBStorage: Update on Synonym (Oracle) doesn't work - Synonym Support implemented
+ */
+package com.sibvisions.rad.persist.jdbc;
+
+import java.math.BigDecimal;
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.List;
+import java.util.Map;
+
+import javax.rad.model.condition.Equals;
+import javax.rad.model.datatype.BinaryDataType;
+import javax.rad.remote.MasterConnection;
+import javax.rad.type.bean.Bean;
+import javax.rad.type.bean.BeanType;
+
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
+
+import com.sibvisions.rad.model.remote.RemoteDataBook;
+import com.sibvisions.rad.model.remote.RemoteDataSource;
+import com.sibvisions.rad.persist.jdbc.param.InOutParam;
+import com.sibvisions.rad.persist.jdbc.param.InParam;
+import com.sibvisions.rad.persist.jdbc.param.OutParam;
+import com.sibvisions.rad.util.DirectObjectConnection;
+import com.sibvisions.util.ArrayUtil;
+import com.sibvisions.util.type.CodecUtil;
+
+/**
+ * Test the functionality of {@link OracleDBAccess}.
+ * 
+ * @author René Jahn
+ */
+public class TestOracleDBAccess extends TestDBAccess
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Overwritten methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/** 
+	 * {@inheritDoc}
+	 */
+	@Before
+	@Override
+	public void open() throws Exception
+	{
+		checkConnectionError();
+		
+		dba = createDBAccess();
+		
+		// set connect properties		
+		dba.setUrl(getDBURL());
+		dba.setUsername(getUserName());
+		dba.setPassword("test");
+
+		try
+		{
+			// open and check
+			dba.open();
+			
+			setConnectionError(false);
+		}
+		catch (Exception e)
+		{
+			setConnectionError(true);
+			
+			throw e;
+		}
+		
+		Assert.assertTrue(dba.isOpen());
+		
+		dba.executeStatement("delete from detail");
+		dba.executeStatement("delete from test");
+		dba.executeStatement("delete from test_sort");
+
+		// Test db 2
+		dba2 = createDBAccess();
+		dba2.setUrl(getDBURL());
+		dba2.setUsername(getUserName());
+		dba2.setPassword("test");
+		
+		dba2.open();
+		Assert.assertTrue(dba2.isOpen());
+	}
+		
+	/** 
+	 * Creates test tables for new tests.
+	 * 
+	 * @throws Exception
+	 *             if the connect or the create table fails
+	 */
+    @Override
+	protected void createTestTables() throws Exception
+	{
+		dba.executeStatement("create table test_unquoted_lowercase (id number(18) NOT NULL, name varchar(100), CONSTRAINT tuql_pk PRIMARY KEY (id))");
+
+		dba.executeStatement("create table TEST_UNQUOTED_UPPERCASE (ID numeric(18) NOT NULL, NAME varchar(100), CONSTRAINT tuqu_pk PRIMARY KEY (ID))");
+
+		dba.executeStatement("create table `Test_Quoted` (`Id` numeric(18) NOT NULL, `Name` varchar(100), CONSTRAINT tq_pk PRIMARY KEY (`Id`))");
+		
+		dba.executeStatement("create table test_timestamp (some_value varchar(30), created_at date default sysdate NOT NULL,"
+		        + "created2_at date default CURRENT_DATE NOT NULL,"
+		        + "created3_at timestamp default CURRENT_DATE NOT NULL,"
+		        + "created4_at timestamp default sysdate NOT NULL,"
+		        + "created5_at timestamp default CURRENT_TIMESTAMP(9) NOT NULL,"
+		        + "created6_at timestamp(6) default CURRENT_TIMESTAMP(9) NOT NULL,"
+		        + "created7_at timestamp(9) default CURRENT_TIMESTAMP(9) NOT NULL, CONSTRAINT tt_pk PRIMARY KEY (some_value))");
+
+        dba.executeStatement("create table TEST_COLUMN_SPECIALCHAR (ID integer not null, \"FIRST NAME\" varchar(100), \"LAST#NAME\" varchar(100), "
+                + "constraint TESC_PK primary key (ID))");
+		
+		dba.executeStatement("create table BLOB_TEST (data blob)");
+		dba.executeStatement("insert into BLOB_TEST (data) values (hextoraw('AACCDD'))");
+		dba.executeStatement("insert into BLOB_TEST (data) values (hextoraw('AACCDD000000AA00AA0000FF'))");
+		dba.executeStatement("insert into BLOB_TEST (data) values (hextoraw('AACCDD000000AA00AA0000FFEECC6622993344776565'))");
+
+		dba.executeStatement("create table TEST_PK_FETCH (SOME_VALUE varchar(32) not null, CREATED_AT date default sysdate not null, " +
+		                     "CONSTRAINT tpkf_pk PRIMARY KEY (SOME_VALUE))"); 
+		
+		
+		dba.executeStatement("CREATE SEQUENCE TEST_ALL_SEQ minvalue 0 maxvalue 999999999999999999999999999 start with 0 increment by 1 nocache	order");
+
+		dba.executeStatement("create or replace trigger tuql_trigger before insert on test_unquoted_lowercase for each row\n"
+				+ "BEGIN\n"
+				+ "if (:NEW.id is null) then\n"
+				+ "select TEST_ALL_SEQ.nextval into :NEW.id from dual;\n"
+				+ "end if;\n"
+				+ "END tuql_trigger;");
+
+		dba.executeStatement("create or replace trigger tuqu_trigger before insert on test_unquoted_uppercase for each row\n"
+				+ "BEGIN\n"
+				+ "if (:NEW.id is null) then\n"
+				+ "select TEST_ALL_SEQ.nextval into :NEW.id from dual;\n"
+				+ "end if;\n"
+				+ "END tuqu_trigger;");
+
+		dba.executeStatement("create or replace trigger tq_trigger before insert on `Test_Quoted` for each row\n"
+				+ "BEGIN\n"
+				+ "if (:NEW.`Id` is null) then\n"
+				+ "select TEST_ALL_SEQ.nextval into :NEW.`Id` from dual;\n"
+				+ "end if;\n"
+				+ "END tq_trigger;");
+	}
+	
+	/** 
+	 * Drops test tables for new tests.
+	 */
+    @Override
+	protected void dropTestTables()
+	{
+		super.dropTestTables();
+		
+		try
+		{
+			dba.executeStatement("drop table BLOB_TEST");
+			dba.executeStatement("drop sequence TEST_ALL_SEQ");
+		}
+		catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
+	}
+    
+	/**
+	 * Don't test!
+	 */
+	@Test
+	@Override
+	public void testBaseStatements()
+	{
+	}
+	
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // User-defined methods
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Creates a new instance of {@link DBAccess}.
+	 * 
+	 * @return the {@link DBAccess}
+	 */
+	protected DBAccess createDBAccess()
+	{
+	    return new OracleDBAccess();
+	}
+	
+	/**
+	 * Gets the database URL.
+	 * 
+	 * @return the URL
+	 */
+	protected String getDBURL()
+	{
+	    return "jdbc:oracle:thin:@" + getHostName() + ":1521:XE";	    
+	}
+	
+	/**
+     * Gets the hostname.
+     * 
+     * @return the hostname or IP
+     */
+	protected String getHostName()
+	{
+	    return "192.168.1.201";
+	}
+	
+	/**
+	 * Gets the username.
+	 * 
+	 * @return the username
+	 */
+	protected String getUserName()
+	{
+		return "TEST";
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Test methods
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    /**
+     * {@inheritDoc}
+     */
+    @Test
+    @Override
+    public void testGetDefaultValue() throws Exception
+    {
+        Map<String, Object> htDefaults = dba.getDefaultValues(null, getUserName(), "TEST_DEFAULTS");
+        
+        Assert.assertEquals("N", htDefaults.get("ACTIVE"));
+        Assert.assertEquals(new BigDecimal("1234"), htDefaults.get("NUMBERVAL"));
+        Assert.assertEquals("2010-01-01 12:00:00.0", htDefaults.get("DATETIMEVAL").toString());
+        Assert.assertEquals("TEXT Test", htDefaults.get("TEXT"));
+    }   
+    
+    /**
+     * {@inheritDoc}
+     */
+    @Test
+    @Override
+    public void testDefaultAllowedValues() throws Exception
+    {
+		try
+		{
+			dba.executeStatement("drop table test_defaultallowed");
+		}
+		catch (SQLException se)
+		{
+			//nothing to be done
+		}
+		
+		dba.executeStatement("CREATE TABLE test_defaultallowed (dummyname varchar(100), zahl integer DEFAULT 15, text varchar(100) DEFAULT 'Hallo')");
+		
+		DBStorage dbs = new DBStorage();
+		dbs.setDBAccess(dba);
+		dbs.setWritebackTable("test_defaultallowed");
+		dbs.open();
+		
+		//#1751 #1750
+		Assert.assertEquals(BigDecimal.valueOf(15), dbs.getMetaData().getColumnMetaData("ZAHL").getDefaultValue());
+		Assert.assertEquals("Hallo", dbs.getMetaData().getColumnMetaData("TEXT").getDefaultValue());
+		
+    }   
+
+    /**
+	 * Tests {@link OracleDBAccess#getAllowedValues(String)}.
+	 * 
+	 * @throws Exception if the test fails
+	 */
+	@Test
+	public void testAllowedValues() throws Exception
+	{
+		Map<String, Object[]> htValues = dba.getAllowedValues(null, getUserName(), "USERS");
+
+		Assert.assertArrayEquals(new Object[] {"Y", "N"}, htValues.get("ACTIVE"));
+		Assert.assertArrayEquals(new Object[] {"Y", "N"}, htValues.get("CHANGE_PASSWORD"));
+		Assert.assertArrayEquals(new Object[] {"Y", "N"}, htValues.get("CHANGE_PASSWORD2"));
+	}
+
+	/**
+	 * Tests function calls with standard java objects and special in/out parameter objects.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testFunctionCall() throws Exception
+	{
+		// Standard IN-OUT Parameter Test with plain JDBC
+		Connection con = dba.getConnection();
+		
+		CallableStatement cstmt = con.prepareCall("{ ? = call EXECFUNCTION(?, ?, ?) }");
+		cstmt.registerOutParameter(1, Types.VARCHAR);
+		cstmt.registerOutParameter(2, Types.DECIMAL);
+		cstmt.registerOutParameter(4, Types.VARCHAR);
+		
+		cstmt.setObject(2, BigDecimal.valueOf(1), Types.DECIMAL);
+		cstmt.setObject(3, "ABC", Types.VARCHAR);
+		cstmt.execute();
+		
+		Assert.assertEquals("IN-Param Nr: 1", cstmt.getObject(1));
+		Assert.assertEquals(2, ((Number)cstmt.getObject(2)).intValue());
+		Assert.assertEquals("Out:  In: ABC", cstmt.getObject(4));
+		
+		//Test OUT parameter only IN/OUT as simple IN parameter
+		OutParam ouTextParam = new OutParam(InOutParam.SQLTYPE_VARCHAR);
+		
+		Object oResult = dba.executeFunction("execFunction", Types.VARCHAR, new InOutParam(InOutParam.SQLTYPE_DECIMAL, BigDecimal.valueOf(1)), "ABC", ouTextParam);
+		
+		Assert.assertEquals("Out:  In: ABC", ouTextParam.getValue());
+		Assert.assertEquals("IN-Param Nr: 1", oResult);
+
+		InOutParam ioNumberParam = new InOutParam(InOutParam.SQLTYPE_DECIMAL, BigDecimal.valueOf(1));
+
+		//Test IN/OUT and OUT Parameter
+		oResult = dba.executeFunction("execFunction", Types.VARCHAR, ioNumberParam, "ABC", ouTextParam);
+
+		Assert.assertEquals(2, ((Number)ioNumberParam.getValue()).intValue());
+		Assert.assertEquals("Out:  In: ABC", ouTextParam.getValue());
+		Assert.assertEquals("IN-Param Nr: 1", oResult);
+		
+		//null types
+		oResult = dba.executeFunction("execFunction", Types.VARCHAR, new InOutParam(InOutParam.SQLTYPE_DECIMAL), null, new InOutParam(Types.VARCHAR));
+		
+		Assert.assertEquals("IN-Param Nr: ", oResult);
+		
+		//Standard objects
+		oResult = dba.executeFunction("execFunction", Types.VARCHAR, new InOutParam(InOutParam.SQLTYPE_DECIMAL, BigDecimal.valueOf(1)), "ABC", "ABC");
+		
+		Assert.assertEquals("IN-Param Nr: 1", oResult);
+	}
+	
+	/**
+	 * Tests procedure calls with standard java objects and special in/out parameter objects.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testProcedureCall() throws Exception
+	{
+		// Standard IN-OUT Parameter Test with plain JDBC
+		Connection con = dba.getConnection();
+		
+		CallableStatement cstmt = con.prepareCall("{ call EXECPROCEDURE(?, ?, ?) }");
+
+		cstmt.registerOutParameter(1, Types.DECIMAL);
+        cstmt.registerOutParameter(3, Types.VARCHAR);
+        
+        cstmt.setObject(1, BigDecimal.valueOf(1), Types.DECIMAL);
+        cstmt.setObject(2, "ABC", Types.VARCHAR);
+		
+		cstmt.execute();
+		
+		Assert.assertEquals(2, ((Number)cstmt.getObject(1)).intValue());
+		Assert.assertEquals("Out:  In: ABC", cstmt.getObject(3));
+		
+		//Test OUT parameter only IN/OUT as simple IN parameter
+		OutParam ouTextParam = new OutParam(InOutParam.SQLTYPE_VARCHAR);
+
+		dba.executeProcedure("execProcedure", new InOutParam(InOutParam.SQLTYPE_DECIMAL, BigDecimal.valueOf(1)), "ABC", ouTextParam);
+		
+		Assert.assertEquals("Out:  In: ABC", ouTextParam.getValue());
+
+		InOutParam ioNumberParam = new InOutParam(InOutParam.SQLTYPE_DECIMAL, BigDecimal.valueOf(1));
+
+		//Test IN/OUT and OUT Parameter
+		dba.executeProcedure("execProcedure", ioNumberParam, "ABC", ouTextParam);
+
+		Assert.assertEquals(2, ((Number)ioNumberParam.getValue()).intValue());
+		Assert.assertEquals("Out:  In: ABC", ouTextParam.getValue());
+		
+		//null types
+		dba.executeProcedure("execProcedure", new InOutParam(InOutParam.SQLTYPE_DECIMAL), null, new InOutParam(Types.VARCHAR));
+		
+		//Standard objects
+		dba.executeProcedure("execProcedure", new InOutParam(InOutParam.SQLTYPE_DECIMAL, BigDecimal.valueOf(1)), "ABC", "ABC");
+	}
+	
+	/**
+	 * Tests if the synonym support works.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testSynonyms() throws Exception
+	{
+		DBStorage dbsTest = new DBStorage();
+		dbsTest.setDBAccess(dba);
+		dbsTest.setWritebackTable("SYN_TEST");
+		dbsTest.open();
+		
+		// SYN_TEST points to the DETAIL Table, it should find a Primary Key to make sure the synonym is replace with the DETAIL table.
+		Assert.assertTrue(dbsTest.getMetaData().getPrimaryKeyColumnNames().length > 0);
+	}
+
+	/**
+	 * Tests if detect modified is working.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testDetectModified() throws Exception
+	{
+		
+		dba.setAutoCommit(false);
+
+		Connection con = dba.getConnection();
+
+		Assert.assertFalse(dba.isModified());
+
+		dba.executeStatement("update USERS set username = username");
+		
+		Assert.assertTrue(dba.isModified());
+
+		dba.rollback();
+		
+		Assert.assertFalse(dba.isModified());
+
+		dba.setAutoCommit(true);
+	}
+
+	/**
+	 * Tests varray access.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testSqlVarrayAndObject() throws Exception
+	{
+		Connection con = dba.getConnection();
+		
+		try 
+		{ 
+			dba.executeStatement("drop type t_users"); 
+		} 
+		catch (Exception ex) 
+		{ 
+			// Do Nothing
+		}
+		try 
+		{ 
+			dba.executeStatement("drop type o_user");
+		} 
+		catch (Exception ex) 
+		{ 
+			// Do Nothing
+		}
+		try 
+		{ 
+			dba.executeStatement("drop type t_varchar");
+		} 
+		catch (Exception ex) 
+		{ 
+			// Do Nothing
+		}
+		
+		try 
+		{ 
+			dba.executeStatement("insert into users (id, username, created_by, created_on, changed_by, changed_on) values (1, 'admin', 'admin', sysdate, 'admin', sysdate)");
+			dba.executeStatement("insert into users (id, username, created_by, created_on, changed_by, changed_on) values (2, 'martin', 'admin', sysdate, 'admin', sysdate)");
+		} 
+		catch (Exception ex) 
+		{ 
+			// Do Nothing
+		}
+		
+		dba.executeStatement(
+				"create type o_user is object (id number(16), username varchar2(200) )");
+		dba.executeStatement(
+				"create type t_users is table of o_user");
+		dba.executeStatement(
+				"create type t_varchar is table of varchar2(50)");
+		dba.executeStatement(
+				"create or replace package TestArray is " +
+				"  procedure test(pOutput in out t_users); " +
+				"  procedure test2(pOutput in out t_varchar); " +
+				"  procedure test3(pOutput in t_varchar); " +
+				"  procedure test4(pOutput in out o_user); " +
+				"  function test5 return o_user; " +
+                "  function test6 return SYS_REFCURSOR; " +
+				"end;");
+		dba.executeStatement(
+				"create or replace package body TestArray is " + 
+				"  procedure test(pOutput in out t_users) is " +
+				"  begin " +
+				"    select o_user(id, username) " +
+				"    bulk collect into pOutput " +
+				"    from users; " +
+				"  end; " +
+				"  procedure test2(pOutput in out t_varchar) is " +
+				"  begin " +
+				"    select username " +
+				"    bulk collect into pOutput " +
+				"    from users; " +
+				"  end; " +
+				"  procedure test3(pOutput in t_varchar) is " +
+				"  begin " +
+				"    null; " +
+				"  end; " +
+				"  procedure test4(pOutput in out o_user) is " +
+				"  begin " +
+				"    select o_user(id, username) " +
+				"      into pOutput " +
+				"    from users where rownum < 2; " +
+				"  end; " +
+				"  function test5 return o_user is " +
+				"    result o_user;" +
+				"  begin " +
+				"    select o_user(id, username) " +
+				"      into result " +
+				"    from users where rownum < 2; " +
+				"    return result; " +
+				"  end; " +
+                "  function test6 return SYS_REFCURSOR is " +
+                "    result1 t_users;" +
+                "    result2 SYS_REFCURSOR;" +
+                "  begin " +
+                "    select o_user(id, username) " +
+                "      bulk collect into result1 " +
+                "    from users; " +
+                "    OPEN result2 FOR SELECT * FROM TABLE(result1); " +
+                "    return result2; " +
+                "  end; " +
+				"end;");
+		dba.setAutoCommit(false);
+
+		BeanType btUser = new BeanType("ID", "USERNAME");
+		Bean bean1 = new Bean(btUser, "1", "Hallo");
+		Bean bean2 = new Bean(btUser, "2", "Hallo2");
+		
+		InOutParam param = InOutParam.newArrayParam("T_USERS", new Object[] {bean1, bean2});
+		
+		dba.executeProcedure("TESTARRAY.TEST", param);
+				
+		Assert.assertEquals(new ArrayUtil(new Bean(btUser, BigDecimal.valueOf(1), "admin"), new Bean(btUser, BigDecimal.valueOf(2), "martin")), param.getValue());
+
+		InOutParam param2 = InOutParam.newArrayParam("T_VARCHAR", new Object[] {"A", "B"});
+		
+		dba.executeProcedure("TESTARRAY.TEST2", param2);
+
+		InParam in = InParam.newArrayParam("T_VARCHAR");
+		dba.executeProcedure("TESTARRAY.TEST3", in);
+
+		Assert.assertEquals(new ArrayUtil("admin", "martin"), param2.getValue());
+
+		InOutParam param3 = InOutParam.newStructParam("O_USER");
+		
+		dba.executeProcedure("TESTARRAY.TEST4", param3);
+
+		System.out.println(param3.getValue());
+
+		OutParam param4 = OutParam.newStructParam("O_USER");
+		
+		Object result = dba.executeFunction("TESTARRAY.TEST5", param4);
+
+		System.out.println(param4.getValue());
+
+		OutParam param5 = new OutParam(DBAccess.CURSOR); // OracleTypes.CURSOR
+		
+        Object result2 = dba.executeFunction("TESTARRAY.TEST6", param5);
+
+        System.out.println(param5.getValue());
+	}
+	
+	/**
+	 * Tests boolean access.
+	 * 
+	 * @throws Exception if test fails
+	 */
+	@Test
+	public void testBoolean() throws Exception
+	{
+		dba.executeStatement(
+				"create or replace package TestBoolean is " +
+				"  function test(pOutput boolean) return boolean; " +
+				"  procedure testBoolOut(pOutput in out boolean); " +
+				"end;");
+		dba.executeStatement(
+				"create or replace package body TestBoolean is " + 
+				"  function test(pOutput boolean) return boolean is " +
+				"  begin " +
+				"    if pOutput = TRUE then " +
+				"      return false; " +
+				"    else " +
+				"      return true; " +
+				"    end if; " +
+				"  end; " +
+				"  procedure testBoolOut(pOutput in out boolean) is " +
+				"  begin " +
+				"    if pOutput = TRUE then " +
+				"      pOutput := false; " +
+				"    else " +
+				"      pOutput := true; " +
+				"    end if; " +
+				"  end; " +
+				"end;");
+		dba.setAutoCommit(false);
+
+		Assert.assertEquals(Boolean.TRUE, dba.executeFunction("TESTBOOLEAN.TEST", Types.BOOLEAN, Boolean.FALSE));
+		Assert.assertEquals(Boolean.TRUE, dba.executeFunction("TESTBOOLEAN.TEST", Types.BOOLEAN, new InParam(Types.BOOLEAN)));
+
+		InOutParam param = new InOutParam(Types.BOOLEAN, Boolean.FALSE);
+		dba.executeProcedure("TESTBOOLEAN.TESTBOOLOUT", param);
+		
+		Assert.assertEquals(Boolean.TRUE, param.getValue());
+	}
+	
+    /**
+     * Tests for ticket #1594, that fetching blobs fails if they are above the
+     * large object limit and there is no primary key column.
+     * 
+     * @throws Exception if the test fails.
+     */
+	@Test
+	public void testBlobFetchWithoutPrimaryKeyColumnsTicket1594() throws Exception
+	{
+		prepareTestTables();
+		
+		dba.setLargeObjectLimit(8);
+		
+		DBStorage dbs = new DBStorage();
+		dbs.setDBAccess(dba);
+		dbs.setWritebackTable("BLOB_TEST");
+		dbs.open();
+		
+		dbs.fetch(null, null, 0, 5);
+		
+		
+	}
+
+    /**
+     * Tests for ticket #1594, that fetching blobs fails if they are above the
+     * large object limit and there is no primary key column.
+     * 
+     * @throws Exception if the test fails.
+     */
+    @Test
+    public void testBlobFetch() throws Exception
+    {
+        try
+        {
+            dba.executeStatement("drop table BLOB_TEST2");
+        }
+        catch (Exception ex)
+        {
+            // Ignore
+        }
+        dba.executeStatement("create table BLOB_TEST2 (id number(16) NOT NULL, data blob, CONSTRAINT blte2_pk PRIMARY KEY (id))");
+        dba.executeStatement("insert into BLOB_TEST2 (id, data) values (1, hextoraw('AACCDD'))");
+        dba.executeStatement("insert into BLOB_TEST2 (id, data) values (2, hextoraw('AACCDD000000AA00AA0000FF'))");
+        dba.executeStatement("insert into BLOB_TEST2 (id, data) values (3, hextoraw('AACCDD000000AA00AA0000FFEECC6622993344776565'))");
+        
+        dba.setLargeObjectLimit(8);
+        
+        DBStorage dbs = new DBStorage();
+        dbs.setDBAccess(dba);
+        dbs.setWritebackTable("BLOB_TEST2");
+        dbs.open();
+        
+        List<Object[]> data = dbs.fetch(null, null, 0, 5);
+        
+//        LoggerFactory.getInstance(DBAccess.class).setLevel(LogLevel.ALL);
+        
+        for (Object[] dat : data)
+        {
+            if (dat != null)
+            {
+                byte[] content = BinaryDataType.getContent(dat[1]);
+                System.out.println(content.length + "  " + CodecUtil.encodeHex(content));
+            }
+        }
+        
+        dba.executeStatement("drop table BLOB_TEST2");
+    }
+
+	/**
+	 * Tests table function query.
+	 * 
+	 * @throws Throwable if test fails
+	 */
+	@Test
+	public void testTableFunction() throws Throwable
+	{
+        DBStorage dbs = new DBStorage();
+        dbs.setDBAccess(dba);
+        dbs.setFromClause(" TABLE(get_tablefunction(:COUNT))");
+        dbs.open();
+
+        DirectObjectConnection con = new DirectObjectConnection();
+        con.put("dbs", dbs);
+        
+        MasterConnection macon = new MasterConnection(con);
+        macon.open();
+        
+        RemoteDataSource rds = new RemoteDataSource(macon);
+        rds.open();
+        
+        RemoteDataBook rdb = new RemoteDataBook();
+        rdb.setDataSource(rds);
+        rdb.setName("dbs");
+        rdb.setFilter(new Equals("COUNT", BigDecimal.valueOf(20)));
+        rdb.open();
+        
+        rdb.fetchAll();
+        
+        Assert.assertEquals(20, rdb.getRowCount());
+		
+	}
+	
+	/**
+     * Tests CURRENT_TIMESTAMP default values.
+     * 
+     * @throws Throwable
+     */
+    @Test
+    public void testDefaultCurrentTimeStamp() throws Throwable
+    {
+        DBStorage dbs = new DBStorage();
+        dbs.setDBAccess(dba);
+        dbs.setFromClause("test_timestamp");
+        dbs.setWritebackTable("test_timestamp");
+        dbs.open();
+        
+        DirectObjectConnection con = new DirectObjectConnection();
+        con.put("testTimestamp", dbs);
+        
+        MasterConnection macon = new MasterConnection(con);
+        macon.open();
+        
+        RemoteDataSource rds = new RemoteDataSource(macon);
+        rds.open();
+
+        RemoteDataBook rdbTest = new RemoteDataBook();
+        rdbTest.setDataSource(rds);
+        rdbTest.setName("testTimestamp");
+        rdbTest.open();
+        
+        int iSearchNext = rdbTest.searchNext(new Equals("SOME_VALUE", "TEST_VALUE"));
+        if (iSearchNext >= 0)
+        {
+            rdbTest.setSelectedRow(iSearchNext);
+            rdbTest.delete();
+        }
+        
+        rdbTest.insert(false);
+        rdbTest.setValue("SOME_VALUE", "TEST_VALUE");
+        rdbTest.saveSelectedRow();
+        
+        iSearchNext = rdbTest.searchNext(new Equals("SOME_VALUE", "TEST_VALUE"));
+        Assert.assertTrue("INSERT failed!", iSearchNext >= 0);
+        rdbTest.setSelectedRow(iSearchNext);
+        Assert.assertNotNull("CREATED_AT not set!", rdbTest.getValue("CREATED_AT"));
+        Assert.assertNotNull("CREATED2_AT not set!", rdbTest.getValue("CREATED2_AT"));
+        Assert.assertNotNull("CREATED3_AT not set!", rdbTest.getValue("CREATED3_AT"));
+        Assert.assertNotNull("CREATED4_AT not set!", rdbTest.getValue("CREATED4_AT"));
+        Assert.assertNotNull("CREATED5_AT not set!", rdbTest.getValue("CREATED5_AT"));
+        Assert.assertNotNull("CREATED6_AT not set!", rdbTest.getValue("CREATED6_AT"));
+        Assert.assertNotNull("CREATED7_AT not set!", rdbTest.getValue("CREATED7_AT"));
+    }
+	
+}	// TestOracleDBAccess

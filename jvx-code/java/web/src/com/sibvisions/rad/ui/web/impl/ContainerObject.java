@@ -1,0 +1,214 @@
+/*
+ * Copyright 2009 SIB Visions GmbH
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not
+ * use this file except in compliance with the License. You may obtain a copy of
+ * the License at
+ * 
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations under
+ * the License.
+ *
+ *
+ * History
+ *
+ * 19.11.2009 - [HM] - creation
+ */
+package com.sibvisions.rad.ui.web.impl;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.rad.ui.IComponent;
+import javax.rad.ui.ILayout;
+import javax.rad.ui.container.IWindow;
+
+/**
+ * The <code>ContainerObject</code> acts like an {@link javax.rad.ui.IContainer} but doesn't implement {@link javax.rad.ui.IContainer}.
+ * This class should be used for {@link javax.rad.ui.IContainer} that are not inherited from {@link WebContainer}. 
+ * 
+ * @author René Jahn
+ */
+public class ContainerObject
+{
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Class members
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/** the connected container. */
+	private IWebContainer webcont;
+
+	/** list of subcomponents. */
+	protected List<WebComponent> components = new ArrayList<WebComponent>(4);
+	
+	/** the layout. */
+	private ILayout layout;
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	// Initialization
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	  
+    /**
+     * Creates a new instance of <code>ContainerObject</code>.
+     *
+     * @param pContainer the connected container 
+     */
+	public ContainerObject(IWebContainer pContainer)
+	{
+		webcont = pContainer;
+	}
+	
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    // Interface Implementation
+    //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+	/**
+	 * Gets the layout.
+	 * 
+	 * @return the layout
+	 */
+	public ILayout getLayout()
+    {
+		return layout;
+    }
+
+	/**
+	 * Sets the layout.
+	 * 
+	 * @param pLayout the layout
+	 */
+	public void setLayout(ILayout pLayout)
+    {
+		if (layout != null && layout instanceof WebLayout)
+		{
+			((WebLayout)layout).setContainer(null);
+		}
+		
+		layout = pLayout;
+		
+		if (pLayout instanceof WebLayout)
+		{
+			((WebLayout)layout).setContainer(webcont);
+		}
+		else
+		{
+	    	webcont.setProperty("layout", pLayout);			
+		}
+    }
+
+	/**
+	 * Adds a component to the layout, with the given constraints at the given index.
+	 * 
+	 * @param pComponent the component
+	 * @param pConstraints the constraints
+	 * @param pIndex the index
+	 */
+	public void add(IComponent pComponent, Object pConstraints, int pIndex)
+    {
+		// Remove from Container
+		if (pComponent.getParent() != null)
+		{
+			pComponent.getParent().remove(pComponent);
+		}
+		
+		if (pIndex < 0)
+		{
+			components.add((WebComponent)pComponent);
+		}
+		else
+		{
+			components.add(pIndex, (WebComponent)pComponent);
+		}
+		
+		pComponent.setParent(webcont);
+		
+		if (layout != null
+			&& layout instanceof WebLayout
+			&& !(pComponent instanceof IWindow))
+		{
+			((WebLayout)layout).setComponentConstraints(pComponent, pConstraints);
+		}
+    }
+
+	/**
+	 * Removes the component to the layout, at the given index.
+	 *  
+	 * @param pIndex the index
+	 */
+	public void remove(int pIndex)
+    {
+		IComponent component = components.remove(pIndex);
+		
+		component.setParent(null);
+		
+		if (layout != null
+			&& layout instanceof WebLayout
+			&& !(component instanceof IWindow))
+		{
+			((WebLayout)layout).setConstraints(component, null);
+		}
+		
+		((WebFactory)component.getFactory()).getLauncher().markRemoved(component);
+    }
+
+	/**
+	 * Removes the given component from the layout.
+	 * 
+	 * @param pComponent the component
+	 */
+	public void remove(IComponent pComponent)
+	{
+		if (pComponent.getParent() == webcont)
+		{
+			webcont.remove(components.indexOf(pComponent));
+		}
+	}
+
+	/**
+	 * Removes all components from the layout.
+	 */
+	public void removeAll()
+	{
+		while (components.size() > 0)
+		{
+			webcont.remove(components.size() - 1);
+		}
+	}
+
+	/**
+	 * Gets the current component count.
+	 * 
+	 * @return the number of already added components
+	 */
+	public int getComponentCount()
+	{
+		return components.size();
+	}
+
+	/**
+	 * Gets the component at the given index.
+	 * 
+	 * @param pIndex the index
+	 * @return the component
+	 */
+	public WebComponent getComponent(int pIndex)
+	{
+		return components.get(pIndex);
+	}
+	
+	/**
+	 * Gets the layout index of the given component.
+	 * 
+	 * @param pComponent the component
+	 * @return the index
+	 */
+	public int indexOf(IComponent pComponent)
+	{
+		return components.indexOf(pComponent);
+	}
+	
+}	// ContainerObject
